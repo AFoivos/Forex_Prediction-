@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 def get_data(file_path, symbole) -> pd.DataFrame:
     """
     Load the dataset from a CSV file.
+    !!!!!! THE FILE MUST BE ENCODED IN UTF-16 AND FETCHED FROM MT5 !!!!!!
 
     Args:
         file_path (str): Path to the CSV file.
@@ -25,13 +26,21 @@ def get_data(file_path, symbole) -> pd.DataFrame:
     df['Time'] = pd.to_datetime(df['Time'])
     df.set_index('Time', inplace=True)
     
+    
     print (f'First 5 rows:\n{df.head()} \n')
+    print('---'*20)
     print (f'Last 5 rows:\n{df.tail()} \n')
+    print('---'*20)
     print (f'Shape: {df.shape} \n')
+    print('---'*20)
     print (f'Info: {df.info()} \n')
+    print('---'*20)
     print (f'Null values:\n{df.isnull().sum()} \n')
+    print('---'*20)
     print (f'Duplicated values: {df.duplicated().sum()}\n')    
+    print('---'*20)
     print (f'Data types:\n{df.dtypes}\n')
+    print('---'*20)
     print (f'Statistics:\n{df.describe()}\n')
     
     plt.figure(figsize=(12, 6))
