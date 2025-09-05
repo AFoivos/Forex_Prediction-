@@ -205,3 +205,23 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# MAC
+.DS_Store
+
+# Αρχεία που δημιουργεί η Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+
+# Αρχεία που δημιουργούνται από το VS Code
+.vscode/
+
+# Φάκελοι με δεδομένα που είναι πολύ μεγάλοι
+# και συνήθως κατεβαίνουν από κάποια πηγή
+data/
+
+# Φάκελοι με μοντέλα μηχανικής μάθησης
+# Είναι συχνά μεγάλοι σε μέγεθος
+models/
