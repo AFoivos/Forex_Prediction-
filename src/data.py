@@ -93,6 +93,7 @@ def pct_change(df: pd.DataFrame) -> pd.DataFrame:
     
     sum_of_null = df.isnull().sum().sum()    
     df = df.dropna()
+    
     df = df[new_column_names]
     
     print (f'First 3 rows:\n{df.head(3)} \n')
