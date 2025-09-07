@@ -29,60 +29,22 @@ def lags_and_rolls(df: pd.DataFrame, num_lags: int = 10, num_rolls: int = 10) ->
     for i in range(1, num_r_mean):
         df[f'close_roll_mean{i}'] = df['close'].rolling(i).mean()
         
-   
-    #df = df.dropna().copy()
+    sum_of_null = df.isnull().sum().sum()
+    df = df.dropna().copy()
     
-    print (f'First 5 rows:\n{df.head()} \n')
-    print('---'*40)
-    print (f'Last 5 rows:\n{df.tail()} \n')
-    print('---'*40)
-    print (f'Shape: {df.shape} \n')
-    print('---'*40)
-    print (f'Info: {df.info()} \n')
-    print('---'*40)
-    print (f'Null values:\n{df.isnull().sum()} \n')
-    print('---'*40)
-    print (f'Duplicated values: {df.duplicated().sum()} \n')    
-    print('---'*40)
-    print (f'Data types:\n{df.dtypes} \n')
-    print('---'*40)
+    print (f'First 3 rows:\n{df.head(3)} \n')
+    print ('---'*40)
+    print (f'Last 3 rows:\n{df.tail(3)} \n')
+    print ('---'*40)
     print (f'Statistics:\n{df.describe()} \n')
-
-    last_24_hours = df.tail(24)
-
-    plt.figure(figsize=(12, 6))
-    for i in range(1, num_l):
-        plt.plot(last_24_hours.index, last_24_hours [f'close_lag_{i}'], label=f'Close Lag {i}', linestyle='--')
-        
-    plt.title('Close Lags', fontsize=16)
-    plt.xlabel('Time', fontsize=12)
-    plt.ylabel('Value Change', fontsize=12)
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-    
-    plt.figure(figsize=(12, 6))
-    for i in range(1, num_r_mean):
-        plt.plot(last_24_hours.index, last_24_hours [f'close_roll_mean{i}'], label=f'Close Roll Mean {i}', linestyle='--')
-        
-    plt.title('Rolling Means', fontsize=16)
-    plt.xlabel('Time', fontsize=12)
-    plt.ylabel('Value Change', fontsize=12)
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-    
-    plt.figure(figsize=(12, 6))
-    for i in range(2, num_r_std):
-        plt.plot(last_24_hours.index, last_24_hours [f'close_roll_std{i}'], label=f'Close Roll Std {i}', linestyle='--')
-        
-    plt.title('Rolling Stds', fontsize=16)
-    plt.xlabel('Time', fontsize=12)
-    plt.ylabel('Value Change', fontsize=12)
-    plt.legend()
-    plt.grid(True)
-    plt.show()  
-
+    print ('---'*40)
+    print (f'Info: {df.info()} \n')
+    print ('---'*40)
+    print (f'Null values before dropping:\n{sum_of_null}, \n')
+    print ('---'*40)
+    print (f'Shape: {df.shape} \n')
+    print ('---'*40)
+    print ('Columns names:\n', df.columns, '\n')
     
     return df
 #----------------------------------------------------------------------------------------------------------------------------------------
@@ -160,28 +122,22 @@ def indicators(df: pd.DataFrame) -> pd.DataFrame:
     df['Bollinger_Upper'] = bollinger.bollinger_hband()
     df['Bollinger_Lower'] = bollinger.bollinger_lband()
 
+    sum_of_null = df.isnull().sum().sum()
     df = df.dropna().copy()
     
-    print (f'First 5 rows:\n{df.head()} \n')
-    print('---'*40)
-    print (f'Last 5 rows:\n{df.tail()} \n')
-    print('---'*40)
-    print (f'Shape: {df.shape} \n')
-    print('---'*40)
-    print (f'Info: {df.info()} \n')
-    print('---'*40)
-    print (f'Null values:\n{df.isnull().sum()} \n')
-    print('---'*40)
-    print (f'Duplicated values: {df.duplicated().sum()} \n')    
-    print('---'*40)
-    print (f'Data types:\n{df.dtypes} \n')
-    print('---'*40)
+    print (f'First 3 rows:\n{df.head(3)} \n')
+    print ('---'*40)
+    print (f'Last 3 rows:\n{df.tail(3)} \n')
+    print ('---'*40)
     print (f'Statistics:\n{df.describe()} \n')
+    print ('---'*40)
+    print (f'Info: {df.info()} \n')
+    print ('---'*40)
+    print (f'Null values before dropping:\n{sum_of_null}, \n')
+    print ('---'*40)
+    print (f'Shape: {df.shape} \n')
+    print ('---'*40)
+    print ('Columns names:\n', df.columns, '\n')
 
-    # Heatmap of correlations
-    plt.figure(figsize=(14, 10))
-    sns.heatmap(df.corr(), annot=True, fmt=".2f", cmap='coolwarm', cbar=True)
-    plt.title('Feature Correlation Heatmap', fontsize=16)
-    plt.show()
     
     return df
