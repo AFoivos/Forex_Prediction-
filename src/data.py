@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 def get_data(file_path, symbole) -> pd.DataFrame:
     """
     Load the dataset from a CSV file.
-    !!!!!! THE FILE MUST BE ENCODED IN UTF-16 AND FETCHED FROM MT5 !!!!!!
+    !!!!!! THE FILE MUST BE FETCHED FROM MT5 !!!!!!
 
     Args:
         file_path (str): Path to the CSV file.
@@ -13,41 +13,93 @@ def get_data(file_path, symbole) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Loaded dataset.
     """
-    column_names = [ 'Time', 'Open', 'High', 'Low', 'Close', 'Volume', 'Something_Else']
+    new_column_names = ['date', 'time', 'open', 'high', 'low', 'close', 'tickvol', 'vol', 'spread']
+
     df = pd.read_csv(file_path, 
-                     names=column_names, 
-                     header=None, 
-                     sep=',',
-                     encoding='utf-16',
-                     parse_dates=['Time'],
-                    )
+                    header=None,   
+                    sep='\t',
+                    names=new_column_names, 
+                    skiprows=1  
+    )
     
-    df = df[['Close','Time' ]]
-    df['Time'] = pd.to_datetime(df['Time'])
-    df.set_index('Time', inplace=True)
+    df['time'] = pd.to_datetime(df['date'] + ' ' + df['time'])
+    df.drop(columns=['date','tickvol','vol'], inplace=True)
+    df = df[df['time'].dt.year >= 2020]
+    df.set_index('time', inplace=True)
     
     
     print (f'First 5 rows:\n{df.head()} \n')
-    print('---'*20)
+    print('---'*40)
     print (f'Last 5 rows:\n{df.tail()} \n')
-    print('---'*20)
+    print('---'*40)
     print (f'Shape: {df.shape} \n')
-    print('---'*20)
+    print('---'*40)
     print (f'Info: {df.info()} \n')
-    print('---'*20)
+    print('---'*40)
     print (f'Null values:\n{df.isnull().sum()} \n')
-    print('---'*20)
+    print('---'*40)
     print (f'Duplicated values: {df.duplicated().sum()}\n')    
-    print('---'*20)
+    print('---'*40)
     print (f'Data types:\n{df.dtypes}\n')
-    print('---'*20)
+    print('---'*40)
     print (f'Statistics:\n{df.describe()}\n')
     
     plt.figure(figsize=(12, 6))
-    plt.plot(df.index, df['Close'], label='Close Price', color='blue')
+    plt.plot(df.index, df['close'], label='Close Price', color='blue')
     plt.title( symbole +' Close Price Over Time')
     plt.xlabel('Time')
     plt.ylabel('Close Price')
+    plt.legend()
+    plt.grid()
+    plt.show()
+    
+    return df
+#----------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------
+
+def pct_change(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Adds a 'PercentageChange' columns to the DataFrame.
+
+    Parameters:
+    df (pd.DataFrame): Input DataFrame .
+
+    Returns:
+    pd.DataFrame: DataFrame with added 'PercentageChange' features.
+    """
+    for col in df.columns:
+        new_col_name = f'{col}_pct_change'
+        df[new_col_name] = df[col].pct_change()
+    
+        
+    df = df.dropna()
+    
+    print (f'First 5 rows:\n{df.head()} \n')
+    print('---'*40)
+    print (f'Last 5 rows:\n{df.tail()} \n')
+    print('---'*40)
+    print (f'Shape: {df.shape} \n')
+    print('---'*40)
+    print (f'Info: {df.info()} \n')
+    print('---'*40)
+    print (f'Null values:\n{df.isnull().sum()} \n')
+    print('---'*40)
+    print (f'Duplicated values: {df.duplicated().sum()} \n')    
+    print('---'*40)
+    print (f'Data types:\n{df.dtypes} \n')
+    print('---'*40)
+    print (f'Statistics:\n{df.describe()} \n')
+
+    last_500 = df.tail(500)
+
+    plt.figure(figsize=(12, 6))
+    plt.plot(last_500.index, last_500['close_pct_change'], label='Percentage Change Close Price', color='blue')
+    plt.title('Percentage Change Over Time')
+    plt.xlabel('Time')
+    plt.ylabel('Percentage Change')
     plt.legend()
     plt.grid()
     plt.show()
