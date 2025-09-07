@@ -2,6 +2,15 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+import warnings
+warnings.filterwarnings('ignore')
+
+#----------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------   
+#----------------------------------------------------------------------------------------------------------------------------------------   
+
 def get_data(file_path, symbole) -> pd.DataFrame:
     """
     Load the dataset from a CSV file.
@@ -23,7 +32,7 @@ def get_data(file_path, symbole) -> pd.DataFrame:
     )
     
     df['time'] = pd.to_datetime(df['date'] + ' ' + df['time'])
-    df.drop(columns=['date','tickvol','vol'], inplace=True)
+    df.drop(columns=['date', 'tickvol', 'vol', 'spread'], inplace=True)
     df = df[df['time'].dt.year >= 2020]
     df.set_index('time', inplace=True)
     
@@ -71,8 +80,8 @@ def pct_change(df: pd.DataFrame) -> pd.DataFrame:
     pd.DataFrame: DataFrame with added 'PercentageChange' features.
     """
     for col in df.columns:
-        new_col_name = f'{col}_pct_change'
-        df[new_col_name] = df[col].pct_change()
+        #new_col_name = f'{col}_pct_change'
+        df[col] = df[col].pct_change()
     
         
     df = df.dropna()
@@ -96,7 +105,7 @@ def pct_change(df: pd.DataFrame) -> pd.DataFrame:
     last_500 = df.tail(500)
 
     plt.figure(figsize=(12, 6))
-    plt.plot(last_500.index, last_500['close_pct_change'], label='Percentage Change Close Price', color='blue')
+    plt.plot(last_500.index, last_500['close'], label='Percentage Change Close Price', color='blue')
     plt.title('Percentage Change Over Time')
     plt.xlabel('Time')
     plt.ylabel('Percentage Change')
