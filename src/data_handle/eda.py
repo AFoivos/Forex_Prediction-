@@ -26,6 +26,8 @@ class ForexEDA(FirstLook):
     def basic_analysis(self, plot=True):
         """
         Perform basic data analysis
+        Parameters:
+        plot (bool): Whether to plot basic charts (default True)
         """
         print("BASIC DATA ANALYSIS")
         print("=" * 60)
@@ -52,6 +54,9 @@ class ForexEDA(FirstLook):
     def price_trend_analysis(self, price_column='close', plot=True):
         """
         Analyze price trends and patterns
+        Parameters:
+        price_column (str): Column to analyze (default 'close')
+        plot (bool): Whether to plot the trends (default True)
         """
         if price_column not in self.data.columns:
             print(f"Column '{price_column}' not found!")
@@ -114,6 +119,10 @@ class ForexEDA(FirstLook):
     def stationarity_tests(self, column='close', plot=True, lags=40):
         """
         Perform stationarity tests (ADF and KPSS)
+        Parameters:
+        column (str): Column to test
+        plot (bool): Whether to plot the results
+        lags (int): Number of lags for ACF/PACF plots
         """        
         if column not in self.data.columns:
             print(f"Column '{column}' not found!")
@@ -207,6 +216,10 @@ class ForexEDA(FirstLook):
     def seasonal_decomposition(self, column='close', period=30, plot=True):
         """
         Basic seasonal decomposition analysis
+        Parameters:
+        column (str): Column to decompose
+        period (int): Seasonal period (default 30)
+        plot (bool): Whether to plot the decomposition (default True)
         """
         from statsmodels.tsa.seasonal import seasonal_decompose
         
@@ -248,6 +261,10 @@ class ForexEDA(FirstLook):
     def autocorrelation_analysis(self, column='close', lags=40, plot=True):
         """
         Analyze autocorrelation and partial autocorrelation
+        Parameters:
+        column (str): Column to analyze
+        lags (int): Number of lags for ACF/PACF plots
+        plot (bool): Whether to plot the results (default True)
         """
         if column not in self.data.columns:
             print(f"Column '{column}' not found!")
@@ -277,7 +294,10 @@ class ForexEDA(FirstLook):
         
     def distribution_analysis(self, column='close', plot=True):
         """
-        Analyze distribution of prices or returns
+        Analyze distribution of prices or returns   
+        Parameters:
+        column (str): Column to analyze
+        plot (bool): Whether to plot the distributions (default True)   
         """
         if column not in self.data.columns:
             print(f"Column '{column}' not found!")
@@ -329,6 +349,10 @@ class ForexEDA(FirstLook):
     def volatility_analysis(self, price_column='close', window=20, plot=True):
         """
         Analyze volatility patterns
+        Parameters:
+        price_column (str): Column to analyze
+        window (int): Rolling window for volatility calculation
+        plot (bool): Whether to plot the volatility (default True)
         """
         if price_column not in self.data.columns:
             print(f"Column '{price_column}' not found!")
@@ -371,6 +395,8 @@ class ForexEDA(FirstLook):
     def correlation_analysis(self, plot=True):
         """
         Analyze correlations between different columns
+        Parameters:
+        plot (bool): Whether to plot the correlation matrix (default True)
         """
         numeric_cols = self.data.select_dtypes(include=[np.number]).columns
         
@@ -407,6 +433,8 @@ class ForexEDA(FirstLook):
     def comprehensive_eda(self,plot=True):
         """
         Run comprehensive EDA analysis
+        Parameters:
+        plot (bool): Whether to plot the results (default True)
         """
         print("COMPREHENSIVE EXPLORATORY DATA ANALYSIS")
         print("=" * 60)
