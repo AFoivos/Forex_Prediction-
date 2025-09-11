@@ -49,7 +49,7 @@ class ForexEDA(FirstLook):
         print("\nMissing values:")
         print(self.data.isnull().sum())
     
-    # Οι υπόλοιπες μέθοδοι παραμένουν ίδιες...
+    # Trend Analysis
     def price_trend_analysis(self, price_column='close'):
         """
         Analyze price trends and patterns
