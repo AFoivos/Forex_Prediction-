@@ -16,12 +16,12 @@ class FirstLook:
         """
         self.file_path = file_path
         self.data = None
-        self.load_data()
-        self.get_data()
     
-    def load_data(self):
+    def load_data(self, show_print=True):
         """
         Load CSV data and perform initial processing !!! MUST BE FROM METATRADER 5 !!!
+        Parameters:
+        show_print (bool): Whether to print loading information
         """
         try:
             # Load the CSV file
@@ -33,7 +33,8 @@ class FirstLook:
                                         skiprows=1  
                                         )
             self.data['datetime'] = pd.to_datetime(self.data['date'] + ' ' + self.data['time'])
-    
+            
+            # Remove unnecessary columns
             self.data.drop(columns=['tickvol', 
                             'vol', 
                             'spread'],
@@ -44,9 +45,10 @@ class FirstLook:
             self.data.set_index('datetime', inplace=True)
             
             # Display initial information
-            print('Data loaded successfully!')
-            print(f'Shape: {self.data.shape}')
-            print("\n" + "="*50)
+            if show_print == True:
+                print('Data loaded successfully!')
+                print(f'Shape: {self.data.shape}')
+                print("\n" + "="*50)
             
         except Exception as e:
             print(f"Error loading file: {e}")
@@ -158,7 +160,7 @@ class FirstLook:
         if show_print == True:  
             print(f"Missing values handled: {missing_before - missing_after}")
             
-            print("Data cleaning completed!")
+        print("Data cleaning completed!")
     
     def plot_candlestick(self, periods=100, title="Forex Candlestick Chart"):
         """
@@ -216,7 +218,7 @@ class FirstLook:
         else:
             print(f"Column '{column}' not found in dataset")
     
-    def get_summary(self):
+    def get_summary(self, show_print=True):
         """
         Get a comprehensive summary of the dataset
         """
@@ -229,22 +231,28 @@ class FirstLook:
             'missing_values': self.data.isnull().sum().sum(),
             'duplicates': self.data.duplicated().sum(),
             'columns' : self.data.columns,
+            'index_column': self.data.index.name
         }
         
-        print("DATASET SUMMARY")
-        print("="*50)
-        
-        for key, value in summary.items():
-            print(f"{key.replace('_', ' ').title()}: {value}")
-        
-        print("="*50)
+        if show_print == True:
+            print("DATASET SUMMARY")
+            print("="*50)
+            
+            for key, value in summary.items():
+                print(f"{key.replace('_', ' ').title()}: {value}")
+            
+            print("="*50)
         
     def get_data(self):
         """
         Returns the processed DataFrame.
         """
-        data = self.data
-        cleaned_data = self.clean_data(show_print=False)
-        summary = self.get_summary()
+        # Ensure data is loaded
+        if self.data is None:
+            self.load_data(show_print=True)
+    
+        # Clean data if there are missing values or duplicates
+        if self.data.isnull().sum().sum() > 0 or self.data.duplicated().sum() > 0:
+            self.clean_data(show_print=False)
         
-        return cleaned_data, summary
+        return self.data.copy() 

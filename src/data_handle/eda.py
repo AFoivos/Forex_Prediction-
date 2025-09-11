@@ -18,9 +18,22 @@ import warnings
 warnings.filterwarnings('ignore')
 
 class ForexEDA(FirstLook):
-    def __init__(self, file_path, datetime_column='datetime'):
-        super().__init__(file_path)  
-        self.get_data()
+    def __init__(self, file_path = None, datetime_column='datetime', data_loader = None):
+        super().__init__(file_path,)  
+        
+        if data_loader is None:
+            self.get_data()
+            print('Data loaded successfully!')
+            print(f'Shape: {self.data.shape}')
+            print("\n" + "="*50)
+        elif file_path is None:
+            self.data = data_loader
+            print('Data loaded successfully!')
+            print(f'Shape: {self.data.shape}')
+            print("\n" + "="*50)
+        else:
+            print("Warning: Both file_path and data_loader provided. Using data_loader.")
+        
         self.datetime_column = datetime_column
     
     def basic_analysis(self, plot=True):
@@ -392,7 +405,7 @@ class ForexEDA(FirstLook):
         print(f"Minimum volatility: {rolling_vol.min() * 100:.2f}%")
         
         
-    def correlation_analysis(self, plot=True):
+    def correlation_analysis(self, plot=True, drop = False):
         """
         Analyze correlations between different columns
         Parameters:
@@ -408,15 +421,23 @@ class ForexEDA(FirstLook):
         print("=" * 60)
         
         # Correlation matrix
-        corr_matrix = self.data[numeric_cols].corr()
+        if drop is False:
+            corr_matrix = self.data[numeric_cols].corr()
+        else:
+            corr_matrix = self.data[numeric_cols].drop(columns=['open', 'high', 'low']).corr()
         
         if plot == True:
             try:
-                plt.figure(figsize=(12, 8))
-                sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', center=0, 
-                        square=True, fmt='.3f')
+                plt.figure(figsize=(20, 10))
+                sns.heatmap(corr_matrix, 
+                            annot=True, 
+                            cmap='coolwarm', 
+                            center=0, 
+                            square=True, fmt='.3f')
+                
                 plt.title('Correlation Matrix')
                 plt.show()
+                
             except Exception as e:
                 print(f"Error in plotting correlation matrix: {e}")
             
