@@ -9,7 +9,6 @@ import os
 import sys
 
 project_root = os.path.abspath(os.path.join(os.getcwd(), '..'))
-
 if project_root not in sys.path:
     sys.path.append(project_root)
     
@@ -401,7 +400,7 @@ class ForexEDA(FirstLook):
             for j in range(i+1, len(corr_matrix.columns)):
                 col1, col2 = corr_matrix.columns[i], corr_matrix.columns[j]
                 corr_value = corr_matrix.iloc[i, j]
-                if abs(corr_value) > 0.7:  # Strong correlation threshold
+                if abs(corr_value) > 0.7:  # correlation threshold
                     print(f"{col1} - {col2}: {corr_value:.3f}")
         
         
@@ -420,4 +419,4 @@ class ForexEDA(FirstLook):
         self.correlation_analysis(plot=plot)
         self.autocorrelation_analysis('close', plot=plot)
         
-        print("\n✓ EDA analysis completed!")
+        print("\n EDA analysis completed!")

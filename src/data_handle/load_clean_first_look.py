@@ -246,6 +246,5 @@ class FirstLook:
         data = self.data
         cleaned_data = self.clean_data(show_print=False)
         summary = self.get_summary()
+        
         return cleaned_data, summary
-    
-        return summary
