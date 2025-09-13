@@ -12,47 +12,48 @@ if project_root not in sys.path:
     
 import src.data_handle as dt
 #file_path = os.path.join(project_root, 'src', 'data_handle', 'load_clean_first_look.py')
-from src.data_handle.load_clean_first_look import FirstLook
+from src.data_handle.first_look_and_clean import FirstLook
 from src.data_handle.eda import ForexEDA
 
 import warnings
 warnings.filterwarnings('ignore')
 
-class TechnicalIndicators(ForexEDA, FirstLook):
-    def __init__(self, file_path = None, data_loader = None):
-        super().__init__(file_path)
+class TechnicalIndicators:
+    def __init__(self, df:pd.DataFrame,
+                 printer:bool = True,
+                 calulate_all:bool = False
+                 ):
+        
         """
         Initialize Technical Indicators calculator
         
         Parameters:
-        file_path: path to CSV file (if data_loader is None)
-        data_loader: DataFrame (if provided, overrides file_path)   
-        """
-        if data_loader is None:
-            if isinstance(data_loader, pd.DataFrame):
-                self.get_data()
-                print('Data loaded successfully!')
-                print(f'Shape: {self.data.shape}')
-                print("\n" + "="*50)
-        elif file_path is None:
-            if isinstance(data_loader, pd.DataFrame):
-                self.data = data_loader
-                print('Data loaded successfully!')
-                print(f'Shape: {self.data.shape}')
-                print("\n" + "="*50)
-        else:
-            print("Warning: Both file_path and data_loader provided. Using data_loader.")
+        df: pandas DataFrame 
+        printer: bool, if True prints data load confirmation  
         
+        """
+        
+        self.data = df.copy()
+        
+        print('Data loaded successfully!')
+        print(f'Shape: {self.data.shape}')
+        print("\n" + "="*50)
+                
         self.indicators = {}
         self.signals = {}
         
-        print(f" Data shape: {self.data.shape}")
+        if calulate_all == True:
+            self.calculate_all_indicators()
     
-    def calculate_moving_averages(self, windows=[5, 10, 20, 50, 200]):
+    def calculate_moving_averages(self, 
+                                  windows:list = [5, 10, 20, 50, 200]
+                                  ):
+       
         """
         Calculate Moving Averages using TA-Lib
         Parameters:
         windows: list of moving average windows
+        
         """
         print("CALCULATING MOVING AVERAGES WITH TA-LIB")
         print("=" * 50)
@@ -72,10 +73,16 @@ class TechnicalIndicators(ForexEDA, FirstLook):
             self.indicators[ema_col] = self.data[ema_col]
             
             print(f" Calculated {sma_col} and {ema_col}")
+            
+            self.indicators[sma_col] = self.data[sma_col]
+            self.indicators[ema_col] = self.data[ema_col]
         
         return self.data
     
-    def calculate_rsi(self, window=14):
+    def calculate_rsi(self, 
+                      window:int = 14
+                      ):
+        
         """
         Calculate RSI using TA-Lib
         Parameters:
@@ -92,13 +99,20 @@ class TechnicalIndicators(ForexEDA, FirstLook):
         
         rsi = talib.RSI(close_prices, timeperiod=window)
 
-        self.data['RSI'] = rsi
-        self.indicators['RSI'] = rsi
+        self.data[f'RSI_{window}'] = rsi
+        self.indicators[f'RSI_{window}'] = rsi
         
-        print(f"✓ RSI_{window} calculated")
+        
+        print(f" RSI_{window} calculated")
+                
         return rsi
     
-    def calculate_macd(self, fast=12, slow=26, signal=9):
+    def calculate_macd(self,
+                       fast:int = 12,
+                       slow:int = 26,
+                       signal:int = 9
+                       ):
+        
         """
         Calculate MACD using TA-Lib
         Parameters:
@@ -114,26 +128,32 @@ class TechnicalIndicators(ForexEDA, FirstLook):
         macd, signal_line, histogram = talib.MACD(close_prices, 
                                                 fastperiod=fast, 
                                                 slowperiod=slow, 
-                                                signalperiod=signal)
+                                                signalperiod=signal
+                                                )
         
-        self.data['MACD'] = macd
-        self.data['MACD_Signal'] = signal_line
-        self.data['MACD_Histogram'] = histogram
+        self.data[f'MACD_{fast}_{slow}_{signal}'] = macd
+        self.data[f'MACD_Signal_{fast}_{slow}_{signal}'] = signal_line
+        self.data[f'MACD_Histogram_{fast}_{slow}_{signal}'] = histogram
         
-        self.indicators['MACD'] = macd
-        self.indicators['MACD_Signal'] = signal_line
-        self.indicators['MACD_Histogram'] = histogram
+        self.indicators[f'MACD_{fast}_{slow}_{signal}'] = macd
+        self.indicators[f'MACD_Signal_{fast}_{slow}_{signal}'] = signal_line
+        self.indicators[f'MACD_Histogram_{fast}_{slow}_{signal}'] = histogram
         
-        print("✓ MACD, Signal Line, and Histogram calculated")
+        print(" MACD, Signal Line, and Histogram calculated")
         return macd, signal_line, histogram
     
-    def calculate_bollinger_bands(self, window=20, num_std=2):
+    def calculate_bollinger_bands(self,
+                                  window:int = 20,
+                                  num_std:int = 2
+                                  ):
+
         """
         Calculate Bollinger Bands using TA-Lib
         Parameters:
         window: time period for BB calculation
         num_std: number of standard deviations for BB
         """
+        
         print(f"\nCALCULATING BOLLINGER BANDS ({window}, {num_std}σ) WITH TA-LIB")
         print("=" * 50)
         
@@ -149,18 +169,24 @@ class TechnicalIndicators(ForexEDA, FirstLook):
                                             nbdevdn=num_std)
 
         
-        self.data['BB_Upper'] = upper
-        self.data['BB_Middle'] = middle
-        self.data['BB_Lower'] = lower
-        self.data['BB_Width'] = (upper - lower) / middle
+        self.data[f'BB_Upper_{window}_{num_std}'] = upper
+        self.data[f'BB_Middle_{window}_{num_std}'] = middle
+        self.data[f'BB_Lower_{window}_{num_std}'] = lower
+        self.data[f'BB_Width_{window}_{num_std}'] = (upper - lower) / middle
         
-        for col in ['BB_Upper', 'BB_Middle', 'BB_Lower', 'BB_Width']:
-            self.indicators[col] = self.data[col]
+        self.indicators[f'BB_Upper_{window}_{num_std}'] = upper
+        self.indicators[f'BB_Middle_{window}_{num_std}'] = middle
+        self.indicators[f'BB_Lower_{window}_{num_std}'] = lower
+        self.indicators[f'BB_Width_{window}_{num_std}'] = (upper - lower) / middle
         
-        print("✓ Bollinger Bands calculated")
+        print(" Bollinger Bands calculated")
         return upper, middle, lower
     
-    def calculate_stochastic_oscillator(self, k_window=14, d_window=3):
+    def calculate_stochastic_oscillator(self, 
+                                        k_window:int = 14,
+                                        d_window:int = 3
+                                        ):
+        
         """
         Calculate Stochastic Oscillator using TA-Lib
         Parameters:
@@ -186,16 +212,19 @@ class TechnicalIndicators(ForexEDA, FirstLook):
                                     slowd_period=d_window, 
                                     slowd_matype=0)
         
-        self.data['Stoch_%K'] = slowk
-        self.data['Stoch_%D'] = slowd
+        self.data[f'Stoch_%K_{k_window}_{d_window}'] = slowk
+        self.data[f'Stoch_%D_{k_window}_{d_window}'] = slowd
         
-        self.indicators['Stoch_%K'] = slowk
-        self.indicators['Stoch_%D'] = slowd
+        self.indicators[f'Stoch_%K_{k_window}_{d_window}'] = slowk
+        self.indicators[f'Stoch_%D_{k_window}_{d_window}'] = slowd
         
-        print("✓ Stochastic Oscillator calculated")
+        print(" Stochastic Oscillator calculated")
         return slowk, slowd
     
-    def calculate_atr(self, window=14):
+    def calculate_atr(self, 
+                      window:int = 14
+                      ): 
+        
         """
         Calculate ATR using TA-Lib
         Parameters:
@@ -215,14 +244,16 @@ class TechnicalIndicators(ForexEDA, FirstLook):
         
         atr = talib.ATR(high, low, close, timeperiod=window)
      
+        self.data[f'ATR_{window}'] = atr
+        self.indicators[f'ATR_{window}'] = atr
         
-        self.data['ATR'] = atr
-        self.indicators['ATR'] = atr
-        
-        print("✓ Average True Range calculated")
+        print(" Average True Range calculated")
         return atr
     
-    def calculate_adx(self, window=14):
+    def calculate_adx(self,
+                      window:int = 14
+                      ):
+        
         """
         Calculate ADX using TA-Lib
         
@@ -243,8 +274,8 @@ class TechnicalIndicators(ForexEDA, FirstLook):
         
         adx = talib.ADX(high, low, close, timeperiod=window)
 
-        self.data['ADX'] = adx
-        self.indicators['ADX'] = adx
+        self.data[f'ADX_{window}'] = adx
+        self.indicators[f'ADX_{window}''ADX'] = adx
         
         print(" ADX calculated")
         return adx
@@ -253,25 +284,31 @@ class TechnicalIndicators(ForexEDA, FirstLook):
         """
         Calculate On-Balance Volume using TA-Lib
         """
-        print(f"\nCALCULATING ON-BALANCE VOLUME WITH TA-LIB")
-        print("=" * 50)
-        
-        if 'close' not in self.data.columns:
-            print("Error: 'close' column not found!")
-            return
-        
-        close = self.data['close'].values
-        volume = self.data['volume'].values if 'volume' in self.data.columns else np.ones(len(close))
-        
-        obv = talib.OBV(close, volume)
+        if 'volume' in self.data.columns:
+            print(f"\nCALCULATING ON-BALANCE VOLUME WITH TA-LIB")
+            print("=" * 50)
+            
+            if 'close' not in self.data.columns:
+                print("Error: 'close' column not found!")
+                return
+            
+            close = self.data['close'].values
+            volume = self.data['volume'].values if 'volume' in self.data.columns else np.ones(len(close))
+            
+            obv = talib.OBV(close, volume)
 
-        self.data['OBV'] = obv
-        self.indicators['OBV'] = obv
-        
-        print("✓ On-Balance Volume calculated")
-        return obv
+            self.data['OBV'] = obv
+            self.indicators['OBV'] = obv
+            
+            print(" On-Balance Volume calculated")
+            return obv
+        else:
+            print("Error: 'volume' column not found!")
     
-    def calculate_lags(self, lags=5):
+    def calculate_lags(self, 
+                       lags:int = 5,
+                       ):
+        
         """
         Create lagged features
         Parameters:
@@ -284,24 +321,25 @@ class TechnicalIndicators(ForexEDA, FirstLook):
             lag_col = f'Close_Lag_{lag}'
             self.data[lag_col] = self.data['close'].shift(lag)
             self.indicators[lag_col] = self.data[lag_col]
-            print(f"✓ Created {lag_col}")
+            print(f" Created {lag_col}")
         
         returns = self.data['close'].pct_change()
         for lag in range(1, lags + 1):
             ret_lag_col = f'Return_Lag_{lag}'
             self.data[ret_lag_col] = returns.shift(lag)
             self.indicators[ret_lag_col] = self.data[ret_lag_col]
-            print(f"✓ Created {ret_lag_col}")
+            
+            print(f" Created {ret_lag_col}")
     
     def calculate_all_indicators(self,
-                                 mas=[5, 10, 20, 50, 200],
-                                 rsi=14,
-                                 macd=(12,26,9),
-                                 bb=(20,2),
-                                 stoch =(14,3),
-                                 atr=14,
-                                 adx=14,
-                                 lags=5):
+                                 mas:list = [5, 10, 20, 50, 200],
+                                 rsi:int = 14,
+                                 macd:tuple = (12,26,9),
+                                 bb:tuple = (20,2),
+                                 stoch:tuple = (14,3),
+                                 atr:int = 14,
+                                 adx:int = 14,
+                                 lags:int = 5):
         """
         Calculate all technical indicators using TA-Lib
         Parameters:
@@ -313,6 +351,7 @@ class TechnicalIndicators(ForexEDA, FirstLook):
         atr: time period for ATR calculation
         adx: time period for ADX calculation
         lags: number of lags to create
+    
         """
         print("CALCULATING ALL TECHNICAL INDICATORS WITH TA-LIB")
         print("=" * 60)

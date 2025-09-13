@@ -1,0 +1,123 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.pylab import date2num
+import mplfinance as mpf
+
+import warnings
+warnings.filterwarnings('ignore')
+
+class LoadData:
+    def __init__(self, 
+                 file_path:str = None, 
+                 df:pd.DataFrame = None, 
+                 connection_string:str = None, 
+                 query:str = None ,
+                 ):
+        
+        """
+        Initialize the Forex Data Loader
+        Parameters:
+        prints (bool): Whether to print loading information
+
+        """
+        self.file_path = file_path
+        self.df = df
+        self.connection_string = connection_string
+        self.query = query
+        self.data = None
+        
+        try:
+            if self.file_path is not None:
+                self.load_csv()
+            elif self.df is not None:
+                self.load_dataframe()
+            elif self.connection_string is not None and self.query is not None:
+                self.load_from_database()
+            else:
+                print("No data loaded yet. Please load data using one of the methods.")
+        except Exception as e:
+            print(f"Error during initialization: {e}")
+
+        
+    def load_csv(self):
+        
+        """
+        Load data from a CSV file
+        !!! MUST BE FROM METATRADER 5 !!!
+        Parameters:
+        file_path (str): Path to the CSV file
+        
+        """ 
+        try:
+            # Load the CSV file
+            new_column_names = ['date', 'time', 'open', 'high', 'low', 'close', 'tickvol', 'vol', 'spread']
+            self.data = pd.read_csv(self.file_path,
+                                        header=None,   
+                                        sep='\t',
+                                        names=new_column_names, 
+                                        skiprows=1  
+                                        )
+            self.data['datetime'] = pd.to_datetime(self.data['date'] + ' ' + self.data['time'])
+            
+            # Remove unnecessary columns
+            self.data.drop(columns=['tickvol', 
+                            'vol', 
+                            'spread'],
+                            inplace=True)
+    
+            self.data = self.data[self.data['datetime'].dt.year > 2020]
+    
+            self.data.set_index('datetime', inplace=True)
+            
+            # Display initial information
+            print('Data loaded successfully!')
+            print(f'Shape: {self.data.shape}')
+            print("\n" + "="*50)
+        except Exception as e:
+            raise ValueError(f"Error loading file: {e}")
+    
+    def load_dataframe(self):
+        
+        """
+        Load data from a DataFrame
+        Parameters:
+        df (pd.DataFrame): DataFrame containing the data
+        
+        """ 
+        try:
+            if isinstance(self.df, pd.DataFrame):
+                self.data = self.df.copy()
+                if self.prints == True:
+                    print('Data loaded successfully from DataFrame!')
+                    print(f'Shape: {self.data.shape}')
+                    print("\n" + "="*50)
+            else:
+                raise ValueError("Input is not a valid DataFrame.")
+        except Exception as e:
+            print(f"Error loading DataFrame: {e}")
+            
+    def load_from_database(self, 
+                           connection_string:str , 
+                           query:str
+                           ):
+        
+        # """
+        # Load data from a database
+        # Parameters:
+        # connection_string (str): Database connection string
+        # query (str): SQL query to fetch the data
+        #
+        # """
+        # 
+        # try:
+        #     import sqlalchemy
+        #     engine = sqlalchemy.create_engine(connection_string)
+        #     self.data = pd.read_sql(query, engine)
+        #     if self.prints == True:
+        #         print('Data loaded successfully from database!')
+        #         print(f'Shape: {self.data.shape}')
+        #         print("\n" + "="*50)
+        # except Exception as e:
+        #     print(f"Error loading data from database: {e}")
+        pass

@@ -3,55 +3,64 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pylab import date2num
 import mplfinance as mpf
+
 import warnings
 warnings.filterwarnings('ignore')
 
-class FirstLook:
-    def __init__(self, file_path):
+class FirstLook():
+    def __init__(self, 
+                 df: pd.DataFrame,
+                 full_analysis: bool = False,
+                 periods: int = None,
+                 prints: bool = True,
+                 column : str = 'close'):
         """
         Initialize the Forex Data Analyzer
         
         Parameters:
-        file_path (str): Path to the CSV file
+        df (pd.DataFrame): DataFrame containing the data
+        full_abalysis (bool): Whether to perform full analysis upon initialization  
+        periods (int): Number of periods to display
+        prints (bool): Whether to print loading information
+        column (str): Column to plot
         """
-        self.file_path = file_path
-        self.data = None
-    
-    def load_data(self, show_print=True):
-        """
-        Load CSV data and perform initial processing !!! MUST BE FROM METATRADER 5 !!!
-        Parameters:
-        show_print (bool): Whether to print loading information
-        """
-        try:
-            # Load the CSV file
-            new_column_names = ['date', 'time', 'open', 'high', 'low', 'close', 'tickvol', 'vol', 'spread']
-            self.data = pd.read_csv(self.file_path,
-                                        header=None,   
-                                        sep='\t',
-                                        names=new_column_names, 
-                                        skiprows=1  
-                                        )
-            self.data['datetime'] = pd.to_datetime(self.data['date'] + ' ' + self.data['time'])
+        
+        self.data = df.copy()
+        self.plot_data = df.copy()
+        
+        if periods is not None:
+            if periods > len(df):
+                print(f"Warning: periods ({periods}) is greater than the length of the dataframe ({len(df)}). Showing full data instead.")
+                periods = None
+            else:
+                self.plot_data = df.tail(periods).copy() 
             
-            # Remove unnecessary columns
-            self.data.drop(columns=['tickvol', 
-                            'vol', 
-                            'spread'],
-                            inplace=True)
+        self.periods = periods
+        self.column = column    
+        self.prints = prints    
+        self.summary = None
+        
+        if full_analysis == True:
+            self.full_analysis()
+        else:
+            print(f"Data shape: {self.data.shape}")
+            print(f"Date range: {self.data.index.min()} to {self.data.index.max()}")
+            if self.prints == True:
+                print(self.data.head(3))
+                print("="*50)
+                print(self.data.tail(3))
+                print("="*50)
+                print("Available methods:")
+                print(" - display_info()")
+                print(" - check_missing_values_and_duplicates()")
+                print(" - clean_data()")
+                print(" - plot_candlestick()")
+                print(" - plot_time_series()")
+                print(" - get_summary()")
+                print(" - full_analysis() -- performs all the above methods in sequence")
+                print("="*50)
+
     
-            self.data = self.data[self.data['datetime'].dt.year > 2020]
-    
-            self.data.set_index('datetime', inplace=True)
-            
-            # Display initial information
-            if show_print == True:
-                print('Data loaded successfully!')
-                print(f'Shape: {self.data.shape}')
-                print("\n" + "="*50)
-            
-        except Exception as e:
-            print(f"Error loading file: {e}")
     
     def display_info(self):
         """
@@ -132,11 +141,11 @@ class FirstLook:
         print(infinite_values)
         print("="*50)
     
-    def clean_data(self, show_print=True):
+    def clean_data(self):
         """
         Clean the data by handling missing values and duplicates
         """
-        if show_print == True   :  
+        if self.prints == True:  
             print("DATA CLEANING")
             print("="*50)
         
@@ -145,7 +154,7 @@ class FirstLook:
         self.data = self.data.drop_duplicates()
         duplicates_removed = initial_rows - len(self.data)
         
-        if show_print == True:  
+        if self.prints == True:  
             print(f"Duplicates removed: {duplicates_removed}")
         
         # Handle missing values
@@ -157,12 +166,12 @@ class FirstLook:
         
         missing_after = self.data.isnull().sum().sum()
         
-        if show_print == True:  
+        if self.prints == True:  
             print(f"Missing values handled: {missing_before - missing_after}")
             
         print("Data cleaning completed!")
     
-    def plot_candlestick(self, periods=100, title="Forex Candlestick Chart"):
+    def plot_candlestick(self):
         """
         Plot candlestick chart using mplfinance
         
@@ -177,16 +186,13 @@ class FirstLook:
                 print("Error: Missing OHLC columns for candlestick chart")
                 return
             
-            # Get the last 'periods' data points
-            plot_data = self.data.iloc[-periods:].copy()
-            
             # Create the candlestick chart
             plt.figure(figsize=(15, 6))
             
-            mpf.plot(plot_data, 
+            mpf.plot(self.plot_data, 
                     type='candle',
                     style='charles',
-                    title=title,
+                    title= 'Candlestick Chart',
                     ylabel='Price',
                     volume=False,
                     figratio=(15, 8),
@@ -198,7 +204,7 @@ class FirstLook:
         except Exception as e:
             print(f"Error creating candlestick chart: {e}")
     
-    def plot_time_series(self, column='close', periods=200, title="Price Time Series"):
+    def plot_time_series(self):
         """
         Plot time series of a specific column
         
@@ -207,18 +213,19 @@ class FirstLook:
         periods (int): Number of periods to display
         title (str): Chart title
         """
-        if column in self.data.columns:
+        if self.column in self.data.columns:
             plt.figure(figsize=(15, 6))
-            self.data[column].iloc[-periods:].plot()
-            plt.title(f'{title} - Last {periods} periods')
-            plt.ylabel(column)
+            
+            self.plot_data[self.column].plot()
+            plt.title(f'Line Plot of {self.column}')
+            plt.ylabel(self.column)
             plt.xlabel('Date')
             plt.grid(True)
             plt.show()
         else:
-            print(f"Column '{column}' not found in dataset")
+            print(f"Column '{self.column}' not found in dataset")
     
-    def get_summary(self, show_print=True):
+    def get_summary(self):
         """
         Get a comprehensive summary of the dataset
         """
@@ -233,8 +240,9 @@ class FirstLook:
             'columns' : self.data.columns,
             'index_column': self.data.index.name
         }
+        self.summary = summary
         
-        if show_print == True:
+        if self.prints == True:
             print("DATASET SUMMARY")
             print("="*50)
             
@@ -243,16 +251,13 @@ class FirstLook:
             
             print("="*50)
         
-    def get_data(self):
+    def full_analysis(self):
         """
-        Returns the processed DataFrame.
+        Perform full analysis: display info, check missing values, clean data, and get summary
         """
-        # Ensure data is loaded
-        if self.data is None:
-            self.load_data(show_print=True)
-    
-        # Clean data if there are missing values or duplicates
-        if self.data.isnull().sum().sum() > 0 or self.data.duplicated().sum() > 0:
-            self.clean_data(show_print=False)
-        
-        return self.data.copy() 
+        self.display_info()
+        self.check_missing_values_and_duplicates()
+        self.clean_data()
+        self.plot_candlestick()
+        self.plot_time_series()
+        self.get_summary() 
