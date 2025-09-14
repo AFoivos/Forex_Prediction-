@@ -4,6 +4,8 @@ import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
 
+#ADD PRINTS AND EXPLANATIONS 
+
 class ForexDataClean:
     def __init__(self, 
                  data: pd.DataFrame, 
@@ -94,10 +96,8 @@ class ForexDataClean:
         
         """
         
-        # Check High >= Low
         high_low_violations = (self.data['high'] < self.data['low'])
         
-        # Check Open/Close within range
         open_violations = ((self.data['open'] < self.data['low']) |
                            (self.data['open'] > self.data['high']))
         
