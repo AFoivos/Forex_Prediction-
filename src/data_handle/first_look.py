@@ -7,13 +7,15 @@ import mplfinance as mpf
 import warnings
 warnings.filterwarnings('ignore')
 
-class FirstLook():
+class ForexFirstLook():
     def __init__(self, 
                  df: pd.DataFrame,
                  full_analysis: bool = False,
                  periods: int = None,
                  prints: bool = True,
-                 column : str = 'close'):
+                 column : str = 'close'
+                 ):
+        
         """
         Initialize the Forex Data Analyzer
         
@@ -140,36 +142,7 @@ class FirstLook():
         print("\n6. INFINITE VALUES:")
         print(infinite_values)
         print("="*50)
-    
-    def clean_data(self):
-        """
-        Clean the data by handling missing values and duplicates
-        """
-        if self.prints == True:  
-            print("DATA CLEANING")
-            print("="*50)
-        
-        # Remove duplicates
-        initial_rows = len(self.data)
-        self.data = self.data.drop_duplicates()
-        duplicates_removed = initial_rows - len(self.data)
-        
-        if self.prints == True:  
-            print(f"Duplicates removed: {duplicates_removed}")
-        
-        # Handle missing values
-        missing_before = self.data.isnull().sum().sum()
-        
-        # For numeric columns, fill with forward fill then backward fill
-        numeric_cols = self.data.select_dtypes(include=[np.number]).columns
-        self.data[numeric_cols] = self.data[numeric_cols].fillna(method='ffill').fillna(method='bfill')
-        
-        missing_after = self.data.isnull().sum().sum()
-        
-        if self.prints == True:  
-            print(f"Missing values handled: {missing_before - missing_after}")
-            
-        print("Data cleaning completed!")
+
     
     def plot_candlestick(self):
         """
@@ -183,9 +156,8 @@ class FirstLook():
             # Ensure we have OHLC data
             required_cols = ['open', 'high', 'low', 'close']
             if not all(col in self.data.columns for col in required_cols):
-                print("Error: Missing OHLC columns for candlestick chart")
-                return
-            
+                raise ValueError("Error: Missing OHLC columns for candlestick chart")
+                
             # Create the candlestick chart
             plt.figure(figsize=(15, 6))
             
@@ -257,7 +229,6 @@ class FirstLook():
         """
         self.display_info()
         self.check_missing_values_and_duplicates()
-        self.clean_data()
         self.plot_candlestick()
         self.plot_time_series()
         self.get_summary() 

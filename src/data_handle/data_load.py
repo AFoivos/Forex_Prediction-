@@ -7,12 +7,13 @@ import mplfinance as mpf
 import warnings
 warnings.filterwarnings('ignore')
 
-class LoadData:
+class ForexDataLoad:
     def __init__(self, 
-                 file_path:str = None, 
-                 df:pd.DataFrame = None, 
-                 connection_string:str = None, 
-                 query:str = None ,
+                 file_path: str = None, 
+                 df: pd.DataFrame = None, 
+                 connection_string: str = None, 
+                 query: str = None ,
+                 prints: bool = True
                  ):
         
         """
@@ -26,6 +27,7 @@ class LoadData:
         self.connection_string = connection_string
         self.query = query
         self.data = None
+        self.prints = prints
         
         try:
             if self.file_path is not None:
@@ -51,29 +53,31 @@ class LoadData:
         """ 
         try:
             # Load the CSV file
-            new_column_names = ['date', 'time', 'open', 'high', 'low', 'close', 'tickvol', 'vol', 'spread']
+            new_column_names = ['date', 'time', 'open', 'high', 'low', 'close', 'tickvol', 'volume', 'spread']
             self.data = pd.read_csv(self.file_path,
                                         header=None,   
                                         sep='\t',
                                         names=new_column_names, 
                                         skiprows=1  
                                         )
+            
             self.data['datetime'] = pd.to_datetime(self.data['date'] + ' ' + self.data['time'])
             
             # Remove unnecessary columns
-            self.data.drop(columns=['tickvol', 
-                            'vol', 
+            self.data.drop(columns=['tickvol',  
                             'spread'],
-                            inplace=True)
+                            inplace=True
+                            )
     
-            self.data = self.data[self.data['datetime'].dt.year > 2020]
+            # self.data = self.data[self.data['datetime'].dt.year > 2020]
     
             self.data.set_index('datetime', inplace=True)
             
-            # Display initial information
-            print('Data loaded successfully!')
-            print(f'Shape: {self.data.shape}')
-            print("\n" + "="*50)
+            if self.prints:
+                # Display initial information
+                print('Data loaded successfully!')
+                print(f'Shape: {self.data.shape}')
+                print("\n" + "="*50)
         except Exception as e:
             raise ValueError(f"Error loading file: {e}")
     
@@ -88,18 +92,18 @@ class LoadData:
         try:
             if isinstance(self.df, pd.DataFrame):
                 self.data = self.df.copy()
-                if self.prints == True:
+                if self.prints:
                     print('Data loaded successfully from DataFrame!')
                     print(f'Shape: {self.data.shape}')
                     print("\n" + "="*50)
             else:
                 raise ValueError("Input is not a valid DataFrame.")
         except Exception as e:
-            print(f"Error loading DataFrame: {e}")
+            raise ValueError(f"Error loading DataFrame: {e}")
             
     def load_from_database(self, 
-                           connection_string:str , 
-                           query:str
+                           connection_string: str , 
+                           query: str
                            ):
         
         # """
