@@ -1,0 +1,36 @@
+1.Trend Indicators:
+
+SMA 
+EMA 
+MACD
+ADX (trend strength)
+Parabolic SAR
+
+2.Momentum Indicators:
+
+RSI 
+Stochastic 
+Williams %R
+CCI
+Momentum
+
+3.Volatility Indicators:
+
+ATR 
+Bollinger Bands
+Keltner Channels
+Standard Deviation
+
+4.Volume Indicators (αν υπάρχει volume):
+
+OBV
+Volume SMA
+Volume Rate of Change
+
+5.Custom Features:
+
+Returns & Log returns
+Volatility measures
+Price position in range
+Seasonality features
+Time-based features
