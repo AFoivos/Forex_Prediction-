@@ -10,10 +10,11 @@ warnings.filterwarnings('ignore')
 class ForexFirstLook():
     def __init__(self, 
                  df: pd.DataFrame,
-                 full_analysis: bool = False,
+                 full_look: bool = False,
                  periods: int = None,
                  prints: bool = True,
-                 column : str = 'close'
+                 column : str = 'close',
+                 plots: bool = True,
                  ):
         
         """
@@ -25,10 +26,12 @@ class ForexFirstLook():
         periods (int): Number of periods to display
         prints (bool): Whether to print loading information
         column (str): Column to plot
+        
         """
         
         self.data = df.copy()
         self.plot_data = df.copy()
+        self.plot = plots
         
         if periods is not None:
             if periods > len(df):
@@ -42,7 +45,7 @@ class ForexFirstLook():
         self.prints = prints    
         self.summary = None
         
-        if full_analysis == True:
+        if full_look == True:
             self.full_analysis()
         else:
             print(f"Data shape: {self.data.shape}")
@@ -65,9 +68,12 @@ class ForexFirstLook():
     
     
     def display_info(self):
+        
         """
         Display comprehensive information about the dataset
+        
         """
+        
         print("DATASET INFORMATION")
         print("="*50)
         
@@ -103,9 +109,12 @@ class ForexFirstLook():
         print("="*50)
     
     def check_missing_values_and_duplicates(self):
+        
         """
         Check for missing and NaN values in the dataset
+        
         """
+        
         print("MISSING VALUES ANALYSIS")
         print("="*50)
         
@@ -145,13 +154,16 @@ class ForexFirstLook():
 
     
     def plot_candlestick(self):
+        
         """
         Plot candlestick chart using mplfinance
         
         Parameters:
         periods (int): Number of periods to display
         title (str): Chart title
+        
         """
+        
         try:
             # Ensure we have OHLC data
             required_cols = ['open', 'high', 'low', 'close']
@@ -171,12 +183,12 @@ class ForexFirstLook():
                     figscale=1.2,
                     returnfig=True)
             
-            plt.show()
-            
+            plt.show()  
         except Exception as e:
             print(f"Error creating candlestick chart: {e}")
     
     def plot_time_series(self):
+        
         """
         Plot time series of a specific column
         
@@ -184,7 +196,9 @@ class ForexFirstLook():
         column (str): Column to plot
         periods (int): Number of periods to display
         title (str): Chart title
+        
         """
+        
         if self.column in self.data.columns:
             plt.figure(figsize=(15, 6))
             
@@ -198,9 +212,12 @@ class ForexFirstLook():
             print(f"Column '{self.column}' not found in dataset")
     
     def get_summary(self):
+        
         """
         Get a comprehensive summary of the dataset
+        
         """
+        
         summary = {
             'total_rows': len(self.data),
             'total_columns': len(self.data.columns),
@@ -224,11 +241,19 @@ class ForexFirstLook():
             print("="*50)
         
     def full_analysis(self):
+       
         """
         Perform full analysis: display info, check missing values, clean data, and get summary
+       
         """
+       
         self.display_info()
         self.check_missing_values_and_duplicates()
-        self.plot_candlestick()
-        self.plot_time_series()
+        
+        if self.plot:
+            self.plot_candlestick()
+            self.plot_time_series()
+            
         self.get_summary() 
+        
+        return self.data, self.summary
