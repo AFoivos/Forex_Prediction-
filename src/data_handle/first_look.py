@@ -9,7 +9,7 @@ warnings.filterwarnings('ignore')
 
 class ForexFirstLook():
     def __init__(self, 
-                 df: pd.DataFrame,
+                 data: pd.DataFrame,
                  full_look: bool = False,
                  periods: int = None,
                  prints: bool = True,
@@ -21,31 +21,29 @@ class ForexFirstLook():
         Initialize the Forex Data Analyzer
         
         Parameters:
-        df (pd.DataFrame): DataFrame containing the data
+        data (pd.DataFrame): DataFrame containing the data
         full_abalysis (bool): Whether to perform full analysis upon initialization  
         periods (int): Number of periods to display
         prints (bool): Whether to print loading information
         column (str): Column to plot
         
         """
-        
-        self.data = df.copy()
-        self.plot_data = df.copy()
-        self.plot = plots
-        
-        if periods is not None:
-            if periods > len(df):
-                print(f"Warning: periods ({periods}) is greater than the length of the dataframe ({len(df)}). Showing full data instead.")
-                periods = None
-            else:
-                self.plot_data = df.tail(periods).copy() 
-            
+    
+        self.plot = plots    
         self.periods = periods
         self.column = column    
         self.prints = prints    
         self.summary = None
         
-        if full_look == True:
+        if self.periods is not None:
+            if self.periods > len(data):  
+                print(f"Warning: periods ({periods}) is greater than the length of the dataframe ({len(data)}). Showing full data instead.")
+            else:
+                self.data = data.tail(self.periods).copy()
+        else:
+            self.data = data.copy()
+        
+        if full_look:
             self.full_analysis()
         else:
             print(f"Data shape: {self.data.shape}")
@@ -58,11 +56,9 @@ class ForexFirstLook():
                 print("Available methods:")
                 print(" - display_info()")
                 print(" - check_missing_values_and_duplicates()")
-                print(" - clean_data()")
                 print(" - plot_candlestick()")
                 print(" - plot_time_series()")
                 print(" - get_summary()")
-                print(" - full_analysis() -- performs all the above methods in sequence")
                 print("="*50)
 
     
@@ -173,7 +169,7 @@ class ForexFirstLook():
             # Create the candlestick chart
             plt.figure(figsize=(15, 6))
             
-            mpf.plot(self.plot_data, 
+            mpf.plot(self.data, 
                     type='candle',
                     style='charles',
                     title= 'Candlestick Chart',
@@ -202,7 +198,7 @@ class ForexFirstLook():
         if self.column in self.data.columns:
             plt.figure(figsize=(15, 6))
             
-            self.plot_data[self.column].plot()
+            self.data[self.column].plot()
             plt.title(f'Line Plot of {self.column}')
             plt.ylabel(self.column)
             plt.xlabel('Date')

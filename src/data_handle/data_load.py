@@ -10,7 +10,7 @@ warnings.filterwarnings('ignore')
 class ForexDataLoad:
     def __init__(self, 
                  file_path: str = None, 
-                 df: pd.DataFrame = None, 
+                 data: pd.DataFrame = None, 
                  connection_string: str = None, 
                  query: str = None ,
                  prints: bool = True
@@ -23,7 +23,7 @@ class ForexDataLoad:
 
         """
         self.file_path = file_path
-        self.df = df
+        self.data = data
         self.connection_string = connection_string
         self.query = query
         self.data = None
@@ -32,7 +32,7 @@ class ForexDataLoad:
         try:
             if self.file_path is not None:
                 self.load_csv()
-            elif self.df is not None:
+            elif self.data is not None:
                 self.load_dataframe()
             elif self.connection_string is not None and self.query is not None:
                 self.load_from_database()
@@ -86,12 +86,12 @@ class ForexDataLoad:
         """
         Load data from a DataFrame
         Parameters:
-        df (pd.DataFrame): DataFrame containing the data
+        data (pd.DataFrame): DataFrame containing the data
         
         """ 
         try:
-            if isinstance(self.df, pd.DataFrame):
-                self.data = self.df.copy()
+            if isinstance(self.data, pd.DataFrame):
+                self.data = self.data.copy()
                 if self.prints:
                     print('Data loaded successfully from DataFrame!')
                     print(f'Shape: {self.data.shape}')
