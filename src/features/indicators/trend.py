@@ -7,7 +7,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-class TrendIndicators:
+class ForexTrendIndicators:
     def __init__(self, 
                  data: pd.DataFrame,
                  open_col: str = 'open',

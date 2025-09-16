@@ -249,7 +249,8 @@ class ForexDataClean:
         
         for col in columns:
             # Skip non-numeric columns
-            if not np.issubdtype(self.data[col].dtype, np.number):
+            if not pd.api.types.is_numeric_dtype(self.data[col]):
+
                 print(f"⏭️  Skipping non-numeric column: {col}")
                 continue
             
