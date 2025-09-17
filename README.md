@@ -1,5 +1,5 @@
 # Forex_Prediction-OnGoing 
-rediction Models: Implements various machine learning and deep learning models for both Regression (forecasting future prices) and Classification (predicting price movement direction).
+Prediction Models: Implements various machine learning and deep learning models for both Regression (forecasting future prices) and Classification (predicting price movement direction).
 
 Classical Models: XGBoost, CatBoost.
 
