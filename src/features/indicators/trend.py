@@ -6,7 +6,6 @@ from typing import Dict, List, Optional, Union
 import warnings
 warnings.filterwarnings('ignore')
 
-
 class ForexTrendIndicators:
     def __init__(self, 
                  data: pd.DataFrame,
@@ -39,8 +38,10 @@ class ForexTrendIndicators:
         self.available_get_trend_strength = [False,False,False]
         
         #Validate data_cols
-        if not all(col in self.data.columns for col in [self.open_col, self.high_col, self.low_col, self.close_col]):
-            raise ValueError ("Invalid column names in DataFrame")
+        required_cols = [self.open_col, self.high_col, self.low_col, self.close_col]
+        missing_cols = [col for col in required_cols if col not in self.data.columns]
+        if missing_cols:
+            raise ValueError(f"Missing columns in DataFrame: {missing_cols}")
         
     def add_sma(self, 
                 periods: List[int] = [10, 20, 50, 100, 200]
@@ -129,6 +130,8 @@ class ForexTrendIndicators:
         """
         print("="*50)
         print("MACD INDICATOR")
+        print("="*50)
+        print(" Available Fuctions \n1 add_macd \n2 add_adx \n3 add_parabolic_sar \n4 add_trend_confirmation")
         print("="*50)
         
         macd, macd_signal, macd_hist = talib.MACD(

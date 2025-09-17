@@ -1,11 +1,10 @@
 import pandas as pd
 import numpy as np
 import talib
-from typing import List, Optional
+from typing import Dict, List, Optional, Union
 
 import warnings
 warnings.filterwarnings('ignore')
-
 
 class ForexMomentumIndicators:
     def __init__(self, 
@@ -32,6 +31,8 @@ class ForexMomentumIndicators:
         print("="*50)
         print("MOMENTUM INDICATORS")
         print("="*50)
+        print(" Available Fuctions \n1 add_rsi \n2 add_stochastic \n3 add_williams_r \n4 add_cci \n5 add_momentum \n6 add_momentum_confirmation")
+        print("="*50) 
         
         self.data = data.copy()
         self.open_col = open_col

@@ -22,6 +22,13 @@ class ForexDataLoad:
         prints (bool): Whether to print loading information
 
         """
+        
+        print("="*50)
+        print("FOREX DATA LOADER")
+        print("="*50)
+        print(" Available Fuctions \n1 load_csv \n2 load_dataframe \n3 load_from_database")
+        print("="*50)
+        
         self.file_path = file_path
         self.data = data
         self.connection_string = connection_string
@@ -51,6 +58,7 @@ class ForexDataLoad:
         file_path (str): Path to the CSV file
         
         """ 
+        
         try:
             # Load the CSV file
             new_column_names = ['date', 'time', 'open', 'high', 'low', 'close', 'tickvol', 'volume', 'spread']
@@ -89,6 +97,7 @@ class ForexDataLoad:
         data (pd.DataFrame): DataFrame containing the data
         
         """ 
+        
         try:
             if isinstance(self.data, pd.DataFrame):
                 self.data = self.data.copy()
@@ -124,4 +133,5 @@ class ForexDataLoad:
         #         print("\n" + "="*50)
         # except Exception as e:
         #     print(f"Error loading data from database: {e}")
+        
         pass

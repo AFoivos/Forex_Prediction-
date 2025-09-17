@@ -28,6 +28,11 @@ class ForexQuickLook():
         column (str): Column to plot
         
         """
+        print("="*50)
+        print("FOREX QUICK LOOK")
+        print("="*50)
+        print(" Available Fuctions \n1 display_info \n2 check_missing_values_and_duplicates \n3 plot_candlestick \n4 plot_time_series \n5 get_summary")
+        print("="*50)
     
         self.plot = plots    
         self.periods = periods
@@ -46,20 +51,16 @@ class ForexQuickLook():
         if full_look:
             self.full_analysis()
         else:
+            print(self.data.head(3))
+            print("="*50)
+            print(self.data.tail(3))
+            print("="*50)
             print(f"Data shape: {self.data.shape}")
+            print("="*50)
+            print(f"Columns: {self.data.columns}")
+            print("="*50)
             print(f"Date range: {self.data.index.min()} to {self.data.index.max()}")
-            if self.prints == True:
-                print(self.data.head(3))
-                print("="*50)
-                print(self.data.tail(3))
-                print("="*50)
-                print("Available methods:")
-                print(" - display_info()")
-                print(" - check_missing_values_and_duplicates()")
-                print(" - plot_candlestick()")
-                print(" - plot_time_series()")
-                print(" - get_summary()")
-                print("="*50)
+
 
     
     

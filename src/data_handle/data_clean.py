@@ -22,6 +22,11 @@ class ForexDataClean:
         fast_clean (bool): Whether to perform fast cleaning upon initialization
         
         """
+        print("="*50)
+        print("FOREX DATA CLEANER")
+        print("="*50)
+        print(" Available Fuctions \n1 remove_duplicates \n2 handle_missing_values \n3 validate_ohlc_integrity \n4 handle_outliers")
+        print("="*50)
     
         self.data = data.copy()
         self.original_data = data.copy()
