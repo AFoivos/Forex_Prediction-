@@ -284,6 +284,7 @@ class ForexFeatureAnalysis:
         results = {}
         
         for feature in self.numeric_cols:
+            
             # Calculate correlations at different lags
             lag_correlations = []
             for lag in range(0, max_lags + 1):
@@ -316,7 +317,7 @@ class ForexFeatureAnalysis:
         performance_df['Abs_Correlation'] = performance_df['Correlation'].abs()
         performance_df = performance_df.sort_values('Abs_Correlation', ascending=False)
         
-        print("Top Features by Predictive Power (with Optimal Lags):")
+        print("Top Features by Predictive Power:")
         print(performance_df.head(15).to_string(index=False))
         
         return results
