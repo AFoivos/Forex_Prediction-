@@ -340,16 +340,9 @@ class ForexFeatureAnalysis:
         
         results = {}
         
-        # 1. Multicollinearity Check
         results['vif'] = self.calculate_vif()
-        
-        # 2. Feature Importance (if target specified)
         results['importance'] = self.feature_importance_analysis(problem_type)
-        
-        # 3. Feature Relationships
         results['relationships'] = self.feature_relationships()
-        
-        # 4. Optimal Lag Analysis (if target specified)
         results['lags'] = self.optimal_lag_analysis()
         
         print("="*50)
