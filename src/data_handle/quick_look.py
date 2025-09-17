@@ -7,7 +7,7 @@ import mplfinance as mpf
 import warnings
 warnings.filterwarnings('ignore')
 
-class ForexFirstLook():
+class ForexQuickLook():
     def __init__(self, 
                  data: pd.DataFrame,
                  full_look: bool = False,
