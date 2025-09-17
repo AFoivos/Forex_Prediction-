@@ -50,6 +50,7 @@ class ForexMomentumIndicators:
                 periods: List[int] = [14, 21, 28],
                 overbought: int = 70,
                 oversold: int = 30):
+        
         """
         Relative Strength Index
         
@@ -95,6 +96,7 @@ class ForexMomentumIndicators:
                       slowd_period: int = 3,
                       overbought: int = 80,
                       oversold: int = 20):
+        
         """
         Stochastic Oscillator
         
@@ -148,6 +150,7 @@ class ForexMomentumIndicators:
                       period: int = 14,
                       overbought: int = -20,
                       oversold: int = -80):
+        
         """
         Williams %R
         
@@ -194,6 +197,7 @@ class ForexMomentumIndicators:
                period: int = 20,
                overbought: int = 100,
                oversold: int = -100):
+        
         """
         Commodity Channel Index
         
@@ -235,8 +239,8 @@ class ForexMomentumIndicators:
         
         return self.data
     
-    def add_momentum(self,
-                    periods: List[int] = [10, 14, 20]):
+    def add_momentum(self, periods: List[int] = [10, 14, 20]):
+        
         """
         Momentum Indicator
         
@@ -270,6 +274,7 @@ class ForexMomentumIndicators:
         return self.data
     
     def add_momentum_confirmation(self):
+        
         """
         Adding momentum confirmation features
         
@@ -311,6 +316,7 @@ class ForexMomentumIndicators:
         return self.data
     
     def get_momentum_score(self) -> Optional[float]:
+        
         """
         Returns overall momentum score
         
@@ -378,6 +384,7 @@ class ForexMomentumIndicators:
                                    williams_period: int = 14,
                                    cci_period: int = 20,
                                    momentum_periods: List[int] = [10, 14, 20]):
+        
         """
         Adds all momentum indicators
         
