@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Union
 import warnings
 warnings.filterwarnings('ignore')
 
-class CustomFeatures:
+class ForexCustomFeatures:
     def __init__(self, 
                  data: pd.DataFrame,
                  open_col: str = 'open',
