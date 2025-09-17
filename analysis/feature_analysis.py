@@ -265,10 +265,10 @@ class ForexFeatureAnalysis:
             'high_correlation_pairs': high_corr_pairs
         }
     
-    def lag_analysis(self, max_lags: int = 5):
+    def lag_analysis(self, max_lags: int = 24): # Full Day Lags  
         
         """
-        Find optimal lags for features
+        Calculate lags for features
         
         Parameters:
         max_lags (int): Maximum number of lags to test
