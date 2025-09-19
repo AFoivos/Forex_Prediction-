@@ -263,82 +263,7 @@ class ForexTrendIndicators:
         print('New columns added: parabolic_sar, sar_signal, sar_above_price, sar_trend_change')
         print("="*50)
         
-        return self.data    
-    
-    def add_trend_confirmation(self):
-        
-        """
-        Adding trend confirmation features
-        
-        """ 
-        
-        print("="*50)
-        print("TREND CONFIRMATION")
-        print("="*50)
-        
-        # Price above/below key moving averages
-        if 'sma_50' in self.data.columns and 'sma_200' in self.data.columns:
-            self.data['price_above_sma50'] = (self.data[self.close_col] > self.data['sma_50']).astype(int)
-            self.data['price_above_sma200'] = (self.data[self.close_col] > self.data['sma_200']).astype(int)
-            self.data['golden_cross'] = ((self.data['sma_50'] > self.data['sma_200']) & (self.data['sma_50'].shift(1) <= self.data['sma_200'].shift(1))).astype(int)
-            self.data['death_cross'] = ((self.data['sma_50'] < self.data['sma_200']) & (self.data['sma_50'].shift(1) >= self.data['sma_200'].shift(1))).astype(int)
-        
-        # Multiple timeframe trend confirmation
-        if all(col in self.data.columns for col in ['sma_20', 'sma_50', 'sma_100']):
-            self.data['multi_tf_bullish'] = ((self.data[self.close_col] > self.data['sma_20']) & 
-                                         (self.data[self.close_col] > self.data['sma_50']) &
-                                         (self.data[self.close_col] > self.data['sma_100'])).astype(int)
-            
-            self.data['multi_tf_bearish'] = ((self.data[self.close_col] < self.data['sma_20']) & 
-                                         (self.data[self.close_col] < self.data['sma_50']) &
-                                         (self.data[self.close_col] < self.data['sma_100'])).astype(int)
-            
-        print('New columns added: price_above_sma50, price_above_sma200, golden_cross, death_cross, multi_tf_bullish, multi_tf_bearish')
-        print("="*50)
-        
-        return self.data
-    
-    def get_trend_strength(self) -> pd.Series:
-        
-        """
-        Returns trend strength score
-        
-        10: Strong Uptrend
-        5: Neutral Trend 
-        0: Strong Downtrend
-        
-        """
-        
-        print("="*50)
-        print("TREND STRENGTH")
-        print("="*50)
-        
-        if self.available_get_trend_strength == [True,True,True]:
-            strength_score = pd.Series(5.0, index=self.data.index)  
-            
-            # ADX contribution
-            if 'adx' in self.data.columns:
-                # ADX > 25 indicates meaningful trend
-                adx_contribution = np.clip((self.data['adx'] - 25) / 25, 0, 3)
-                strength_score += adx_contribution
-            
-            # Moving average slope contribution
-            slope_cols = [col for col in self.data.columns if col.endswith('_slope')]
-            for col in slope_cols:
-                # Normalize slope to reasonable range
-                slope_contribution = np.clip(self.data[col] * 100, -2, 2)
-                strength_score += slope_contribution
-            
-            # Ensure final score is between 0-10
-            strength_score = np.clip(strength_score, 0, 10)
-            strength_score = strength_score.round()  
-            current_trend_strength = strength_score.iloc[-1]
-            
-            print(current_trend_strength)
-            
-            return current_trend_strength
-        else:
-            print('You need to calculate EMA,SMA and ADX before you can get trend strength')  
+        return self.data     
          
     def get_all_trend_indicators(self,
                                     sma_periods: List[int] = [20, 50, 100],
@@ -371,8 +296,8 @@ class ForexTrendIndicators:
         self.add_macd(macd_fastperiod, macd_slowperiod, macd_signalperiod)
         self.add_adx(adx_period)
         self.add_parabolic_sar(parabolic_sar_acceleration, parabolic_sar_maximum)
-        self.add_trend_confirmation()
-        self.get_trend_strength()
+        # self.add_trend_confirmation()
+        # self.get_trend_strength()
         
         return self.data
         

@@ -165,118 +165,6 @@ class ForexVolumeIndicators:
         
         return self.data
     
-    def add_volume_confirmation(self):
-        
-        """
-        Adding volume confirmation features
-        
-        """
-        
-        print("="*50)
-        print("VOLUME CONFIRMATION")
-        print("="*50)
-        
-        added_columns = []
-        
-        # Volume-Price confirmation
-        if all(col in self.data.columns for col in ['obv', 'volume_sma_20_ratio']):
-            self.data['volume_price_confirmation'] = (
-                (self.data[self.close_col].diff() > 0) & (self.data['obv_trend'] > 0) |
-                (self.data[self.close_col].diff() < 0) & (self.data['obv_trend'] < 0)
-            ).astype(int)
-            
-            self.data['volume_divergence'] = (
-                (self.data[self.close_col].diff() > 0) & (self.data['obv_trend'] < 0) |
-                (self.data[self.close_col].diff() < 0) & (self.data['obv_trend'] > 0)
-            ).astype(int)
-            
-            added_columns.extend(['volume_price_confirmation', 'volume_divergence'])
-        
-        # High volume breakout detection
-        if 'volume_sma_20_ratio' in self.data.columns:
-            self.data['high_volume_breakout'] = (
-                (self.data['volume_sma_20_ratio'] > 2.0) &
-                (self.data[self.close_col].diff() > 0)
-            ).astype(int)
-            
-            self.data['high_volume_breakdown'] = (
-                (self.data['volume_sma_20_ratio'] > 2.0) &
-                (self.data[self.close_col].diff() < 0)
-            ).astype(int)
-            
-            added_columns.extend(['high_volume_breakout', 'high_volume_breakdown'])
-        
-        # Volume spike detection
-        if 'volume_roc_5' in self.data.columns:
-            self.data['volume_spike'] = (self.data['volume_roc_5'] > 100).astype(int)
-            self.data['volume_drought'] = (self.data['volume_roc_5'] < -50).astype(int)
-            
-            added_columns.extend(['volume_spike', 'volume_drought'])
-        
-        print(f'New columns added: {added_columns}')
-        print("="*50)
-        
-        return self.data
-    
-    def get_volume_score(self) -> Optional[float]:
-        
-        """
-        Returns overall volume score
-        
-        100: Extremely High Volume Activity
-        50: Normal Volume Activity
-        0: Extremely Low Volume Activity
-        
-        """
-        
-        print("="*50)
-        print("VOLUME SCORE")
-        print("="*50)
-        
-        required_indicators = ['obv_trend', 'volume_sma_20_ratio', 'volume_roc_5']
-        missing_indicators = [ind for ind in required_indicators if ind not in self.data.columns]
-        
-        if missing_indicators:
-            print(f'Missing indicators: {missing_indicators}')
-            print('Calculate OBV, Volume SMA and Volume ROC first')
-            return None
-        
-        volume_score = 50.0  # Normal starting point
-        
-        # OBV trend contribution
-        obv_contribution = np.clip(self.data['obv_trend'].iloc[-1] / abs(self.data['obv_trend'].iloc[-1] + 1e-10) * 10, -25, 25)
-        volume_score += obv_contribution
-        
-        # Volume SMA ratio contribution
-        volume_ratio = self.data['volume_sma_20_ratio'].iloc[-1]
-        volume_ratio_contribution = np.clip((volume_ratio - 1.0) * 25, -25, 25)
-        volume_score += volume_ratio_contribution
-        
-        # Volume ROC contribution
-        volume_roc = self.data['volume_roc_5'].iloc[-1]
-        volume_roc_contribution = np.clip(volume_roc / 4, -25, 25)
-        volume_score += volume_roc_contribution
-        
-        # Ensure final score is between 0-100
-        volume_score = np.clip(volume_score, 0, 100)
-        volume_score = round(volume_score, 2)
-        
-        print(f"Current volume score: {volume_score}")
-        
-        # Interpret the score
-        if volume_score >= 75:
-            print("Extremely High Volume Activity")
-        elif volume_score >= 60:
-            print("High Volume Activity")
-        elif volume_score >= 40:
-            print("Normal Volume Activity")
-        elif volume_score >= 25:
-            print("Low Volume Activity")
-        else:
-            print("Extremely Low Volume Activity")
-        
-        return volume_score
-    
     def get_all_volume_indicators(self,
                                  volume_sma_periods: List[int] = [5, 10, 20, 50],
                                  volume_roc_periods: List[int] = [5, 10, 14, 21]):
@@ -293,7 +181,7 @@ class ForexVolumeIndicators:
         self.add_obv()
         self.add_volume_sma(volume_sma_periods)
         self.add_volume_roc(volume_roc_periods)
-        self.add_volume_confirmation()
-        self.get_volume_score()
+        # self.add_volume_confirmation()
+        # self.get_volume_score()
         
         return self.data

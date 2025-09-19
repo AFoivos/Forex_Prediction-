@@ -237,111 +237,6 @@ class VolatilityIndicators:
         
         return self.data
     
-    def add_volatility_confirmation(self):
-        
-        """
-        Adding volatility confirmation features
-        
-        """
-        
-        print("="*50)
-        print("VOLATILITY CONFIRMATION")
-        print("="*50)
-        
-        added_columns = []
-        
-        # Volatility regime detection
-        if all(col in self.data.columns for col in ['atr_14_pct', 'bb_20_width', 'std_dev_20_pct']):
-            self.data['high_volatility_regime'] = (
-                (self.data['atr_14_pct'] > 2.0) |
-                (self.data['bb_20_width'] > 0.15) |
-                (self.data['std_dev_20_pct'] > 2.0)
-            ).astype(int)
-            
-            self.data['low_volatility_regime'] = (
-                (self.data['atr_14_pct'] < 0.5) &
-                (self.data['bb_20_width'] < 0.05) &
-                (self.data['std_dev_20_pct'] < 0.5)
-            ).astype(int)
-            
-            added_columns.extend(['high_volatility_regime', 'low_volatility_regime'])
-        
-        # Bollinger Band Squeeze detection
-        if 'bb_20_squeeze' in self.data.columns:
-            self.data['bb_squeeze_breakout'] = (
-                (self.data['bb_20_squeeze'] == 1) & 
-                (self.data['bb_20_squeeze'].shift(1) == 0)
-            ).astype(int)
-            added_columns.append('bb_squeeze_breakout')
-        
-        # Volatility expansion/contraction
-        if 'atr_14' in self.data.columns:
-            self.data['volatility_expansion'] = (self.data['atr_14'].pct_change() > 0.2).astype(int)
-            self.data['volatility_contraction'] = (self.data['atr_14'].pct_change() < -0.2).astype(int)
-            added_columns.extend(['volatility_expansion', 'volatility_contraction'])
-        
-        print(f'New columns added: {", ".join(added_columns)}')
-        print("="*50)
-        
-        return self.data
-    
-    def get_volatility_score(self) -> Optional[float]:
-        
-        """
-        Returns overall volatility score
-        
-        100: Extremely High Volatility
-        50: Normal Volatility
-        0: Extremely Low Volatility
-        
-        """
-        
-        print("="*50)
-        print("VOLATILITY SCORE")
-        print("="*50)
-        
-        required_indicators = ['atr_14_pct', 'bb_20_width', 'std_dev_20_pct']
-        missing_indicators = [ind for ind in required_indicators if ind not in self.data.columns]
-        
-        if missing_indicators:
-            print(f'Missing indicators: {", ".join(missing_indicators)}')
-            print('Calculate ATR, Bollinger Bands and Standard Deviation first')
-            return None
-        
-        volatility_score = 50.0  # Normal starting point
-        
-        # ATR contribution (percentage based)
-        atr_contribution = np.clip((self.data['atr_14_pct'].iloc[-1] - 1.0) * 25, -25, 25)
-        volatility_score += atr_contribution
-        
-        # Bollinger Band width contribution
-        bb_contribution = np.clip((self.data['bb_20_width'].iloc[-1] - 0.1) * 100, -25, 25)
-        volatility_score += bb_contribution
-        
-        # Standard Deviation contribution
-        std_contribution = np.clip((self.data['std_dev_20_pct'].iloc[-1] - 1.0) * 25, -25, 25)
-        volatility_score += std_contribution
-        
-        # Ensure final score is between 0-100
-        volatility_score = np.clip(volatility_score, 0, 100)
-        volatility_score = round(volatility_score, 2)
-        
-        print(f"Current volatility score: {volatility_score}")
-        
-        # Interpret the score
-        if volatility_score >= 75:
-            print("Extremely High Volatility")
-        elif volatility_score >= 60:
-            print("High Volatility")
-        elif volatility_score >= 40:
-            print("Normal Volatility")
-        elif volatility_score >= 25:
-            print("Low Volatility")
-        else:
-            print("Extremely Low Volatility")
-        
-        return volatility_score
-    
     def get_all_volatility_indicators(self,
                                      atr_periods: List[int] = [14, 21, 28],
                                      bb_periods: List[int] = [20, 50],
@@ -367,7 +262,7 @@ class VolatilityIndicators:
         self.add_bollinger_bands(bb_periods)
         self.add_keltner_channels(keltner_ema_period, keltner_atr_period, keltner_multiplier)
         self.add_standard_deviation(std_periods)
-        self.add_volatility_confirmation()
-        self.get_volatility_score()
+        # self.add_volatility_confirmation()
+        # self.get_volatility_score()
         
         return self.data

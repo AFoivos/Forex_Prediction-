@@ -274,109 +274,6 @@ class ForexMomentumIndicators:
         
         return self.data
     
-    def add_momentum_confirmation(self):
-        
-        """
-        Adding momentum confirmation features
-        
-        """
-        
-        print("="*50)
-        print("MOMENTUM CONFIRMATION")
-        print("="*50)
-        
-        added_columns = []
-        
-        # Multiple momentum indicator confirmation
-        if all(col in self.data.columns for col in ['rsi_14', 'stoch_slowk', 'cci']):
-            self.data['momentum_bullish_confirmation'] = (
-                (self.data['rsi_14'] > 50) &
-                (self.data['stoch_slowk'] > 50) &
-                (self.data['cci'] > 0)
-            ).astype(int)
-            
-            self.data['momentum_bearish_confirmation'] = (
-                (self.data['rsi_14'] < 50) &
-                (self.data['stoch_slowk'] < 50) &
-                (self.data['cci'] < 0)
-            ).astype(int)
-            
-            added_columns.extend(['momentum_bullish_confirmation', 'momentum_bearish_confirmation'])
-        
-        # Divergence detection
-        if 'rsi_14' in self.data.columns:
-            self.data['price_rsi_divergence'] = (
-                (self.data[self.close_col].diff() > 0) & (self.data['rsi_14'].diff() < 0) |
-                (self.data[self.close_col].diff() < 0) & (self.data['rsi_14'].diff() > 0)
-            ).astype(int)
-            added_columns.append('price_rsi_divergence')
-        
-        print(f'New columns added: {", ".join(added_columns)}')
-        print("="*50)
-        
-        return self.data
-    
-    def get_momentum_score(self) -> Optional[float]:
-        
-        """
-        Returns overall momentum score
-        
-        100: Strong Bullish Momentum
-        50: Neutral Momentum
-        0: Strong Bearish Momentum
-        
-        """
-        
-        print("="*50)
-        print("MOMENTUM SCORE")
-        print("="*50)
-        
-        required_indicators = ['rsi_14', 'stoch_slowk', 'cci', 'momentum_14']
-        missing_indicators = [ind for ind in required_indicators if ind not in self.data.columns]
-        
-        if missing_indicators:
-            print(f'Missing indicators: {", ".join(missing_indicators)}')
-            print('Calculate RSI, Stochastic, CCI and Momentum first')
-            return None
-        
-        momentum_score = 50.0  # Neutral starting point
-        
-        # RSI contribution (0-100 scale)
-        rsi_contribution = (self.data['rsi_14'].iloc[-1] - 50) / 50 * 25
-        momentum_score += rsi_contribution
-        
-        # Stochastic contribution (0-100 scale)
-        stoch_contribution = (self.data['stoch_slowk'].iloc[-1] - 50) / 50 * 25
-        momentum_score += stoch_contribution
-        
-        # CCI contribution (normalized)
-        cci_contribution = np.clip(self.data['cci'].iloc[-1] / 100, -1, 1) * 25
-        momentum_score += cci_contribution
-        
-        # Momentum contribution
-        mom_contribution = np.clip(self.data['momentum_14'].iloc[-1] / self.data[self.close_col].iloc[-1] * 100, -25, 25)
-        momentum_score += mom_contribution
-        
-        # Ensure final score is between 0-100
-        momentum_score = np.clip(momentum_score, 0, 100)
-        momentum_score = round(momentum_score, 2)
-        
-        print(f"Current momentum score: {momentum_score}")
-        
-        # Interpret the score
-        if momentum_score >= 75:
-            print("Strong Bullish Momentum")
-        elif momentum_score >= 60:
-            print("Bullish Momentum")
-        elif momentum_score >= 40:
-            print("Neutral Momentum")
-        elif momentum_score >= 25:
-            print("Bearish Momentum")
-        else:
-            print("Strong Bearish Momentum")
-        
-        return momentum_score
-    
     def get_all_momentum_indicators(self,
                                    rsi_periods: List[int] = [14, 21, 28],
                                    stochastic_fastk: int = 14,
@@ -405,7 +302,7 @@ class ForexMomentumIndicators:
         self.add_williams_r(williams_period)
         self.add_cci(cci_period)
         self.add_momentum(momentum_periods)
-        self.add_momentum_confirmation()
-        self.get_momentum_score()
+        # self.add_momentum_confirmation()
+        # self.get_momentum_score()
         
         return self.data

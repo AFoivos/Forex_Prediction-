@@ -267,15 +267,6 @@ class ForexCustomFeatures:
         
         added_columns = []
         
-        # # Trading session features
-        # self.data['is_london_session'] = ((self.data.index.hour >= 8) & (self.data.index.hour < 16)).astype(int)
-        # self.data['is_ny_session'] = ((self.data.index.hour >= 13) & (self.data.index.hour < 21)).astype(int)
-        # self.data['is_asia_session'] = ((self.data.index.hour >= 22) | (self.data.index.hour < 6)).astype(int)
-        # self.data['is_overlap_session'] = (
-        #     ((self.data.index.hour >= 8) & (self.data.index.hour < 12)) |  # London-NY overlap
-        #     ((self.data.index.hour >= 13) & (self.data.index.hour < 16))    # NY-London overlap
-        # ).astype(int)
-        
         # Time since market open (assuming 24/5 market)
         self.data['minutes_since_monday_open'] = (
             (self.data.index.dayofweek * 24 * 60) + 
