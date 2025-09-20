@@ -73,7 +73,9 @@ class ForexDataLoad:
             
             # Remove unnecessary columns
             self.data.drop(columns=['tickvol',  
-                            'spread'],
+                            'spread',
+                            'date',
+                            'time'],
                             inplace=True
                             )
     

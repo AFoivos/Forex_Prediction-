@@ -104,79 +104,8 @@ class ForexFeatureAnalysis:
         print(f"Found {high_vif_count} features with high multicollinearity")
         
         return vif_df
-    
-    def feature_importance_analysis(self,
-                                    problem_type: str = 'regression',
-                                    estimators: int = 100,
-                                    random_state: int = 42):
         
-        """
-        Analyze feature importance using multiple methods
-        
-        Parameters:
-        problem_type (str): 'regression' or 'classification'
-        estimators (int): Number of estimators for Random Forest
-        random_state (int): Random state for reproducibility
-        
-        """
-        
-        print("="*50)
-        print(" Analyzing Feature Importance...")
-        print("="*50)
-        
-        print(f"Feature Importance Analysis ({problem_type})...")
-        
-        # Prepare data
-        analysis_data = self.data[[self.target_col] + self.numeric_cols].dropna()
-        X = analysis_data[self.numeric_cols]
-        y = analysis_data[self.target_col]
-        
-        # Scale features if True
-        if self.scale:
-            X_scaled = self.scaler.fit_transform(X)
-            X = pd.DataFrame(X_scaled, columns=self.numeric_cols, index=analysis_data.index)
-        
-        results = {}
-        
-        # 1. Random Forest Importance
-        if problem_type == 'regression':
-            if self.use_xgboost:
-                model = XGBRegressor(n_estimators=100, random_state=42, verbosity=0)
-            else:
-                model = RandomForestRegressor(n_estimators=100, random_state=42)
-            mi_method = mutual_info_regression
-        else:
-            if self.use_xgboost:
-                model = XGBClassifier(n_estimators=100, random_state=42, verbosity=0)
-            else:
-                model = RandomForestClassifier(n_estimators=100, random_state=42)
-            mi_method = mutual_info_classif
-        
-        model.fit(X, y)
-        
-        # Get importance scores based on model type
-        if self.use_xgboost:
-            importance_scores = model.feature_importances_
-        else:
-            importance_scores = model.feature_importances_
-        
-        model_importance = pd.DataFrame({
-            'Feature': self.numeric_cols,
-            'Model_Importance': importance_scores
-        }).sort_values('Model_Importance', ascending=False)
-        
-        results['random_forest'] = model_importance
-        
-        # 2. Mutual Information
-        mi_scores = mi_method(X, y, random_state=42)
-        mi_importance = pd.DataFrame({
-            'Feature': self.numeric_cols,
-            'MI_Score': mi_scores
-        }).sort_values('MI_Score', ascending=False)
-        
-        results['mutual_info'] = mi_importance
-        
-        # 3. Correlation with target
+        # Correlation with target
         correlations = []
         
         for col in self.numeric_cols:
