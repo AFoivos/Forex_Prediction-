@@ -1,0 +1,8 @@
+pandas
+numpy
+seaborn
+matplotlib
+mplfinance
+tsfresh
+joblib
+TA-Lib

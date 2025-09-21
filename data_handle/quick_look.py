@@ -169,8 +169,9 @@ class ForexQuickLook():
                 
             # Create the candlestick chart
             plt.figure(figsize=(15, 6))
+            plot_data = self.data.dropna()
             
-            mpf.plot(self.data, 
+            mpf.plot(plot_data, 
                     type='candle',
                     style='charles',
                     title= 'Candlestick Chart',
