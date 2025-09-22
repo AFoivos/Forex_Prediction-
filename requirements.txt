@@ -6,3 +6,8 @@ mplfinance
 tsfresh
 joblib
 TA-Lib
+scikit-learn
+scipy
+statsmodels
+jupyter
+ipywidgets
