@@ -72,9 +72,7 @@ class ForexCustomFeatures:
             # Returns direction
             dir_col = f'return_direction_{period}'
             self.data[dir_col] = np.where(self.data[ret_col] > 0, 1, -1)
-            
-            added_columns.extend([ret_col, log_ret_col, vol_col, dir_col])
-        
+                    
         # Cumulative returns
         self.data['cumulative_return'] = (1 + self.data['return_1']).cumprod() - 1
         self.data['cumulative_log_return'] = self.data['log_return_1'].cumsum()
