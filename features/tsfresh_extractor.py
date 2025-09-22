@@ -119,6 +119,7 @@ class ForexTSFeatures:
                           n_jobs: int = 4,
                           feature_settings: Optional[Dict] = None,
                           disable_progressbar: bool = False):
+        
         """
         Extract features using tsfresh
         
@@ -162,8 +163,6 @@ class ForexTSFeatures:
         
         return self.extracted_features
     
-    
-
     def select_relevant_features(self, 
                                  fdr_level: float = 0.05, 
                                  ml_task: str = 'regression'):
@@ -310,7 +309,7 @@ class ForexTSFeatures:
                                 index=X_test.index, 
                                 columns=X_test.columns)
             self.scaler = scaler
-            print("🔧 Features scaled using StandardScaler")
+            print("Features scaled using StandardScaler")
                 
         return X_train, X_test, y_train, y_test
     
@@ -319,6 +318,7 @@ class ForexTSFeatures:
                         window_size: int = 50,
                         test_size: float = 0.2,
                         scale_features: bool = True):
+        
         """
         Complete pipeline: preparation → extraction → selection → split
         
