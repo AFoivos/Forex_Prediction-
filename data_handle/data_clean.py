@@ -167,7 +167,7 @@ class ForexDataClean:
             print("All OHLC values are consistent")
             return violation_count
         
-            # Detailed violation report
+        # Detailed violation report
 
         print(f"Found {violation_count} OHLC integrity violations:")
         print(f"-High < Low violations: {high_low_violations.sum()}")
@@ -181,7 +181,7 @@ class ForexDataClean:
         if violation_count > 0:
             print(f"Found {violation_count} OHLC integrity violations")
             
-        if fix_errors:
+        #if fix_errors:
         #     print(f"\n Attempting to fix {violation_count} violations...")
             
         #     # Fix High < Low violations by swapping
@@ -214,10 +214,8 @@ class ForexDataClean:
         #     return remaining_violations
         # else:
         #     print(f"\n Use fix_errors=True to automatically fix these violations")
-                    
-                pass
         
-        return violation_count
+        # return violation_count
     
     def handle_outliers(self, 
                     method='quantile', 
@@ -225,6 +223,7 @@ class ForexDataClean:
                     strategy='cap', 
                     columns: list = None,
                     remove: bool = False):
+        
         """
         Handle outliers in numeric columns
         
@@ -235,8 +234,6 @@ class ForexDataClean:
         columns: Specific columns to process
         remove: Whether to actually remove outliers or just detect them
         
-        Returns:
-        self.data: The cleaned DataFrame
         """
         
         if columns is None:
@@ -253,6 +250,7 @@ class ForexDataClean:
         total_rows_before = len(self.data)
         
         for col in columns:
+            
             # Skip non-numeric columns
             if not pd.api.types.is_numeric_dtype(self.data[col]):
 
@@ -291,7 +289,7 @@ class ForexDataClean:
             col_outliers = lower_outliers + upper_outliers
             
             if col_outliers == 0:
-                print(f"✓ {col}: No outliers found [{original_min:.5f} - {original_max:.5f}]")
+                print(f"{col}: No outliers found [{original_min:.5f} - {original_max:.5f}]")
                 continue
             
             total_outliers += col_outliers
@@ -339,7 +337,6 @@ class ForexDataClean:
             
             print()
         
-        # Summary - ΕΞΩ από το loop!
         print("=" * 50)
         if total_outliers == 0:
             print("No outliers found in any numeric columns!")
@@ -362,8 +359,14 @@ class ForexDataClean:
         
     def fast_cleaner(self):
         
+        """
+        Fast clean 
+         
+        """
+        
         self.remove_duplicates()
         self.handle_missing_values()
+        self.handle_outliers()
         self.validate_ohlc_integrity()
         
         return self.data
