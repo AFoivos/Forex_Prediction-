@@ -55,13 +55,7 @@ class ForexCustomFeatures:
         periods (List[int]): List of periods for returns calculation
         
         """
-        
-        print("="*50)
-        print("RETURNS FEATURES")
-        print("="*50)
-        
-        added_columns = []
-        
+                
         for period in periods:
             # Simple returns
             ret_col = f'return_{period}'
@@ -85,11 +79,6 @@ class ForexCustomFeatures:
         self.data['cumulative_return'] = (1 + self.data['return_1']).cumprod() - 1
         self.data['cumulative_log_return'] = self.data['log_return_1'].cumsum()
         
-        added_columns.extend(['cumulative_return', 'cumulative_log_return'])
-        
-        print(f'New columns added: {added_columns}')
-        print("="*50)
-        
         return self.data
     
     def add_volatility_measures(self, periods: List[int] = [5, 10, 20, 50]):
@@ -102,11 +91,6 @@ class ForexCustomFeatures:
         
         """
         
-        print("="*50)
-        print("VOLATILITY MEASURES")
-        print("="*50)
-        
-        added_columns = []
         
         for period in periods:
             # Historical volatility (annualized)
@@ -128,17 +112,10 @@ class ForexCustomFeatures:
             # Volatility ratio (close-to-close vs high-low)
             vol_ratio_col = f'vol_ratio_{period}'
             self.data[vol_ratio_col] = self.data[parkinson_col] / (self.data[hv_col] + 1e-10)
-            
-            added_columns.extend([hv_col, parkinson_col, gk_col, vol_ratio_col])
-        
+                    
         # Volatility regimes
         self.data['high_volatility_regime'] = (self.data['historical_vol_20'] > self.data['historical_vol_20'].quantile(0.75)).astype(int)
         self.data['low_volatility_regime'] = (self.data['historical_vol_20'] < self.data['historical_vol_20'].quantile(0.25)).astype(int)
-        
-        added_columns.extend(['high_volatility_regime', 'low_volatility_regime'])
-        
-        print(f'New columns added: {added_columns}')
-        print("="*50)
         
         return self.data
     
@@ -148,13 +125,7 @@ class ForexCustomFeatures:
         Price Position in Range Features
         
         """
-        
-        print("="*50)
-        print("PRICE POSITION FEATURES")
-        print("="*50)
-        
-        added_columns = []
-        
+                
         # Daily price range position
         self.data['daily_range_pct'] = (
             (self.data[self.close_col] - self.data[self.low_col]) / 
@@ -184,15 +155,6 @@ class ForexCustomFeatures:
         self.data['near_weekly_high'] = (self.data['weekly_range_pct'] > 80).astype(int)
         self.data['near_weekly_low'] = (self.data['weekly_range_pct'] < 20).astype(int)
         
-        added_columns.extend([
-            'daily_range_pct', 'weekly_high', 'weekly_low', 'weekly_range_pct',
-            'monthly_high', 'monthly_low', 'monthly_range_pct',
-            'at_daily_high', 'at_daily_low', 'near_weekly_high', 'near_weekly_low'
-        ])
-        
-        print(f'New columns added: {added_columns}')
-        print("="*50)
-        
         return self.data
     
     def add_seasonality_features(self):
@@ -202,16 +164,10 @@ class ForexCustomFeatures:
         
         """
         
-        print("="*50)
-        print("SEASONALITY FEATURES")
-        print("="*50)
-        
         if not self.has_datetime_index:
             print("⏭️  Skipping Seasonality Features - Index is not datetime")
             return self.data
-        
-        added_columns = []
-        
+                
         # Time-based features
         self.data['hour'] = self.data.index.hour
         self.data['day_of_week'] = self.data.index.dayofweek
@@ -243,15 +199,6 @@ class ForexCustomFeatures:
             include_lowest=True
         )
         
-        added_columns.extend([
-            'hour', 'day_of_week', 'day_of_month', 'week_of_year',
-            'month', 'quarter', 'year', 'time_of_day', 'is_weekend',
-            'is_month_end', 'is_quarter_end', 'is_year_end', 'season'
-        ])
-        
-        print(f'New columns added: {added_columns}')
-        print("="*50)
-        
         return self.data
     
     def add_time_based_features(self):
@@ -260,12 +207,6 @@ class ForexCustomFeatures:
         Advanced Time-based Features
         
         """
-        
-        print("="*50)
-        print("TIME-BASED FEATURES")
-        print("="*50)
-        
-        added_columns = []
         
         # Time since market open (assuming 24/5 market)
         self.data['minutes_since_monday_open'] = (
@@ -286,14 +227,6 @@ class ForexCustomFeatures:
         self.data['days_to_month_end'] = (self.data.index + pd.offsets.MonthEnd(0)).day - self.data.index.day
         self.data['days_to_quarter_end'] = (self.data.index + pd.offsets.QuarterEnd(0)).day - self.data.index.day
         
-        added_columns.extend([
-            'is_london_session', 'is_ny_session', 'is_asia_session', 'is_overlap_session',
-            'minutes_since_monday_open', 'period_of_day', 'days_to_month_end', 'days_to_quarter_end'
-        ])
-        
-        print(f'New columns added: {added_columns}')
-        print("="*50)
-        
         return self.data
     
     def add_custom_derived_features(self):
@@ -302,23 +235,15 @@ class ForexCustomFeatures:
         Custom Derived Features
         
         """
-        
-        print("="*50)
-        print("CUSTOM DERIVED FEATURES")
-        print("="*50)
-        
-        added_columns = []
-        
+                
         # Price momentum features
         if all(col in self.data.columns for col in [self.close_col, 'return_5', 'return_10']):
             self.data['price_acceleration'] = self.data['return_5'] - self.data['return_10']
             self.data['momentum_ratio'] = self.data['return_5'] / (self.data['return_10'] + 1e-10)
-            added_columns.extend(['price_acceleration', 'momentum_ratio'])
         
         # Volatility-normalized returns
         if all(col in self.data.columns for col in ['return_1', 'historical_vol_20']):
             self.data['vol_normalized_return'] = self.data['return_1'] / (self.data['historical_vol_20'] + 1e-10)
-            added_columns.append('vol_normalized_return')
         
         # Range expansion/contraction
         if all(col in self.data.columns for col in [self.high_col, self.low_col]):
@@ -326,18 +251,13 @@ class ForexCustomFeatures:
             avg_range = daily_range.rolling(window=20).mean()
             self.data['range_expansion'] = (daily_range > avg_range * 1.5).astype(int)
             self.data['range_contraction'] = (daily_range < avg_range * 0.5).astype(int)
-            added_columns.extend(['range_expansion', 'range_contraction'])
         
         # Price vs moving average distance
         if 'sma_20' in self.data.columns:
             self.data['price_vs_sma_pct'] = (
                 (self.data[self.close_col] - self.data['sma_20']) / self.data['sma_20'] * 100
             )
-            added_columns.append('price_vs_sma_pct')
-        
-        print(f'New columns added: {added_columns}')
-        print("="*50)
-        
+                
         return self.data
     
     def get_all_custom_features(self,

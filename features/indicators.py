@@ -47,27 +47,16 @@ class ForexMomentumIndicators:
         if missing_cols:
             raise ValueError(f"Missing columns in DataFrame: {missing_cols}")
     
-    def add_rsi(self, 
-                periods: List[int] = [14, 21, 28],
-                overbought: int = 70,
-                oversold: int = 30):
+    def add_rsi(self, periods: List[int] = [14, 21, 28]):
         
         """
         Relative Strength Index
         
         Parameters:
         periods (List[int]): List of periods for RSI
-        overbought (int): Overbought threshold
-        oversold (int): Oversold threshold
         
         """
-        
-        print("="*50)
-        print("RSI INDICATOR")
-        print("="*50)
-        
-        added_columns = []
-        
+                
         for period in periods:
             col_name = f'rsi_{period}'
             self.data[col_name] = talib.RSI(self.data[self.close_col], timeperiod=period)
@@ -81,13 +70,6 @@ class ForexMomentumIndicators:
             
             # RSI divergence
             self.data[f'{col_name}_trend'] = self.data[col_name].diff()
-            
-            added_columns.extend([col_name, f'{col_name}_overbought', 
-                                f'{col_name}_oversold', f'{col_name}_signal',
-                                f'{col_name}_trend'])
-        
-        print(f'New columns added: {added_columns}')
-        print("="*50)
         
         return self.data
     
@@ -109,10 +91,6 @@ class ForexMomentumIndicators:
         oversold (int): Oversold threshold
         
         """
-        
-        print("="*50)
-        print("STOCHASTIC OSCILLATOR")
-        print("="*50)
         
         slowk, slowd = talib.STOCH(
             self.data[self.high_col],
@@ -141,10 +119,7 @@ class ForexMomentumIndicators:
             (slowk < oversold) & (slowd < oversold), 1,
             np.where((slowk > overbought) & (slowd > overbought), -1, 0)
         )
-        
-        print(f'New columns added: {", ".join(stochastic_columns)}')
-        print("="*50)
-        
+                
         return self.data
     
     def add_williams_r(self,
@@ -161,10 +136,6 @@ class ForexMomentumIndicators:
         oversold (int): Oversold threshold
         
         """
-        
-        print("="*50)
-        print("WILLIAMS %R INDICATOR")
-        print("="*50)
         
         willr = talib.WILLR(
             self.data[self.high_col],
@@ -188,10 +159,7 @@ class ForexMomentumIndicators:
             np.where(willr > overbought, -1, 0)
         )
         self.data['willr_trend'] = willr.diff()
-        
-        print(f'New columns added: {", ".join(willr_columns)}')
-        print("="*50)
-        
+                
         return self.data
     
     def add_cci(self,
@@ -208,10 +176,6 @@ class ForexMomentumIndicators:
         oversold (int): Oversold threshold
         
         """
-        
-        print("="*50)
-        print("CCI INDICATOR")
-        print("="*50)
         
         cci = talib.CCI(
             self.data[self.high_col],
@@ -234,10 +198,7 @@ class ForexMomentumIndicators:
             cci > 0, 1, -1
         )
         self.data['cci_trend'] = cci.diff()
-        
-        print(f'New columns added: {", ".join(cci_columns)}')
-        print("="*50)
-        
+                
         return self.data
     
     def add_momentum(self, periods: List[int] = [10, 14, 20]):
@@ -250,11 +211,6 @@ class ForexMomentumIndicators:
         
         """
         
-        print("="*50)
-        print("MOMENTUM INDICATOR")
-        print("="*50)
-        
-        added_columns = []
         for period in periods:
             col_name = f'momentum_{period}'
             self.data[col_name] = talib.MOM(self.data[self.close_col], timeperiod=period)
@@ -265,12 +221,6 @@ class ForexMomentumIndicators:
             )
             self.data[f'{col_name}_strength'] = self.data[col_name].abs()
             self.data[f'{col_name}_trend'] = self.data[col_name].diff()
-            
-            added_columns.extend([col_name, f'{col_name}_signal', 
-                                f'{col_name}_strength', f'{col_name}_trend'])
-        
-        print(f'New columns added: {", ".join(added_columns)}')
-        print("="*50)
         
         return self.data
     
@@ -352,11 +302,7 @@ class ForexVolumeIndicators:
         On-Balance Volume
         
         """
-        
-        print("="*50)
-        print("ON-BALANCE VOLUME (OBV)")
-        print("="*50)
-        
+
         if not self.has_volume:
             print("⏭️  Skipping OBV - Volume data not available")
             return self.data
@@ -385,9 +331,6 @@ class ForexVolumeIndicators:
             obv_ma = self.data['obv'].rolling(window=20).mean()
             self.data['obv_ma_ratio'] = self.data['obv'] / obv_ma
         
-        print(f'New columns added: {added_columns}')
-        print("="*50)
-        
         return self.data
     
     def add_volume_sma(self, periods: List[int] = [5, 10, 20, 50]):
@@ -400,11 +343,6 @@ class ForexVolumeIndicators:
         
         """
         
-        print("="*50)
-        print("VOLUME SMA")
-        print("="*50)
-        
-        added_columns = []
         for period in periods:
             col_name = f'volume_sma_{period}'
             self.data[col_name] = self.data[self.volume_col].rolling(window=period).mean()
@@ -416,12 +354,6 @@ class ForexVolumeIndicators:
             )
             self.data[f'{col_name}_trend'] = self.data[col_name].diff()
             
-            added_columns.extend([col_name, f'{col_name}_ratio', 
-                                f'{col_name}_signal', f'{col_name}_trend'])
-        
-        print(f'New columns added: {added_columns}')
-        print("="*50)
-        
         return self.data
     
     def add_volume_roc(self, periods: List[int] = [5, 10, 14, 21]):
@@ -433,13 +365,7 @@ class ForexVolumeIndicators:
         periods (List[int]): List of periods for Volume ROC
         
         """
-        
-        print("="*50)
-        print("VOLUME RATE OF CHANGE")
-        print("="*50)
-        
-        added_columns = []
-        
+            
         for period in periods:
             col_name = f'volume_roc_{period}'
             
@@ -454,13 +380,6 @@ class ForexVolumeIndicators:
             self.data[f'{col_name}_high_vol'] = (self.data[col_name] > 50).astype(int)
             self.data[f'{col_name}_low_vol'] = (self.data[col_name] < -50).astype(int)
             self.data[f'{col_name}_trend'] = self.data[col_name].diff()
-            
-            added_columns.extend([col_name, f'{col_name}_signal', 
-                                f'{col_name}_high_vol', f'{col_name}_low_vol',
-                                f'{col_name}_trend'])
-        
-        print(f'New columns added: {added_columns}')
-        print("="*50)
         
         return self.data
     
@@ -480,9 +399,7 @@ class ForexVolumeIndicators:
         self.add_obv()
         self.add_volume_sma(volume_sma_periods)
         self.add_volume_roc(volume_roc_periods)
-        # self.add_volume_confirmation()
-        # self.get_volume_score()
-        
+
         return self.data
     
 class ForexVolatilityIndicators:
@@ -535,12 +452,7 @@ class ForexVolatilityIndicators:
         periods (List[int]): List of periods for ATR
         
         """
-        
-        print("="*50)
-        print("ATR INDICATOR")
-        print("="*50)
-        
-        added_columns = []
+
         for period in periods:
             col_name = f'atr_{period}'
             self.data[col_name] = talib.ATR(
@@ -554,13 +466,7 @@ class ForexVolatilityIndicators:
             self.data[f'{col_name}_pct'] = (self.data[col_name] / self.data[self.close_col]) * 100
             self.data[f'{col_name}_trend'] = self.data[col_name].diff()
             self.data[f'{col_name}_high_vol'] = (self.data[f'{col_name}_pct'] > 2.0).astype(int)
-            
-            added_columns.extend([col_name, f'{col_name}_pct', 
-                                f'{col_name}_trend', f'{col_name}_high_vol'])
-        
-        print(f'New columns added: {", ".join(added_columns)}')
-        print("="*50)
-        
+
         return self.data
     
     def add_bollinger_bands(self,
@@ -577,12 +483,6 @@ class ForexVolatilityIndicators:
         nbdevdn (float): Number of standard deviations for lower band
         
         """
-        
-        print("="*50)
-        print("BOLLINGER BANDS")
-        print("="*50)
-        
-        added_columns = []
         
         for period in periods:
             prefix = f'bb_{period}'
@@ -612,15 +512,6 @@ class ForexVolatilityIndicators:
                 self.data[self.close_col] > upper, -1,  # Overbought
                 np.where(self.data[self.close_col] < lower, 1, 0)  # Oversold
             )
-            
-            added_columns.extend([
-                f'{prefix}_upper', f'{prefix}_middle', f'{prefix}_lower',
-                f'{prefix}_width', f'{prefix}_pct_b', f'{prefix}_above_upper',
-                f'{prefix}_below_lower', f'{prefix}_squeeze', f'{prefix}_signal'
-            ])
-        
-        print(f'New columns added: {", ".join(added_columns)}')
-        print("="*50)
         
         return self.data
     
@@ -638,10 +529,6 @@ class ForexVolatilityIndicators:
         atr_multiplier (float): Multiplier for ATR
         
         """
-        
-        print("="*50)
-        print("KELTNER CHANNELS")
-        print("="*50)
         
         # Calculate EMA middle line
         ema = talib.EMA(self.data[self.close_col], timeperiod=ema_period)
@@ -672,10 +559,7 @@ class ForexVolatilityIndicators:
             self.data[self.close_col] > self.data['keltner_upper'], -1,  # Overbought
             np.where(self.data[self.close_col] < self.data['keltner_lower'], 1, 0)  # Oversold
         )
-        
-        print(f'New columns added: {", ".join(keltner_columns)}')
-        print("="*50)
-        
+                
         return self.data
     
     def add_standard_deviation(self, periods: List[int] = [20, 50, 100]):
@@ -688,11 +572,6 @@ class ForexVolatilityIndicators:
         
         """
         
-        print("="*50)
-        print("STANDARD DEVIATION")
-        print("="*50)
-        
-        added_columns = []
         for period in periods:
             col_name = f'std_dev_{period}'
             self.data[col_name] = talib.STDDEV(
@@ -706,13 +585,6 @@ class ForexVolatilityIndicators:
             self.data[f'{col_name}_zscore'] = (self.data[self.close_col] - self.data[self.close_col].rolling(period).mean()) / self.data[col_name]
             self.data[f'{col_name}_high_vol'] = (self.data[f'{col_name}_pct'] > 2.0).astype(int)
             self.data[f'{col_name}_trend'] = self.data[col_name].diff()
-            
-            added_columns.extend([col_name, f'{col_name}_pct', 
-                                f'{col_name}_zscore', f'{col_name}_high_vol',
-                                f'{col_name}_trend'])
-        
-        print(f'New columns added: {", ".join(added_columns)}')
-        print("="*50)
         
         return self.data
     
@@ -741,8 +613,6 @@ class ForexVolatilityIndicators:
         self.add_bollinger_bands(bb_periods)
         self.add_keltner_channels(keltner_ema_period, keltner_atr_period, keltner_multiplier)
         self.add_standard_deviation(std_periods)
-        # self.add_volatility_confirmation()
-        # self.get_volatility_score()
         
         return self.data
     
@@ -768,6 +638,8 @@ class ForexTrendIndicators:
         
         print("="*50)
         print("TREND INDICATORS")
+        print("="*50)
+        print(" Available Fuctions: \n1 add_sma \n2 add_ema \n3 add_macd \n4 add_adx \n5 add_parabolic_sar \n6 add_trend_confirmation")
         print("="*50)
         
         self.data = data.copy()
@@ -795,26 +667,11 @@ class ForexTrendIndicators:
         
         """ 
         
-        print("="*50)
-        print("SMA INDICATOR")
-        print("="*50)
-        
         for period in periods:
             col_name = f'sma_{period}'
             self.data[col_name] = talib.SMA(self.data[self.close_col], timeperiod=period)
             # Slope of SMA
             self.data[f'{col_name}_slope'] = self.data[col_name].diff()
-        
-        # SMA Signals 
-        last_sma = f'sma_{periods[-1]}'
-        self.data[f'{last_sma}_signal'] = np.where(
-            self.data[self.close_col] > self.data[last_sma], 1, -1
-        )
-        
-        self.available_get_trend_strength[0] = True
-        
-        print('New columns added: sma_20, sma_50, sma_100, sma_200, sma_20_slope, sma_50_slope, sma_100_slope, sma_200_slope, sma_20_signal, sma_50_signal, sma_100_signal, sma_200_signal')
-        print("="*50)
         
         return self.data
         
@@ -830,27 +687,15 @@ class ForexTrendIndicators:
         
         """
         
-        print("="*50)
-        print("EMA INDICATOR")
-        print("="*50)
-        
         for period in periods:
             col_name = f'ema_{period}'
             self.data[col_name] = talib.EMA(self.data[self.close_col], timeperiod=period)
-        
-        # EMA signals
-        self.data[f'{col_name}_signal'] = np.where(
-            self.data[self.close_col] > self.data[col_name], 1, -1
-        )
         
         # EMA slope
         self.data[f'{col_name}_slope'] = self.data[col_name].diff()
         
         self.available_get_trend_strength[1] = True
-        
-        print('New columns added: ema_20, ema_50, ema_100, ema_200, ema_20_slope, ema_50_slope, ema_100_slope, ema_200_slope, ema_20_signal, ema_50_signal, ema_100_signal, ema_200_signal')
-        print("="*50)
-        
+
         return self.data
         
     def add_macd(self, 
@@ -868,11 +713,6 @@ class ForexTrendIndicators:
         signalperiod (int): Signal period for MACD
         
         """
-        print("="*50)
-        print("MACD INDICATOR")
-        print("="*50)
-        print(" Available Fuctions \n1 add_macd \n2 add_adx \n3 add_parabolic_sar \n4 add_trend_confirmation")
-        print("="*50)
         
         macd, macd_signal, macd_hist = talib.MACD(
             self.data[self.close_col],
@@ -885,17 +725,6 @@ class ForexTrendIndicators:
         self.data['macd_signal'] = macd_signal
         self.data['macd_histogram'] = macd_hist
         
-        # MACD signals
-        self.data['macd_cross'] = np.where(macd > macd_signal, 1, -1)
-        self.data['macd_above_zero'] = (macd > 0).astype(int)
-        self.data['macd_signal_above_zero'] = (macd_signal > 0).astype(int)
-        
-        # MACD histogram changes
-        self.data['macd_hist_change'] = macd_hist.diff()
-        
-        print('New columns added: macd_line, macd_signal, macd_histogram, macd_cross, macd_above_zero, macd_signal_above_zero, macd_hist_change')
-        print("="*50)
-        
         return self.data
     
     def add_adx(self, period: int = 14):
@@ -906,11 +735,7 @@ class ForexTrendIndicators:
         Parameters:
         period (int): Period for ADX
         
-        """
-        
-        print("="*50)
-        print("ADX INDICATOR")
-        print("="*50)        
+        """  
 
         adx = talib.ADX(
             self.data[self.high_col],
@@ -937,29 +762,7 @@ class ForexTrendIndicators:
         self.data['adx'] = adx
         self.data['plus_di'] = plus_di
         self.data['minus_di'] = minus_di
-
-        # ADX Signals
-        self.data['adx_trend_strength'] = pd.cut(
-            adx,
-            bins=[0, 25, 50, 75, 100],
-            labels=['weak', 'moderate', 'strong', 'very_strong']
-        )
-        
-        self.data['adx_strong_trend'] = (adx > 25).astype(int)
-        self.data['di_crossover'] = np.where(plus_di > minus_di, 1, -1)
-        
-        # Trend direction based on DI
-        self.data['trend_direction'] = np.where(
-            plus_di > minus_di, 
-            'uptrend', 
-            np.where(plus_di < minus_di, 'downtrend', 'neutral')
-        )
-        
-        self.available_get_trend_strength[2] = True
-        
-        print('New columns added: adx, plus_di, minus_di, adx_trend_strength, adx_strong_trend, di_crossover, trend_direction')
-        print("="*50)
-        
+                
         return self.data
         
     def add_parabolic_sar(self, 
@@ -976,10 +779,6 @@ class ForexTrendIndicators:
         
         """
         
-        print("="*50)
-        print("PARABOLIC SAR INDICATOR")
-        print("="*50)
-        
         sar = talib.SAR(
             self.data[self.high_col],
             self.data[self.low_col],
@@ -988,21 +787,7 @@ class ForexTrendIndicators:
         )
         
         self.data['parabolic_sar'] = sar
-        
-        # SAR signals
-        self.data['sar_signal'] = np.where(
-            self.data[self.close_col] > sar, 1, -1
-        )
-        
-        self.data['sar_above_price'] = (sar > self.data[self.close_col]).astype(int)
-        
-        # SAR trend changes
-        self.data['sar_trend_change'] = self.data['sar_signal'].diff()
-        self.data['sar_trend_change'] = self.data['sar_trend_change'].fillna(0)
-        
-        print('New columns added: parabolic_sar, sar_signal, sar_above_price, sar_trend_change')
-        print("="*50)
-        
+                   
         return self.data     
          
     def get_all_trend_indicators(self,
@@ -1036,7 +821,6 @@ class ForexTrendIndicators:
         self.add_macd(macd_fastperiod, macd_slowperiod, macd_signalperiod)
         self.add_adx(adx_period)
         self.add_parabolic_sar(parabolic_sar_acceleration, parabolic_sar_maximum)
-        # self.add_trend_confirmation()
-        # self.get_trend_strength()
         
         return self.data
+    

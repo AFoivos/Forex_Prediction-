@@ -60,9 +60,6 @@ class ForexQuickLook():
             print(f"Columns: {self.data.columns}")
             print("="*50)
             print(f"Date range: {self.data.index.min()} to {self.data.index.max()}")
-
-
-    
     
     def display_info(self):
         
