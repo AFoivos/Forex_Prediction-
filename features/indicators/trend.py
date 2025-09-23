@@ -13,7 +13,7 @@ class ForexTrendIndicators:
         high_col: str = 'high', 
         low_col: str = 'low', 
         close_col: str = 'close',
-        ):
+    ):
         
         """
         Class for Trend Indicators
@@ -49,7 +49,7 @@ class ForexTrendIndicators:
     def add_sma(
         self, 
         periods: List[int] = [10, 20, 50, 100, 200]
-        ):
+    ):
         
         """
         Simple Moving Averages
@@ -70,7 +70,7 @@ class ForexTrendIndicators:
     def add_ema(
         self, 
         periods: List[int] = [10, 20, 50, 100, 200]
-        ):
+    ):
         
         """
         Exponential Moving Averages 
@@ -96,7 +96,7 @@ class ForexTrendIndicators:
         fastperiod: int = 12,
         slowperiod: int = 26,
         signalperiod: int = 9
-        ):
+    ):
         
         """
         MACD Indicator 
@@ -124,7 +124,7 @@ class ForexTrendIndicators:
     def add_adx(
         self,
         period: int = 14,
-        ):
+    ):
 
         """
         Average Directional Movement Index
@@ -166,7 +166,7 @@ class ForexTrendIndicators:
         self, 
         acceleration: float = 0.02,
         maximum: float = 0.2
-        ):
+    ):
         
         """
         Parabolic Stop and Reverse
@@ -198,7 +198,7 @@ class ForexTrendIndicators:
         adx_period: int = 14,
         parabolic_sar_acceleration: float = 0.02,
         parabolic_sar_maximum: float = 0.2,
-        ):
+    ):
         
         """
         Adds all trend indicators

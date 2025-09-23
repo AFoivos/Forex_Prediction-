@@ -7,11 +7,12 @@ warnings.filterwarnings('ignore')
 #ADD PRINTS AND EXPLANATIONS 
 
 class ForexDataClean:
-    def __init__(self, 
-                 data: pd.DataFrame, 
-                 columns: list = None,
-                 fast_clean: bool = False, 
-                 ):
+    def __init__(
+        self, 
+        data: pd.DataFrame, 
+        columns: list = None,
+        fast_clean: bool = False, 
+    ):
         
         """
         Initialize the Forex Data Cleaner
@@ -50,10 +51,11 @@ class ForexDataClean:
         
         return self.data
         
-    def remove_duplicates(self, 
-                          subset: list = None, 
-                          keep='first'
-                          ):
+    def remove_duplicates(
+        self, 
+        subset: list = None, 
+        keep='first'
+    ):
         
         """
         Remove duplicate entries
@@ -82,10 +84,11 @@ class ForexDataClean:
         
         return self.data
             
-    def handle_missing_values(self, 
-                              method: str = 'drop', 
-                              columns: list = None
-                              ):
+    def handle_missing_values(
+        self, 
+        method: str = 'drop', 
+        columns: list = None
+    ):
         
         """
         Handle missing values in specified columns
@@ -136,7 +139,10 @@ class ForexDataClean:
     
         return self.data    
             
-    def validate_ohlc_integrity(self, fix_errors = False):
+    def validate_ohlc_integrity(
+        self, 
+        fix_errors = False
+    ):
         
         """
         Validate OHLC data integrity and optionally fix errors
@@ -217,12 +223,14 @@ class ForexDataClean:
         
         # return violation_count
     
-    def handle_outliers(self, 
-                    method='quantile', 
-                    threshold=3.0, 
-                    strategy='cap', 
-                    columns: list = None,
-                    remove: bool = False):
+    def handle_outliers(
+        self, 
+        method='quantile', 
+        threshold=3.0, 
+        strategy='cap', 
+        columns: list = None,
+        remove: bool = False
+    ):
         
         """
         Handle outliers in numeric columns

@@ -15,7 +15,7 @@ class ForexMomentumIndicators:
         low_col: str = 'low', 
         close_col: str = 'close',
         volume_col: str = 'volume',
-        ):
+    ):
         
         """
         Class for Momentum Indicators
@@ -52,7 +52,7 @@ class ForexMomentumIndicators:
     def add_rsi(
         self, 
         periods: List[int] = [14, 21, 28],
-        ):
+    ):
         
         """
         Relative Strength Index
@@ -78,7 +78,7 @@ class ForexMomentumIndicators:
         slowd_period: int = 3,
         overbought: int = 80,
         oversold: int = 20
-        ):
+    ):
         
         """
         Stochastic Oscillator
@@ -116,7 +116,7 @@ class ForexMomentumIndicators:
     def add_williams_r(
         self,
         period: int = 14,
-        ):
+    ):
         
         """
         Williams %R
@@ -147,7 +147,7 @@ class ForexMomentumIndicators:
     def add_cci(
         self,
         period: int = 20,
-        ):
+    ):
         
         """
         Commodity Channel Index
@@ -173,7 +173,7 @@ class ForexMomentumIndicators:
     def add_momentum(
         self, 
         periods: List[int] = [10, 14, 20],
-        ):
+    ):
         
         """
         Momentum Indicator
@@ -198,7 +198,7 @@ class ForexMomentumIndicators:
         williams_period: int = 14,
         cci_period: int = 20,
         momentum_periods: List[int] = [10, 14, 20],
-        ):
+    ):
         
         """
         Adds all momentum indicators

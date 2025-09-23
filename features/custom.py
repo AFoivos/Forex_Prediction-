@@ -14,7 +14,7 @@ class ForexCustomFeatures:
         low_col: str = 'low', 
         close_col: str = 'close',
         volume_col: str = 'volume',
-        ):
+    ):
         
         """
         Class for Custom Features
@@ -51,7 +51,7 @@ class ForexCustomFeatures:
     def add_returns_features(
         self, 
         periods: List[int] = [1, 5, 10, 20],
-        ):
+    ):
         
         """
         Returns and Logarithmic Returns
@@ -87,7 +87,7 @@ class ForexCustomFeatures:
     def add_volatility_measures(
         self,
         periods: List[int] = [5, 10, 20, 50],
-        ):
+    ):
         
         """
         Advanced Volatility Measures
@@ -266,7 +266,7 @@ class ForexCustomFeatures:
         self,
         returns_periods: List[int] = [1, 5, 10, 20],
         volatility_periods: List[int] = [5, 10, 20, 50],
-        ):
+    ):
         
         """
         Adds all custom features

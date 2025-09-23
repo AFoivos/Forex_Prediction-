@@ -15,7 +15,7 @@ class ForexVolatilityIndicators:
         low_col: str = 'low', 
         close_col: str = 'close',
         volume_col: str = 'volume',
-        ):
+    ):
         
         """
         Class for Volatility Indicators
@@ -52,7 +52,7 @@ class ForexVolatilityIndicators:
     def add_atr(
         self, 
         periods: List[int] = [14, 21, 28],
-        ):
+    ):
         
         """
         Average True Range
@@ -83,7 +83,7 @@ class ForexVolatilityIndicators:
         periods: List[int] = [20, 50],
         nbdevup: float = 2.0,
         nbdevdn: float = 2.0,
-        ):
+    ):
 
         """
         Bollinger Bands
@@ -125,7 +125,7 @@ class ForexVolatilityIndicators:
         ema_period: int = 20,
         atr_period: int = 10,
         atr_multiplier: float = 2.0,
-        ):
+    ):
 
         """
         Keltner Channels
@@ -162,7 +162,7 @@ class ForexVolatilityIndicators:
     def add_standard_deviation(
         self, 
         periods: List[int] = [20, 50, 100],
-        ):
+    ):
         
         """
         Standard Deviation
@@ -190,7 +190,7 @@ class ForexVolatilityIndicators:
         keltner_atr_period: int = 10,
         keltner_multiplier: float = 2.0,
         std_periods: List[int] = [20, 50, 100],
-        ):
+    ):
         
         """
         Adds all volatility indicators

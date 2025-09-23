@@ -7,13 +7,14 @@ import warnings
 warnings.filterwarnings('ignore')
 
 class ForexDataLoad:
-    def __init__(self, 
-                 file_path: str = None, 
-                 data: pd.DataFrame = None, 
-                 connection_string: str = None, 
-                 query: str = None ,
-                 prints: bool = True
-                 ):
+    def __init__(
+        self, 
+        file_path: str = None, 
+        data: pd.DataFrame = None, 
+        connection_string: str = None, 
+        query: str = None ,
+        prints: bool = True
+    ):
         
         """
         Initialize the Forex Data Loader
@@ -111,10 +112,11 @@ class ForexDataLoad:
         except Exception as e:
             raise ValueError(f"Error loading DataFrame: {e}")
             
-    def load_from_database(self, 
-                           connection_string: str , 
-                           query: str
-                           ):
+    def load_from_database(
+        self, 
+        connection_string: str , 
+        query: str
+    ):
         
         # """
         # Load data from a database

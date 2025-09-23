@@ -16,7 +16,7 @@ class ForexTSFeatures:
         data: pd.DataFrame,
         target_column: str,
         instrument_id: str = "forex_pair",
-        ):
+    ):
         
         """
         Class for Automated Feature Engineering with TSFresh
@@ -72,7 +72,7 @@ class ForexTSFeatures:
         feature_columns: Optional[List[str]] = None,
         window_size: int = 50,
         min_timeshift: int = 10,
-        ):
+    ):
         
         """
         Convert DataFrame to long format for tsfresh
@@ -124,7 +124,7 @@ class ForexTSFeatures:
         n_jobs: int = 1,
         feature_settings: Optional[Dict] = None,
         disable_progressbar: bool = False
-        ):
+    ):
 
         """
         Extract features using tsfresh
@@ -173,7 +173,7 @@ class ForexTSFeatures:
         self, 
         fdr_level: float = 0.05, 
         ml_task: str = 'regression',
-        ):
+    ):
         
         """
         Select statistically relevant features
@@ -248,7 +248,7 @@ class ForexTSFeatures:
     def get_feature_importance(
         self,
         top_n: int = 20
-        ):
+    ):
         
         """
         Calculate feature importance using correlation
@@ -284,7 +284,7 @@ class ForexTSFeatures:
         self, 
         test_size: float = 0.2,
         scale_features: bool = True,
-        ):
+    ):
 
         """
         Prepare train/test splits (time-series aware)
@@ -332,7 +332,7 @@ class ForexTSFeatures:
         window_size: int = 50,
         test_size: float = 0.2,
         scale_features: bool = True,
-        ):
+    ):
         
         """
         Complete pipeline: preparation → extraction → selection → split

@@ -15,7 +15,7 @@ class ForexVolumeIndicators:
         low_col: str = 'low', 
         close_col: str = 'close',
         volume_col: str = 'volume',
-        ):
+    ):
         
         """
         Class for Volume Indicators
@@ -64,7 +64,7 @@ class ForexVolumeIndicators:
         self.data['obv_divergence'] = np.where(
             (price_change > 0) & (self.data['obv_trend'] < 0) |
             (price_change < 0) & (self.data['obv_trend'] > 0), 1, 0
-        )
+    )
         
         # OBV to moving average ratio
         if len(self.data) > 20:
@@ -76,7 +76,7 @@ class ForexVolumeIndicators:
     def add_volume_sma(
         self, 
         periods: List[int] = [5, 10, 20, 50],
-        ):
+    ):
         
         """
         Volume Simple Moving Averages
@@ -98,7 +98,7 @@ class ForexVolumeIndicators:
     def add_volume_roc(
         self,
         periods: List[int] = [5, 10, 14, 21],
-        ):
+    ):
         
         """
         Volume Rate of Change
@@ -123,7 +123,7 @@ class ForexVolumeIndicators:
         self,
         volume_sma_periods: List[int] = [5, 10, 20, 50],
         volume_roc_periods: List[int] = [5, 10, 14, 21],
-        ):
+    ):
         
         """
         Adds all volume indicators
@@ -139,3 +139,4 @@ class ForexVolumeIndicators:
         self.add_volume_roc(volume_roc_periods)
 
         return self.data
+    

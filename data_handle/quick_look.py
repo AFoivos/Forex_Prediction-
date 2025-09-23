@@ -8,14 +8,15 @@ import warnings
 warnings.filterwarnings('ignore')
 
 class ForexQuickLook():
-    def __init__(self, 
-                 data: pd.DataFrame,
-                 full_look: bool = False,
-                 periods: int = None,
-                 prints: bool = True,
-                 column : str = 'close',
-                 plots: bool = True,
-                 ):
+    def __init__(
+        self, 
+        data: pd.DataFrame,
+        full_look: bool = False,
+        periods: int = None,
+        prints: bool = True,
+        column : str = 'close',
+        plots: bool = True,
+    ):
         
         """
         Initialize the Forex Data Analyzer

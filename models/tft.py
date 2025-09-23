@@ -4,5 +4,5 @@ import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
 
-class ForexTFTModel:
+class ForexTFT:
     pass
