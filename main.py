@@ -1,1 +1,3 @@
-# not ready for now 
+class ForexApp:
+    def __init__(self):
+        pass

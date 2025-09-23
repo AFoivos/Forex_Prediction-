@@ -11,10 +11,12 @@ import warnings
 warnings.filterwarnings('ignore')
 
 class ForexTSFeatures:
-    def __init__(self, 
-                 data: pd.DataFrame,
-                 target_column: str,
-                 instrument_id: str = "forex_pair"):
+    def __init__(
+        self, 
+        data: pd.DataFrame,
+        target_column: str,
+        instrument_id: str = "forex_pair",
+        ):
         
         """
         Class for Automated Feature Engineering with TSFresh
@@ -65,10 +67,12 @@ class ForexTSFeatures:
         if self.data.empty:
             raise ValueError("DataFrame is empty")
     
-    def prepare_ts_data(self, 
-                       feature_columns: Optional[List[str]] = None,
-                       window_size: int = 50,
-                       min_timeshift: int = 10):
+    def prepare_ts_data(
+        self, 
+        feature_columns: Optional[List[str]] = None,
+        window_size: int = 50,
+        min_timeshift: int = 10,
+        ):
         
         """
         Convert DataFrame to long format for tsfresh
@@ -115,11 +119,13 @@ class ForexTSFeatures:
         
         return self.long_format_data
     
-    def extract_ts_features(self, 
-                          n_jobs: int = 4,
-                          feature_settings: Optional[Dict] = None,
-                          disable_progressbar: bool = False):
-        
+    def extract_ts_features(
+        self, 
+        n_jobs: int = 1,
+        feature_settings: Optional[Dict] = None,
+        disable_progressbar: bool = False
+        ):
+
         """
         Extract features using tsfresh
         
@@ -163,9 +169,11 @@ class ForexTSFeatures:
         
         return self.extracted_features
     
-    def select_relevant_features(self, 
-                                 fdr_level: float = 0.05, 
-                                 ml_task: str = 'regression'):
+    def select_relevant_features(
+        self, 
+        fdr_level: float = 0.05, 
+        ml_task: str = 'regression',
+        ):
         
         """
         Select statistically relevant features
@@ -237,7 +245,10 @@ class ForexTSFeatures:
         
         return self.selected_features
     
-    def get_feature_importance(self, top_n: int = 20):
+    def get_feature_importance(
+        self,
+        top_n: int = 20
+        ):
         
         """
         Calculate feature importance using correlation
@@ -269,10 +280,12 @@ class ForexTSFeatures:
         
         return self.feature_importance
         
-    def get_train_test_split(self, 
-                           test_size: float = 0.2,
-                           scale_features: bool = True):
-        
+    def get_train_test_split(
+        self, 
+        test_size: float = 0.2,
+        scale_features: bool = True,
+        ):
+
         """
         Prepare train/test splits (time-series aware)
         
@@ -313,11 +326,13 @@ class ForexTSFeatures:
                 
         return X_train, X_test, y_train, y_test
     
-    def get_all_features(self,
-                        feature_columns: Optional[List[str]] = None,
-                        window_size: int = 50,
-                        test_size: float = 0.2,
-                        scale_features: bool = True):
+    def get_all_features(
+        self,
+        feature_columns: Optional[List[str]] = None,
+        window_size: int = 50,
+        test_size: float = 0.2,
+        scale_features: bool = True,
+        ):
         
         """
         Complete pipeline: preparation → extraction → selection → split
@@ -349,20 +364,4 @@ class ForexTSFeatures:
         )
         
         return X_train, X_test, y_train, y_test
-    
-    # def get_feature_summary(self):
-    #     """Get summary of feature engineering process"""
-        
-    #     if self.selected_features is None:
-    #         return "No features extracted yet. Run get_all_features() first."
-        
-    #     summary = {
-    #         'total_features_extracted': self.extracted_features.shape[1] if self.extracted_features is not None else 0,
-    #         'selected_features_count': self.selected_features.shape[1],
-    #         'feature_columns': self.selected_features.columns.tolist(),
-    #         'top_features': self.feature_importance.to_dict() if self.feature_importance is not None else {},
-    #         'data_shape': self.data.shape
-    #     }
-        
-    #     return summary
 

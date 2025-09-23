@@ -6,13 +6,15 @@ import warnings
 warnings.filterwarnings('ignore')
 
 class ForexCustomFeatures:
-    def __init__(self, 
-                 data: pd.DataFrame,
-                 open_col: str = 'open',
-                 high_col: str = 'high', 
-                 low_col: str = 'low', 
-                 close_col: str = 'close',
-                 volume_col: str = 'volume'):
+    def __init__(
+        self, 
+        data: pd.DataFrame,
+        open_col: str = 'open',
+        high_col: str = 'high', 
+        low_col: str = 'low', 
+        close_col: str = 'close',
+        volume_col: str = 'volume',
+        ):
         
         """
         Class for Custom Features
@@ -46,7 +48,10 @@ class ForexCustomFeatures:
         if missing_cols:
             raise ValueError(f"Missing columns in DataFrame: {missing_cols}")
     
-    def add_returns_features(self, periods: List[int] = [1, 5, 10, 20]):
+    def add_returns_features(
+        self, 
+        periods: List[int] = [1, 5, 10, 20],
+        ):
         
         """
         Returns and Logarithmic Returns
@@ -79,7 +84,10 @@ class ForexCustomFeatures:
         
         return self.data
     
-    def add_volatility_measures(self, periods: List[int] = [5, 10, 20, 50]):
+    def add_volatility_measures(
+        self,
+        periods: List[int] = [5, 10, 20, 50],
+        ):
         
         """
         Advanced Volatility Measures
@@ -161,10 +169,6 @@ class ForexCustomFeatures:
         Seasonality and Calendar Features
         
         """
-        
-        if not self.has_datetime_index:
-            print("⏭️  Skipping Seasonality Features - Index is not datetime")
-            return self.data
                 
         # Time-based features
         self.data['hour'] = self.data.index.hour
@@ -211,7 +215,7 @@ class ForexCustomFeatures:
             (self.data.index.dayofweek * 24 * 60) + 
             (self.data.index.hour * 60) + 
             self.data.index.minute
-        )
+            )
         
         # Period of day (for intraday patterns)
         self.data['period_of_day'] = pd.cut(
@@ -219,7 +223,7 @@ class ForexCustomFeatures:
             bins=[0, 4, 8, 12, 16, 20, 24],
             labels=['late_night', 'early_morning', 'morning', 'afternoon', 'evening', 'night'],
             include_lowest=True
-        )
+            )
         
         # Holiday proximity (simplified)
         self.data['days_to_month_end'] = (self.data.index + pd.offsets.MonthEnd(0)).day - self.data.index.day
@@ -258,9 +262,11 @@ class ForexCustomFeatures:
                 
         return self.data
     
-    def get_all_custom_features(self,
-                              returns_periods: List[int] = [1, 5, 10, 20],
-                              volatility_periods: List[int] = [5, 10, 20, 50]):
+    def get_all_custom_features(
+        self,
+        returns_periods: List[int] = [1, 5, 10, 20],
+        volatility_periods: List[int] = [5, 10, 20, 50],
+        ):
         
         """
         Adds all custom features
