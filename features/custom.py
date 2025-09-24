@@ -32,7 +32,7 @@ class ForexCustomFeatures:
         print("="*50)
         print("CUSTOM FEATURES")
         print("="*50)
-        print(" Available Fuctions \n1 add_returns_features \n2 add_volatility_measures \n3 add_price_position_features \n4 add_seasonality_features \n5 add_time_based_features \n6 add_custom_derived_features")
+        print(" Available Functions: \n1 add_returns_features \n2 add_volatility_measures \n3 add_price_position_features \n4 add_seasonality_features \n5 add_time_based_features \n6 add_custom_derived_features \n7 get_all_custom_features")
         print("="*50)
         
         self.data = data.copy()
@@ -50,7 +50,7 @@ class ForexCustomFeatures:
     
     def add_returns_features(
         self, 
-        periods: List[int] = [1, 5, 10, 20],
+        periods: List[int] = [1, 4, 24, 120],
     ):
         
         """
@@ -63,24 +63,24 @@ class ForexCustomFeatures:
                 
         for period in periods:
             # Simple returns
-            ret_col = f'return_{period}'
+            ret_col = f'ret_{period}h'
             self.data[ret_col] = self.data[self.close_col].pct_change(period)
             
             # Logarithmic returns
-            log_ret_col = f'log_return_{period}'
+            log_ret_col = f'log_ret_{period}h'
             self.data[log_ret_col] = np.log(self.data[self.close_col] / self.data[self.close_col].shift(period))
             
             # Returns volatility (rolling std)
-            vol_col = f'return_vol_{period}'
-            self.data[vol_col] = self.data[ret_col].rolling(window=period).std()
+            vol_col = f'vol_{period}h'
+            self.data[vol_col] = self.data[ret_col].rolling(window = period).std()
             
             # Returns direction
-            dir_col = f'return_direction_{period}'
+            dir_col = f'ret_direction_{period}h'
             self.data[dir_col] = np.where(self.data[ret_col] > 0, 1, -1)
                     
         # Cumulative returns
-        self.data['cumulative_return'] = (1 + self.data['return_1']).cumprod() - 1
-        self.data['cumulative_log_return'] = self.data['log_return_1'].cumsum()
+        self.data['cumulative_return'] = (1 + self.data['ret_1h']).cumprod() - 1
+        self.data['cumulative_log_return'] = self.data['log_ret_1h'].cumsum()
         
         return self.data
     

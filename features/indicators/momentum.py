@@ -33,7 +33,7 @@ class ForexMomentumIndicators:
         print("="*50)
         print("MOMENTUM INDICATORS")
         print("="*50)
-        print(" Available Fuctions \n1 add_rsi \n2 add_stochastic \n3 add_williams_r \n4 add_cci \n5 add_momentum \n6 add_momentum_confirmation")
+        print(" Available Fuctions \n1 add_rsi \n2 add_stochastic \n3 add_williams_r \n4 add_cci \n5 add_momentum \n6 get_all_momentum_indicators")
         print("="*50) 
         
         self.data = data.copy()

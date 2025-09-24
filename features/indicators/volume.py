@@ -33,7 +33,7 @@ class ForexVolumeIndicators:
         print("="*50)
         print("VOLUME INDICATORS")
         print("="*50)
-        print(" Available Fuctions \n1 add_obv \n2 add_volume_sma \n3 add_volume_roc \n4 add_volume_confirmation")
+        print(" Available Fuctions \n1 add_obv \n2 add_volume_sma \n3 add_volume_roc \n4 get_all_volume_indicators")
         print("="*50)
         
         self.data = data.copy()
@@ -58,14 +58,7 @@ class ForexVolumeIndicators:
         
         # Calculate OBV
         self.data['obv'] = talib.OBV(self.data[self.close_col], self.data[self.volume_col])
-        
-        # OBV divergence (price vs volume)
-        price_change = self.data[self.close_col].diff()
-        self.data['obv_divergence'] = np.where(
-            (price_change > 0) & (self.data['obv_trend'] < 0) |
-            (price_change < 0) & (self.data['obv_trend'] > 0), 1, 0
-    )
-        
+           
         # OBV to moving average ratio
         if len(self.data) > 20:
             obv_ma = self.data['obv'].rolling(window=20).mean()

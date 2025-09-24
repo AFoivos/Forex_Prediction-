@@ -33,7 +33,7 @@ class ForexVolatilityIndicators:
         print("="*50)
         print("VOLATILITY INDICATORS")
         print("="*50)
-        print(" Available Fuctions \n1 add_atr \n2 add_bollinger_bands \n3 add_keltner_channels \n4 add_standard_deviation \n5 add_volatility_confirmation \n6 get_volatility_score \n7 get_all_volatility_indicators")
+        print(" Available Fuctions \n1 add_atr \n2 add_bollinger_bands \n3 add_keltner_channels \n4 add_standard_deviation  \n5 get_all_volatility_indicators")
         print("="*50)
         
         self.data = data.copy()
