@@ -1,7 +1,5 @@
-from ...stored_code.price_baced_label import ForexPriceBasedLabelGenerator
-from ...stored_code.indicators_signals import ForexIndicatorBasedLabelGenerator
+from .indicators_signals import ForexMASignals
 
 __all__ = [
-    "ForexPriceBasedLabelGenerator",
-    "ForexIndicatorBasedLabelGenerator",
+    "ForexMASignals"
 ]

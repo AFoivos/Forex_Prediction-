@@ -1,211 +1,311 @@
-class SMASignalGenerator:
+import pandas as pd
+import numpy as np
+import talib
+from typing import Dict, List, Optional, Union
+
+import warnings
+warnings.filterwarnings('ignore')
+
+class ForexMASignals:
+    
     """
     GENERATES TRADING SIGNALS USING ONLY SMA AND EMA INDICATORS
+    
     """
     
-    def __init__(self, data: pd.DataFrame):
+    def __init__(
+        self, 
+        data: pd.DataFrame,
+        close_col: str = 'close',
+    ):
+        
         self.data = data.copy()
-        self.signals = pd.DataFrame(index=data.index)
+        self.close_col = close_col
         
-    # ==================== CROSSOVER SIGNALS ====================
-    
-    def golden_death_cross(self):
-        """Golden Cross (SMA50 > SMA200) and Death Cross (SMA50 < SMA200)"""
-        if 'trend_sma_50' in self.data.columns and 'trend_sma_200' in self.data.columns:
-            # Golden Cross: SMA50 crosses above SMA200
-            self.signals['golden_cross'] = (
-                (self.data['trend_sma_50'] > self.data['trend_sma_200']) & 
-                (self.data['trend_sma_50'].shift(1) <= self.data['trend_sma_200'].shift(1))
-            )
-            # Death Cross: SMA50 crosses below SMA200  
-            self.signals['death_cross'] = (
-                (self.data['trend_sma_50'] < self.data['trend_sma_200']) & 
-                (self.data['trend_sma_50'].shift(1) >= self.data['trend_sma_200'].shift(1))
-            )
-        return self.signals[['golden_cross', 'death_cross']]
-    
-    def ema_crossover(self, fast_period=20, slow_period=50):
-        """EMA Crossover signals (Bullish: EMA20 > EMA50, Bearish: EMA20 < EMA50)"""
-        fast_col = f'trend_ema_{fast_period}'
-        slow_col = f'trend_ema_{slow_period}'
+        self.signals = pd.DataFrame(
+            {self.close_col : self.data[self.close_col]}, 
+            index = self.data.index
+        )
         
-        if fast_col in self.data.columns and slow_col in self.data.columns:
-            # Bullish Crossover: Fast EMA crosses above Slow EMA
-            self.signals[f'ema_bullish_{fast_period}_{slow_period}'] = (
-                (self.data[fast_col] > self.data[slow_col]) & 
-                (self.data[fast_col].shift(1) <= self.data[slow_col].shift(1))
-            )
-            # Bearish Crossover: Fast EMA crosses below Slow EMA
-            self.signals[f'ema_bearish_{fast_period}_{slow_period}'] = (
-                (self.data[fast_col] < self.data[slow_col]) & 
-                (self.data[fast_col].shift(1) >= self.data[slow_col].shift(1))
-            )
-        return self.signals[[f'ema_bullish_{fast_period}_{slow_period}', 
-                           f'ema_bearish_{fast_period}_{slow_period}']]
-    
-    # ==================== TREND HIERARCHY SIGNALS ====================
-    
-    def trend_hierarchy(self, periods=[10, 20, 50]):
-        """Checks if EMAs are in perfect bullish/bearish alignment"""
-        ema_cols = [f'trend_ema_{p}' for p in periods]
+        self._validate_columns()
         
-        # Verify all required columns exist
-        if all(col in self.data.columns for col in ema_cols):
-            # Bullish hierarchy: EMA10 > EMA20 > EMA50
-            bullish_condition = True
-            for i in range(len(ema_cols)-1):
-                bullish_condition &= (self.data[ema_cols[i]] > self.data[ema_cols[i+1]])
+    def _validate_columns(
+        self, 
+        columns: List[str] =  None
+    ):
+        
+            """
+            Validate that required indicator columns exist
+            """
             
-            # Bearish hierarchy: EMA10 < EMA20 < EMA50  
-            bearish_condition = True
-            for i in range(len(ema_cols)-1):
-                bearish_condition &= (self.data[ema_cols[i]] < self.data[ema_cols[i+1]])
+            required_cols = [
+                self.close_col
+            ]            
             
-            self.signals['trend_hierarchy_bullish'] = bullish_condition
-            self.signals['trend_hierarchy_bearish'] = bearish_condition
-        
-        return self.signals[['trend_hierarchy_bullish', 'trend_hierarchy_bearish']]
-    
-    # ==================== SUPPORT/RESISTANCE BOUNCE SIGNALS ====================
-    
-    def ma_bounce_signals(self, ma_period=20, ma_type='ema'):
-        """Signals when price bounces off moving average support/resistance"""
-        ma_col = f'trend_{ma_type}_{ma_period}'
-        
-        if ma_col in self.data.columns:
-            # Price touches or comes very close to MA (within 0.1%)
-            touch_threshold = self.data[ma_col] * 0.001
-            price_touches_ma = abs(self.data['close'] - self.data[ma_col]) <= touch_threshold
+            if columns is not None:
+                required_cols.extend(columns)
             
-            # Bullish bounce: Price was below, touches MA, then closes above
-            self.signals[f'{ma_type}_{ma_period}_bullish_bounce'] = (
-                (self.data['close'].shift(1) < self.data[ma_col].shift(1)) &
-                price_touches_ma &
-                (self.data['close'] > self.data[ma_col])
-            )
+            missing_cols = [col for col in required_cols if col not in self.data.columns]
+            if missing_cols:
+                raise ValueError(f"Missing columns in DataFrame: {missing_cols}")
             
-            # Bearish bounce: Price was above, touches MA, then closes below  
-            self.signals[f'{ma_type}_{ma_period}_bearish_bounce'] = (
-                (self.data['close'].shift(1) > self.data[ma_col].shift(1)) &
-                price_touches_ma &
-                (self.data['close'] < self.data[ma_col])
-            )
+    def golden_death_cross(
+        self, 
+        fast_col=50, 
+        slow_col=200
+    ):
         
-        return self.signals[[f'{ma_type}_{ma_period}_bullish_bounce', 
-                           f'{ma_type}_{ma_period}_bearish_bounce']]
+        """
+        Golden Cross (2) when fast SMA crosses above slow SMA
+        Death Cross (1) when fast SMA crosses below slow SMA  
+        No signal (0) for no crossover
     
-    # ==================== SLOPE AND MOMENTUM SIGNALS ====================
+        Parameters:
+        fast_col (str): Column name for fast SMA
+        slow_col (str): Column name for slow SMA
+        
+        """
+        
+        columns = [f'trend_sma_{fast_col}', f'trend_sma_{slow_col}']
+        self._validate_columns(columns = columns)
+ 
+            # Golden Cross: fast crosses above slow
+        golden_condition = (
+            (self.data[columns[0]] > self.data[columns[1]]) & 
+            (self.data[columns[0]].shift(1) <= self.data[columns[1]].shift(1))
+        )
+        
+        # Death Cross: fast crosses below slow  
+        death_condition = (
+            (self.data[columns[0]] < self.data[columns[1]]) & 
+            (self.data[columns[0]].shift(1) >= self.data[columns[1]].shift(1))
+        )
+        
+        # Create signal for entire series: 1=Golden, 0=Death, NaN=No signal
+        self.signals['golden_death_cross'] = np.select(
+            [golden_condition, death_condition],
+            [2, 1],
+            default = 0
+        )
     
-    def ma_slope_signals(self, period=20, ma_type='ema', lookback=3):
-        """Signals based on moving average slope and acceleration"""
-        ma_col = f'trend_{ma_type}_{period}'
-        slope_col = f'{ma_col}_slope'
-        
-        if ma_col in self.data.columns:
-            # Create slope if it doesn't exist
-            if slope_col not in self.data.columns:
-                self.data[slope_col] = self.data[ma_col].diff()
-            
-            # Positive slope (uptrend)
-            self.signals[f'{ma_type}_{period}_slope_positive'] = self.data[slope_col] > 0
-            
-            # Slope acceleration (slope increasing)
-            self.signals[f'{ma_type}_{period}_slope_accelerating'] = (
-                self.data[slope_col] > self.data[slope_col].shift(1)
-            )
-            
-            # Strong trend: Price above MA and MA slope positive
-            self.signals[f'{ma_type}_{period}_strong_uptrend'] = (
-                (self.data['close'] > self.data[ma_col]) & 
-                (self.data[slope_col] > 0)
-            )
-        
-        return self.signals[[f'{ma_type}_{period}_slope_positive',
-                           f'{ma_type}_{period}_slope_accelerating',
-                           f'{ma_type}_{period}_strong_uptrend']]
-    
-    # ==================== PRICE EXTENSION SIGNALS ====================
-    
-    def price_extension_signals(self, ma_period=20, ma_type='ema', deviation=0.02):
-        """Signals when price is overextended from moving average"""
-        ma_col = f'trend_{ma_type}_{ma_period}'
-        
-        if ma_col in self.data.columns:
-            # Calculate percentage deviation from MA
-            deviation_pct = abs(self.data['close'] - self.data[ma_col]) / self.data[ma_col]
-            
-            # Overbought: Price significantly above MA
-            self.signals[f'price_overextended_above_{ma_type}_{ma_period}'] = (
-                (self.data['close'] > self.data[ma_col]) & 
-                (deviation_pct > deviation)
-            )
-            
-            # Oversold: Price significantly below MA
-            self.signals[f'price_overextended_below_{ma_type}_{ma_period}'] = (
-                (self.data['close'] < self.data[ma_col]) & 
-                (deviation_pct > deviation)
-            )
-        
-        return self.signals[[f'price_overextended_above_{ma_type}_{ma_period}',
-                           f'price_overextended_below_{ma_type}_{ma_period}']]
-    
-    # ==================== COMPREHENSIVE SIGNAL GENERATION ====================
-    
-    def generate_all_signals(self):
-        """Generate all available SMA/EMA signals"""
-        print("GENERATING SMA/EMA TRADING SIGNALS...")
-        
-        # Crossover signals
-        self.golden_death_cross()
-        self.ema_crossover(20, 50)
-        self.ema_crossover(10, 20)  # Additional fast crossover
-        
-        # Trend hierarchy
-        self.trend_hierarchy([10, 20, 50])
-        
-        # Bounce signals
-        self.ma_bounce_signals(20, 'ema')
-        self.ma_bounce_signals(50, 'sma')
-        
-        # Slope signals
-        self.ma_slope_signals(20, 'ema')
-        self.ma_slope_signals(50, 'sma')
-        
-        # Extension signals
-        self.price_extension_signals(20, 'ema', 0.02)
-        
-        # Clean up: Replace NaN values with False
-        self.signals = self.signals.fillna(False)
-        
-        print(f"Generated {len(self.signals.columns)} trading signals")
+   
         return self.signals
     
-    def get_signal_summary(self):
-        """Get summary of current active signals"""
-        if self.signals.empty:
-            return "No signals generated yet. Call generate_all_signals() first."
+    def ema_crossover(
+        self, 
+        fast_col=20, 
+        slow_col=50
+    ):
         
-        summary = {}
-        for col in self.signals.columns:
-            active_signals = self.signals[col].sum()
-            if active_signals > 0:
-                summary[col] = active_signals
+        """
+        EMA Crossover signals (Bullish: EMA20 > EMA50, Bearish: EMA20 < EMA50)
         
-        return summary
+        """
+        
+        columns = [f'trend_ema_{fast_col}', f'trend_ema_{slow_col}']
+        self._validate_columns(columns = columns)
+        
+        bullish_condition = (
+            (self.data[columns[0]] > self.data[columns[1]]) & 
+            (self.data[columns[0]].shift(1) <= self.data[columns[1]].shift(1))
+        )
+        
+        bearish_condition = (
+            (self.data[columns[0]] < self.data[columns[1]]) & 
+            (self.data[columns[0]].shift(1) >= self.data[columns[1]].shift(1))
+        )
+        
+        self.signals['ema_crossover'] = np.select(
+            [bullish_condition, bearish_condition],
+            [2, 1],
+            default = 0
+        )
+        
+    def trend_hierarchy(
+        self,
+        periods: List[int] = [50, 100, 200]
+    ):
+        
+        """
+        Checks if EMAs are in perfect bullish/bearish alignment
+        
+        Parameters:
+        periods (List[int]): List of periods for EMA
+        
+        """
+        
+        columns = []
+        for period in periods:
+            columns.append(f'trend_ema_{period}')
+            
+        self._validate_columns(columns = columns)
+        
+        bullish_condition = True
+        bearish_condition = True
+        
+        for i in range(len(columns)-1):
+            if columns[i] > columns[i+1]:
+                bullish = False
+            elif columns[i] < columns[i+1]:
+                bearish = False
 
-# ==================== USAGE EXAMPLE ====================
+        self.signals['bearish_bullish_hierarchy'] = np.select(
+            [bullish_condition, bearish_condition],
+            [2, 1],
+            default = 0
+        )
+    
+        return self.signals
+    
+    def ma_bounce_signals(
+        self, 
+        period=20, 
+        ma_type='ema'
+    ):
+        
+        """
+        Signals when price bounces off moving average support/resistance
+        
+        Parameters:
+        ma_period (int): Period for moving average
+        ma_type (str): Type of moving average
+        
+        """
+        
+        column = f'trend_{ma_type}_{period}'
+        self._validate_columns(columns = column)
+        
+        touch_threshold = self.data[column] * 0.001
+        price_touches_ma = abs(self.data[self.close_col] - self.data[column]) <= touch_threshold
+        
+        bearish_bounce = (
+            (self.data[self.close_col].shift(1) > self.data[column].shift(1)) &
+            price_touches_ma &
+            (self.data[self.close_col] < self.data[column])
+        )
+        
+        bullish_bounce = (
+            (self.data[self.close_col].shift(1) < self.data[column].shift(1)) &
+            price_touches_ma &
+            (self.data[self.close_col] > self.data[column])
+        )
+        
+        self.signals['bounce_bearish_bullish'] = np.select(
+            [bearish_bounce, bullish_bounce],
+            [1, 2],
+            default = 0
+        )
+        
+        return self.signals
+        
+    def ma_slope_signals(
+        self, 
+        period: int = 20, 
+        ma_type: str = 'ema', 
+        lookback: int = 3
+    ):
+        
+        """
+        Signals based on moving average slope and acceleration
+        
+        Parameters:
+        period (int): Period for moving average
+        ma_type (str): Type of moving average
+        lookback (int): Number of periods to look back for slope
+        
+        """
+        
+        columns = [f"trend_{ma_type}_{period}", f"trend_{ma_type}_{period}_slope"]
+        self._validate_columns(columns = columns)
+    
+        # Positive/Negative slope 
+        positive_slope = self.data[columns[1]] > 0
+        negative_slope = self.data[columns[1]] < 0
+        
+        self.signals['slope_direction'] = np.select(
+            [positive_slope, negative_slope],
+            [2, 1],
+            default = 0
+        )
+        
+        # Slope acceleration
+        slope_increasing = self.data[columns[1]] > self.data[columns[1]].shift(1)
+        slope_decreasing = self.data[columns[1]] < self.data[columns[1]].shift(1)
 
-# First, create your indicators
-trend_calculator = ForexTrendIndicators(df)
-df_with_indicators = trend_calculator.add_sma([50, 200])
-df_with_indicators = trend_calculator.add_ema([10, 20, 50])
+        self.signals['slope_acceleration'] = np.select(
+            [slope_increasing, slope_decreasing],
+            [2, 1],  
+            default = 0  
+        )
+        
+        # Strong trend signals
+          
+        strong_uptrend = (self.data[self.close_col] > self.data[columns[0]]) & (self.data[columns[1]] > 0)
+        strong_downtrend = (self.data[self.close_col] < self.data[columns[0]]) & (self.data[columns[1]] < 0)
 
-# Then generate signals
-signal_gen = SMASignalGenerator(df_with_indicators)
-all_signals = signal_gen.generate_all_signals()
-
-# See signal summary
-print(signal_gen.get_signal_summary())
-
-# Combine signals with original data
-final_df = pd.concat([df_with_indicators, all_signals], axis=1)
+        self.signals['strong_trend'] = np.select(
+            [strong_uptrend, strong_downtrend],
+            [2, 1],  
+            default = 0  
+        )
+        
+    def price_extension_signals(
+        self, 
+        period: int = 20, 
+        ma_type: str = 'ema', 
+        deviation: float = 0.02
+    ):
+        
+        """
+        Signals when price is overextended from moving average
+        
+        Parameters:
+        period (int): Period for moving average
+        ma_type (str): Type of moving average
+        deviation (float): Deviation threshold for extension
+        
+        """
+        
+        column = f'trend_{ma_type}_{period}'
+        self._validate_columns(columns = column)
+        
+        # Calculate percentage deviation from MA
+        deviation_pct = abs(self.data[self.close_col] - self.data[column]) / self.data[column]
+        
+        # Overbought: Price significantly above MA
+        overbought = ( 
+            (self.data[self.close_col] > self.data[column]) & 
+            (deviation_pct > deviation)
+        )
+        
+        # Oversold: Price significantly below MA    
+        oversold = (
+            (self.data[self.close_col] < self.data[column]) & 
+            (deviation_pct > deviation)
+        )
+        
+        self.signals["overbought_oversold"] = np.select(
+            [overbought, oversold],
+            [2, 1],
+            default = 0
+        )
+        
+        return self.signals
+        
+    def generate_all_signals(self): #CHANGE PARAMETERS TOMMOEOW
+        
+        """
+        Generate all available SMA/EMA signals
+        
+        """
+        
+        self.golden_death_cross()
+        self.ema_crossover()
+        self.trend_hierarchy()
+        self.ma_bounce_signals(20, 'ema')
+        self.ma_bounce_signals(50, 'sma')
+        self.ma_slope_signals(20, 'ema')
+        self.ma_slope_signals(50, 'sma')
+        self.price_extension_signals(20, 'ema', 0.02)
+        print(self.signals.tail(10), "\n", self.signals.shape)
+        return self.signals

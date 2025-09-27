@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Union
 
 import warnings
 warnings.filterwarnings('ignore')
+
 class ForexTrendIndicators:
     def __init__(
         self, 
@@ -30,7 +31,7 @@ class ForexTrendIndicators:
         print("="*50)
         print("TREND INDICATORS")
         print("="*50)
-        print(" Available Fuctions: \n1 add_sma \n2 add_ema \n3 add_macd \n4 add_adx \n5 add_parabolic_sar \n6 add_trend_confirmation")
+        print(" Available Fuctions: \n1 add_sma \n2 add_ema \n3 add_macd \n4 add_adx \n5 add_parabolic_sar")
         print("="*50)
         
         self.data = data.copy()
@@ -85,10 +86,8 @@ class ForexTrendIndicators:
             col_name = f'trend_ema_{period}'
             self.data[col_name] = talib.EMA(self.data[self.close_col], timeperiod=period)
         
-        # EMA slope
-        self.data[f'{col_name}_slope'] = self.data[col_name].diff()
-        
-        self.available_get_trend_strength[1] = True
+            # EMA slope
+            self.data[f'{col_name}_slope'] = self.data[col_name].diff()
 
         return self.data
         
