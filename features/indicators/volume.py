@@ -57,12 +57,12 @@ class ForexVolumeIndicators:
         """
         
         # Calculate OBV
-        self.data['obv'] = talib.OBV(self.data[self.close_col], self.data[self.volume_col])
+        self.data['volu_obv'] = talib.OBV(self.data[self.close_col], self.data[self.volume_col])
            
         # OBV to moving average ratio
         if len(self.data) > 20:
-            obv_ma = self.data['obv'].rolling(window=20).mean()
-            self.data['obv_ma_ratio'] = self.data['obv'] / obv_ma
+            obv_ma = self.data['volu_obv'].rolling(window=20).mean()
+            self.data['volu_obv_ma_ratio'] = self.data['volu_obv'] / obv_ma
         
         return self.data
     
@@ -80,7 +80,7 @@ class ForexVolumeIndicators:
         """
         
         for period in periods:
-            col_name = f'volume_sma_{period}'
+            col_name = f'volu_volume_sma_{period}'
             self.data[col_name] = self.data[self.volume_col].rolling(window=period).mean()
             
             # Volume SMA ratios and signals
@@ -102,7 +102,7 @@ class ForexVolumeIndicators:
         """
             
         for period in periods:
-            col_name = f'volume_roc_{period}'
+            col_name = f'volu_volume_roc_{period}'
             
             # Calculate Volume ROC
             self.data[col_name] = (

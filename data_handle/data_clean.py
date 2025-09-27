@@ -101,7 +101,9 @@ class ForexDataClean:
         
         if columns is None:
             columns = self.columns
-            
+        
+        numeric_cols = [col for col in columns if pd.api.types.is_numeric_dtype(self.data[col])]
+        
         # Count Missing values
         missing_values = self.data[columns].isnull().sum().sum()
 
@@ -111,23 +113,23 @@ class ForexDataClean:
         else:
             print(f"Found {missing_values} missing values")        
             if method == 'interpolate':
-                self.data[columns] = self.data[columns].interpolate(method='linear')
+                self.data[numeric_cols] = self.data[numeric_cols].interpolate(method='linear')
                 affected = self.data[columns].isna().sum().sum()
                 print(f" interpolated: {missing_values - affected} missing values .")
             elif method == 'ffill':
-                self.data[columns] = self.data[columns].fillna(method='ffill')
+                self.data[numeric_cols] = self.data[numeric_cols].fillna(method='ffill')
                 affected = self.data[columns].isna().sum().sum()
                 print(f" forward filled: {missing_values - affected} missing values .")
             elif method == 'bfill':
-                self.data[columns] = self.data[columns].fillna(method='bfill')
+                self.data[numeric_cols] = self.data[numeric_cols].fillna(method='bfill')
                 affected = self.data[columns].isna().sum().sum()
                 print(f" backward filled: {missing_values - affected} missing values .")
             elif method == 'drop':
                 self.data = self.data.dropna(subset=columns)
                 affected = self.data[columns].isna().sum().sum()
                 print(f" dropped: {missing_values - affected} missing values .")
-            elif method == 'zero' and self.volume_col in columns:
-                self.data[self.volume_col] = self.data[self.volume_col].fillna(0)
+            elif method == 'zero':
+                self.data[numeric_cols] = self.data[numeric_cols].fillna(0)
                 affected = self.data[columns].isna().sum().sum()
                 print(f" filled with zeros: {missing_values - affected} missing values .")
             else:

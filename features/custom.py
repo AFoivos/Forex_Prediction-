@@ -101,7 +101,7 @@ class ForexCustomFeatures:
         for period in periods:
             # Historical volatility (annualized)
             hv_col = f'historical_vol_{period}'
-            daily_vol = self.data['log_return_1'].rolling(window=period).std()
+            daily_vol = self.data['log_ret_1h'].rolling(window=period).std()
             self.data[hv_col] = daily_vol * np.sqrt(252)  # Annualized
             
             # Parkinson volatility (high-low based)
@@ -264,7 +264,7 @@ class ForexCustomFeatures:
     
     def get_all_custom_features(
         self,
-        returns_periods: List[int] = [1, 5, 10, 20],
+        returns_periods: List[int] = [1, 4, 24, 120],
         volatility_periods: List[int] = [5, 10, 20, 50],
     ):
         

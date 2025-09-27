@@ -63,18 +63,13 @@ class ForexVolatilityIndicators:
         """
 
         for period in periods:
-            col_name = f'atr_{period}'
+            col_name = f'vol_atr_{period}'
             self.data[col_name] = talib.ATR(
                 self.data[self.high_col],
                 self.data[self.low_col],
                 self.data[self.close_col],
                 timeperiod=period
             )
-            
-            # ATR signals and ratios
-            self.data[f'{col_name}_pct'] = (self.data[col_name] / self.data[self.close_col]) * 100
-            self.data[f'{col_name}_trend'] = self.data[col_name].diff()
-            self.data[f'{col_name}_high_vol'] = (self.data[f'{col_name}_pct'] > 2.0).astype(int)
 
         return self.data
     
@@ -96,7 +91,6 @@ class ForexVolatilityIndicators:
         """
         
         for period in periods:
-            prefix = f'bb_{period}'
             
             upper, middle, lower = talib.BBANDS(
                 self.data[self.close_col],
@@ -105,18 +99,9 @@ class ForexVolatilityIndicators:
                 nbdevdn=nbdevdn
             )
             
-            self.data[f'{prefix}_upper'] = upper
-            self.data[f'{prefix}_middle'] = middle
-            self.data[f'{prefix}_lower'] = lower
-            
-            # Bollinger Band signals
-            self.data[f'{prefix}_width'] = (upper - lower) / middle
-            self.data[f'{prefix}_pct_b'] = (self.data[self.close_col] - lower) / (upper - lower) * 100
-            
-            # Price position relative to bands
-            self.data[f'{prefix}_above_upper'] = (self.data[self.close_col] > upper).astype(int)
-            self.data[f'{prefix}_below_lower'] = (self.data[self.close_col] < lower).astype(int)
-            self.data[f'{prefix}_squeeze'] = (self.data[f'{prefix}_width'] < 0.1).astype(int)
+            self.data[f'vol_bb_upper_{period}'] = upper
+            self.data[f'vol_bb_middle_{period}'] = middle
+            self.data[f'vol_bb_lower_{period}'] = lower
         
         return self.data
     
@@ -153,9 +138,9 @@ class ForexVolatilityIndicators:
             'keltner_width', 'keltner_pct_b', 'keltner_signal'
         ]
         
-        self.data['keltner_middle'] = ema
-        self.data['keltner_upper'] = ema + (atr * atr_multiplier)
-        self.data['keltner_lower'] = ema - (atr * atr_multiplier)
+        self.data['vol_keltner_middle'] = ema
+        self.data['vol_keltner_upper'] = ema + (atr * atr_multiplier)
+        self.data['vol_keltner_lower'] = ema - (atr * atr_multiplier)
                 
         return self.data
     
@@ -173,7 +158,7 @@ class ForexVolatilityIndicators:
         """
         
         for period in periods:
-            col_name = f'std_dev_{period}'
+            col_name = f'vol_std_dev_{period}'
             self.data[col_name] = talib.STDDEV(
                 self.data[self.close_col],
                 timeperiod=period,

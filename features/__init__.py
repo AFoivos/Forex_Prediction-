@@ -6,8 +6,9 @@ from .indicators import (
     ForexVolumeIndicators,
     ForexVolatilityIndicators,
 )
-from .labels import (
+from .signals import (
     ForexPriceBasedLabelGenerator,
+    ForexIndicatorBasedLabelGenerator,
 )
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "ForexVolumeIndicators",
     "ForexVolatilityIndicators",
     "ForexPriceBasedLabelGenerator",
+    "ForexIndicatorBasedLabelGenerator"
 ]

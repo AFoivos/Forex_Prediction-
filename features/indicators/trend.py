@@ -60,8 +60,9 @@ class ForexTrendIndicators:
         """ 
         
         for period in periods:
-            col_name = f'sma_{period}'
+            col_name = f'trend_sma_{period}'
             self.data[col_name] = talib.SMA(self.data[self.close_col], timeperiod=period)
+            
             # Slope of SMA
             self.data[f'{col_name}_slope'] = self.data[col_name].diff()
         
@@ -81,7 +82,7 @@ class ForexTrendIndicators:
         """
         
         for period in periods:
-            col_name = f'ema_{period}'
+            col_name = f'trend_ema_{period}'
             self.data[col_name] = talib.EMA(self.data[self.close_col], timeperiod=period)
         
         # EMA slope
@@ -115,9 +116,9 @@ class ForexTrendIndicators:
             signalperiod=signalperiod
         )
         
-        self.data['macd_line'] = macd
-        self.data['macd_signal'] = macd_signal
-        self.data['macd_histogram'] = macd_hist
+        self.data['trend_macd_line'] = macd
+        self.data['trend_macd_signal'] = macd_signal
+        self.data['trend_macd_histogram'] = macd_hist
         
         return self.data
     
@@ -156,9 +157,9 @@ class ForexTrendIndicators:
             timeperiod=period
         )
         
-        self.data['adx'] = adx
-        self.data['plus_di'] = plus_di
-        self.data['minus_di'] = minus_di
+        self.data['trend_adx'] = adx
+        self.data['trend_plus_di'] = plus_di
+        self.data['trend_minus_di'] = minus_di
                 
         return self.data
         
@@ -184,7 +185,7 @@ class ForexTrendIndicators:
             maximum=maximum
         )
         
-        self.data['parabolic_sar'] = sar
+        self.data['trend_parabolic_sar'] = sar
                    
         return self.data     
          

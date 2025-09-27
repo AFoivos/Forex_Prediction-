@@ -63,7 +63,7 @@ class ForexMomentumIndicators:
         """
                 
         for period in periods:
-            col_name = f'rsi_{period}'
+            col_name = f'momen_rsi_{period}'
             self.data[col_name] = talib.RSI(self.data[self.close_col], timeperiod=period)
             
             # RSI divergence
@@ -108,8 +108,8 @@ class ForexMomentumIndicators:
             'stoch_overbought', 'stoch_oversold', 'stoch_signal'
         ]
         
-        self.data['stoch_slowk'] = slowk
-        self.data['stoch_slowd'] = slowd
+        self.data['momen_stoch_slowk'] = slowk
+        self.data['momen_stoch_slowd'] = slowd
                 
         return self.data
     
@@ -140,7 +140,7 @@ class ForexMomentumIndicators:
             'willr_signal', 'willr_trend'
         ]
         
-        self.data['williams_r'] = willr
+        self.data['momen_williams_r'] = willr
                 
         return self.data
     
@@ -166,7 +166,7 @@ class ForexMomentumIndicators:
             timeperiod = period
         )
         
-        self.data['cci'] = cci
+        self.data['momen_cci'] = cci
                 
         return self.data
     
@@ -184,7 +184,7 @@ class ForexMomentumIndicators:
         """
         
         for period in periods:
-            col_name = f'momentum_{period}'
+            col_name = f'momen_momentum_{period}'
             self.data[col_name] = talib.MOM(self.data[self.close_col], timeperiod=period)
         
         return self.data
