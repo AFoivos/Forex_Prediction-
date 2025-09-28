@@ -58,24 +58,26 @@ class ForexMACDSignals:
         if missing_cols:
             raise ValueError(f"Missing columns in DataFrame: {missing_cols}")
     
-    def macd_crossover_signals(self):
+    def macd_crossover_signals(
+        self,
+        columns = ['trend_macd', 'trend_macd_signal'],
+    ):
         
         """
         MACD Line vs Signal Line Crossover
         
         """
         
-        columns = ['trend_macd', 'trend_macd_signal']
         self._validate_columns(columns = columns)
         
-        bullish_cross = (
-            (self.data['trend_macd'] > self.data['trend_macd_signal']) & 
-            (self.data['trend_macd'].shift(1) <= self.data['trend_macd_signal'].shift(1))
+        bullish_cross = ( # MACD crosses above Signal
+            (self.data[columns[0]] > self.data[columns[1]]) & 
+            (self.data[columns[0]].shift(1) <= self.data[columns[1]].shift(1))
         )
         
-        bearish_cross = (
-            (self.data['trend_macd'] < self.data['trend_macd_signal']) & 
-            (self.data['trend_macd'].shift(1) >= self.data['trend_macd_signal'].shift(1))
+        bearish_cross = ( # MACD crosses below Signal
+            (self.data[columns[0]] < self.data[columns[1]]) & 
+            (self.data[columns[0]].shift(1) >= self.data[columns[1]].shift(1))
         )
         
         self.signals['macd_crossover'] = np.select(
@@ -86,19 +88,21 @@ class ForexMACDSignals:
         
         return self.signals
     
-    def macd_histogram_signals(self):
+    def macd_histogram_signals(
+        self,
+        column: str = 'trend_macd_hist',
+    ):
         
         """
         MACD Histogram Signals
         
         """
-        
-        column = 'trend_macd_hist'
+
         self._validate_columns(columns = [column])
         
         # Histogram positive/negative
-        hist_positive = self.data['trend_macd_hist'] > 0
-        hist_negative = self.data['trend_macd_hist'] < 0
+        hist_positive = self.data[column] > 0
+        hist_negative = self.data[column] < 0
         
         self.signals['macd_histogram_direction'] = np.select(
             [hist_positive, hist_negative],
@@ -107,8 +111,8 @@ class ForexMACDSignals:
         )
         
         # Histogram momentum
-        hist_increasing = self.data['trend_macd_hist'] > self.data['trend_macd_hist'].shift(1)
-        hist_decreasing = self.data['trend_macd_hist'] < self.data['trend_macd_hist'].shift(1)
+        hist_increasing = self.data[column] > self.data[column].shift(1)
+        hist_decreasing = self.data[column] < self.data[column].shift(1)
         
         self.signals['macd_histogram_momentum'] = np.select(
             [hist_increasing, hist_decreasing],
@@ -118,24 +122,26 @@ class ForexMACDSignals:
         
         return self.signals
     
-    def macd_zero_line_signals(self):
+    def macd_zero_line_signals(
+        self,
+        column: str = 'trend_macd'
+    ):
         
         """
         MACD Zero Line Crossover Signals
         
         """
         
-        column = 'trend_macd'
         self._validate_columns(columns = [column])
         
         above_zero = (
-            (self.data['trend_macd'] > 0) & 
-            (self.data['trend_macd'].shift(1) <= 0)
+            (self.data[column] > 0) & 
+            (self.data[column].shift(1) <= 0)
         )
         
         below_zero = (
-            (self.data['trend_macd'] < 0) & 
-            (self.data['trend_macd'].shift(1) >= 0)
+            (self.data[column] < 0) & 
+            (self.data[column].shift(1) >= 0)
         )
         
         self.signals['macd_zero_cross'] = np.select(

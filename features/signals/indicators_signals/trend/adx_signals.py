@@ -204,7 +204,7 @@ class ForexADXSignals:
         
         return self.signals
     
-    def generate_all_adx_signals(self):#add parameters
+    def generate_all_adx_signals(self): #add parameters
         
         """
         Generate all ADX signals
