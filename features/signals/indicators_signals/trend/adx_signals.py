@@ -24,6 +24,8 @@ class ForexADXSignals:
         print("="*50)
         print("ADX SIGNAL GENERATION")
         print("="*50)
+        print(" Available Fuctions: \n1 adx_trend_strength_signals \n2 adx_direction_signals \n3 adx_di_crossover_signals \n4 adx_slope_signals \n5 adx_comprehensive_signals \n6 generate_all_adx_signals")
+        print("="*50)
         
         self.close_col = close_col
         self.data = data.copy()
