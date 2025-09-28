@@ -190,8 +190,8 @@ class ForexTrendIndicators:
          
     def get_all_trend_indicators(
         self,
-        sma_periods: List[int] = [20, 50, 100],
-        ema_periods: List[int] = [12, 26, 50],
+        sma_periods: List[int] = [10, 20, 50, 100, 200],
+        ema_periods: List[int] = [10, 20, 50, 100, 200],
         macd_fastperiod: int = 12,
         macd_slowperiod: int = 26,
         macd_signalperiod: int = 9,

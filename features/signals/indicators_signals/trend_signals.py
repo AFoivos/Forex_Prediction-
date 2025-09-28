@@ -7,31 +7,40 @@ import warnings
 warnings.filterwarnings('ignore')
 
 class ForexMASignals:
-    
-    """
-    GENERATES TRADING SIGNALS USING ONLY SMA AND EMA INDICATORS
-    
-    """
-    
     def __init__(
         self, 
         data: pd.DataFrame,
         close_col: str = 'close',
     ):
         
+        """
+        Class for EMA/SMA signals
+        
+        Parameters:
+        data (pd.DataFrame): DataFrame containing the data    
+        close_col (str): Column name for close price
+        
+        """
+        
+        print("="*50)
+        print("EMA/SMA SIGNAL GENERATION")
+        print("="*50)   
+        print(" Available Fuctions: \n1 golden_death_cross \n2 ema_crossover \n3 trend_hierarchy \n4 ma_bounce_signals \n5 ma_slope_signals \n6 price_extension_signals \n7 generate_all_signals")
+        print("="*50)
+        
         self.data = data.copy()
         self.close_col = close_col
         
         self.signals = pd.DataFrame(
-            {self.close_col : self.data[self.close_col]}, 
-            index = self.data.index
+            {self.close_col: self.data[self.close_col]}, 
+            index=self.data.index
         )
         
         self._validate_columns()
         
     def _validate_columns(
         self, 
-        columns: List[str] =  None
+        columns: List[str] =  None,
     ):
         
             """
@@ -51,8 +60,8 @@ class ForexMASignals:
             
     def golden_death_cross(
         self, 
-        fast_col=50, 
-        slow_col=200
+        fast_col: int = 50, 
+        slow_col: int = 200
     ):
         
         """
@@ -66,7 +75,7 @@ class ForexMASignals:
         
         """
         
-        columns = [f'trend_sma_{fast_col}', f'trend_sma_{slow_col}']
+        columns = f'trend_sma_{fast_col}', f'trend_sma_{slow_col}'
         self._validate_columns(columns = columns)
  
             # Golden Cross: fast crosses above slow
@@ -173,7 +182,7 @@ class ForexMASignals:
         """
         
         column = f'trend_{ma_type}_{period}'
-        self._validate_columns(columns = column)
+        self._validate_columns(columns = [column])
         
         touch_threshold = self.data[column] * 0.001
         price_touches_ma = abs(self.data[self.close_col] - self.data[column]) <= touch_threshold
@@ -267,7 +276,7 @@ class ForexMASignals:
         """
         
         column = f'trend_{ma_type}_{period}'
-        self._validate_columns(columns = column)
+        self._validate_columns(columns = [column])
         
         # Calculate percentage deviation from MA
         deviation_pct = abs(self.data[self.close_col] - self.data[column]) / self.data[column]
