@@ -91,7 +91,7 @@ class ForexMASignals:
         )
         
         # Create signal for entire series: 1=Golden, 0=Death, NaN=No signal
-        self.signals['golden_death_cross'] = np.select(
+        self.signals['signal_trend_golden_death_cross'] = np.select(
             [golden_condition, death_condition],
             [2, 1],
             default = 0
@@ -124,7 +124,7 @@ class ForexMASignals:
             (self.data[columns[0]].shift(1) >= self.data[columns[1]].shift(1))
         )
         
-        self.signals['ema_crossover'] = np.select(
+        self.signals['signal_ema_crossover'] = np.select(
             [bullish_condition, bearish_condition],
             [2, 1],
             default = 0
@@ -158,7 +158,7 @@ class ForexMASignals:
             elif columns[i] < columns[i+1]:
                 bearish = False
 
-        self.signals['bearish_bullish_hierarchy'] = np.select(
+        self.signals['signal_trend_bearish_bullish_hierarchy'] = np.select(
             [bullish_condition, bearish_condition],
             [2, 1],
             default = 0
@@ -199,7 +199,7 @@ class ForexMASignals:
             (self.data[self.close_col] > self.data[column])
         )
         
-        self.signals['bounce_bearish_bullish'] = np.select(
+        self.signals['signla_trend_bounce_bearish_bullish'] = np.select(
             [bearish_bounce, bullish_bounce],
             [1, 2],
             default = 0
@@ -231,7 +231,7 @@ class ForexMASignals:
         positive_slope = self.data[columns[1]] > 0
         negative_slope = self.data[columns[1]] < 0
         
-        self.signals['slope_direction'] = np.select(
+        self.signals['signal_trend_slope_direction'] = np.select(
             [positive_slope, negative_slope],
             [2, 1],
             default = 0
@@ -241,7 +241,7 @@ class ForexMASignals:
         slope_increasing = self.data[columns[1]] > self.data[columns[1]].shift(1)
         slope_decreasing = self.data[columns[1]] < self.data[columns[1]].shift(1)
 
-        self.signals['slope_acceleration'] = np.select(
+        self.signals['signal_trend_slope_acceleration'] = np.select(
             [slope_increasing, slope_decreasing],
             [2, 1],  
             default = 0  
@@ -252,7 +252,7 @@ class ForexMASignals:
         strong_uptrend = (self.data[self.close_col] > self.data[columns[0]]) & (self.data[columns[1]] > 0)
         strong_downtrend = (self.data[self.close_col] < self.data[columns[0]]) & (self.data[columns[1]] < 0)
 
-        self.signals['strong_trend'] = np.select(
+        self.signals['signal_trend_strong'] = np.select(
             [strong_uptrend, strong_downtrend],
             [2, 1],  
             default = 0  
@@ -293,7 +293,7 @@ class ForexMASignals:
             (deviation_pct > deviation)
         )
         
-        self.signals["overbought_oversold"] = np.select(
+        self.signals["signal_trend_overbought_oversold"] = np.select(
             [overbought, oversold],
             [2, 1],
             default = 0
@@ -318,3 +318,5 @@ class ForexMASignals:
         self.price_extension_signals(20, 'ema', 0.02)
         print(self.signals.tail(10), "\n", self.signals.shape)
         return self.signals
+
+

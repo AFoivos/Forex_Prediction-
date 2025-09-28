@@ -1,4 +1,4 @@
-from .trend_signals import ForexMASignals
+from .trend import ForexMASignals
 
 __all__ = [
     "ForexMASignals"
