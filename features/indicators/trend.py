@@ -117,9 +117,9 @@ class ForexTrendIndicators:
             signalperiod=signalperiod
         )
         
-        self.data['trend_macd_line'] = macd
+        self.data['trend_macd'] = macd
         self.data['trend_macd_signal'] = macd_signal
-        self.data['trend_macd_histogram'] = macd_hist
+        self.data['trend_macd_hist'] = macd_hist
         
         return self.data
     

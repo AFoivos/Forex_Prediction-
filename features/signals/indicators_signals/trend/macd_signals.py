@@ -6,7 +6,156 @@ from typing import Dict, List, Optional, Union
 import warnings
 warnings.filterwarnings('ignore')
 
-class ForexMACDSignals:
-    def __init__():
-        pass
+class ForexMACDSignals:    
+    def __init__(
+        self, 
+        data: pd.DataFrame,
+        close_col: str = 'close',
+    ):
+        """
+        Class for MACD signals
+        
+        Parameters:
+        data (pd.DataFrame): DataFrame containing the data    
+        close_col (str): Column name for close price
+        
+        """
+        
+        print("="*50)
+        print("MACD SIGNAL GENERATION")
+        print("="*50)
+        print(" Available Fuctions: \n1 macd_crossover_signals \n2 macd_histogram_signals \n3 macd_zero_line_signals \n4 generate_all_macd_signals")
+        print("="*50)
+        
+        self.close_col = close_col
+        self.data = data.copy()
+        
+        self.signals = pd.DataFrame(
+            {self.close_col: self.data[self.close_col]},
+            index=self.data.index
+        )
+        
+        self._validate_columns()
+    
+    def _validate_columns(
+        self, 
+        columns: list[str] = None,
+    ): 
+        
+        """
+        Validate that required indicator columns exist
+            
+        """
+        
+        required_cols = [
+            self.close_col,
+        ]
+        
+        if columns is not None:
+            required_cols.extend(columns)
+        
+        missing_cols = [col for col in required_cols if col not in self.data.columns]
+        if missing_cols:
+            raise ValueError(f"Missing columns in DataFrame: {missing_cols}")
+    
+    def macd_crossover_signals(self):
+        
+        """
+        MACD Line vs Signal Line Crossover
+        
+        """
+        
+        columns = ['trend_macd', 'trend_macd_signal']
+        self._validate_columns(columns = columns)
+        
+        bullish_cross = (
+            (self.data['trend_macd'] > self.data['trend_macd_signal']) & 
+            (self.data['trend_macd'].shift(1) <= self.data['trend_macd_signal'].shift(1))
+        )
+        
+        bearish_cross = (
+            (self.data['trend_macd'] < self.data['trend_macd_signal']) & 
+            (self.data['trend_macd'].shift(1) >= self.data['trend_macd_signal'].shift(1))
+        )
+        
+        self.signals['macd_crossover'] = np.select(
+            [bullish_cross, bearish_cross],
+            [2, 1],
+            default=0
+        )
+        
+        return self.signals
+    
+    def macd_histogram_signals(self):
+        
+        """
+        MACD Histogram Signals
+        
+        """
+        
+        column = 'trend_macd_hist'
+        self._validate_columns(columns = [column])
+        
+        # Histogram positive/negative
+        hist_positive = self.data['trend_macd_hist'] > 0
+        hist_negative = self.data['trend_macd_hist'] < 0
+        
+        self.signals['macd_histogram_direction'] = np.select(
+            [hist_positive, hist_negative],
+            [2, 1],
+            default=0
+        )
+        
+        # Histogram momentum
+        hist_increasing = self.data['trend_macd_hist'] > self.data['trend_macd_hist'].shift(1)
+        hist_decreasing = self.data['trend_macd_hist'] < self.data['trend_macd_hist'].shift(1)
+        
+        self.signals['macd_histogram_momentum'] = np.select(
+            [hist_increasing, hist_decreasing],
+            [2, 1],
+            default=0
+        )
+        
+        return self.signals
+    
+    def macd_zero_line_signals(self):
+        
+        """
+        MACD Zero Line Crossover Signals
+        
+        """
+        
+        column = 'trend_macd'
+        self._validate_columns(columns = [column])
+        
+        above_zero = (
+            (self.data['trend_macd'] > 0) & 
+            (self.data['trend_macd'].shift(1) <= 0)
+        )
+        
+        below_zero = (
+            (self.data['trend_macd'] < 0) & 
+            (self.data['trend_macd'].shift(1) >= 0)
+        )
+        
+        self.signals['macd_zero_cross'] = np.select(
+            [above_zero, below_zero],
+            [2, 1],
+            default=0
+        )
+        
+        return self.signals
+    
+    def generate_all_macd_signals(self):
+       
+        """
+        Generate all MACD signals
+       
+        """
+        
+        self.macd_crossover_signals()
+        self.macd_histogram_signals()
+        self.macd_zero_line_signals()
+        print(self.signals.tail(10), "\n", self.signals.shape)
+        return self.signals
        
