@@ -216,4 +216,5 @@ class ForexADXSignals:
         self.adx_di_crossover_signals()
         self.adx_slope_signals()
         self.adx_comprehensive_signals()
+        print(self.signals.tail(10), "\n", self.signals.shape)
         return self.signals
