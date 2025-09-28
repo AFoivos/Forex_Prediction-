@@ -1,5 +1,13 @@
-from .trend import ForexMASignals
+from .trend import (
+    ForexMASignals,
+    ForexMACDSignals,
+    ForexParabolicSARSiganls,
+    ForexADXSignals,
+)
 
 __all__ = [
-    "ForexMASignals"
+    "ForexMASignals",
+    "ForexMACDSignals",
+    "ForexParabolicSARSiganls",
+    "ForexADXSignals",
 ]

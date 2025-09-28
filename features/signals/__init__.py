@@ -1,5 +1,13 @@
-from .indicators_signals import ForexMASignals
+from .indicators_signals import (
+    ForexMASignals,
+    ForexMACDSignals,
+    ForexParabolicSARSiganls,
+    ForexADXSignals,
+)
 
 __all__ = [
-    "ForexMASignals"
+    "ForexMASignals",
+    "ForexMACDSignals",
+    "ForexParabolicSARSiganls",
+    "ForexADXSignals",
 ]

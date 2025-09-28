@@ -1,5 +1,6 @@
 from .custom import ForexCustomFeatures
 from .tsfresh_extractor import ForexTSFeatures
+
 from .indicators import (
     ForexMomentumIndicators,
     ForexTrendIndicators,
@@ -8,6 +9,9 @@ from .indicators import (
 )
 from .signals import (
     ForexMASignals,
+    ForexMACDSignals,
+    ForexParabolicSARSiganls,
+    ForexADXSignals,
 )
 
 __all__ = [
@@ -18,4 +22,7 @@ __all__ = [
     "ForexVolumeIndicators",
     "ForexVolatilityIndicators",
     "ForexMASignals",
+    "ForexMACDSignals",
+    "ForexParabolicSARSiganls",
+    "ForexADXSignals",
 ]

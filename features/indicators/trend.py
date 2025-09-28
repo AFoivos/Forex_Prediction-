@@ -39,7 +39,9 @@ class ForexTrendIndicators:
         self.high_col = high_col
         self.low_col = low_col
         self.close_col = close_col
-        self.available_get_trend_strength = [False,False,False]
+        self._validate_columns()
+    
+    def _validate_columns(self):
         
         #Validate data_cols
         required_cols = [self.open_col, self.high_col, self.low_col, self.close_col]
