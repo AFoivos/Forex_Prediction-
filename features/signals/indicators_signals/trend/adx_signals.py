@@ -44,6 +44,9 @@ class ForexADXSignals:
         
         """
         Validate that required indicator columns exist
+        
+        Parameters:
+        columns (list[str]): List of column names to validate
             
         """
         
@@ -71,6 +74,11 @@ class ForexADXSignals:
         1 = Weak Trend (ADX < 20) 
         0 = Developing Trend (20 <= ADX <= 25)
         
+        Parameters:
+        strong_threshold (int): Threshold for strong trend (default: 25)
+        weak_threshold (int): Threshold for weak trend (default: 20)
+        column (str): Column name for ADX
+        
         """
         
         self._validate_columns([column]) # Validate the ADX column
@@ -97,6 +105,9 @@ class ForexADXSignals:
         1 = Bearish (-DI > +DI)
         0 = Neutral
         
+        Parameters:
+        columns (list[str]): List of column names for +DI and -DI
+        
         """
         
         self._validate_columns(columns)
@@ -122,6 +133,9 @@ class ForexADXSignals:
         2 = +DI crosses above -DI (Bullish)
         1 = -DI crosses above +DI (Bearish)
         0 = No crossover
+        
+        Parameters:
+        columns (list[str]): List of column names for +DI and -DI
         
         """
         
@@ -156,6 +170,9 @@ class ForexADXSignals:
         1 = ADX decreasing (trend weakening)
         0 = ADX flat
         
+        Parameters:
+        column (str): Column name for ADX slope
+        
         """
         
         self._validate_columns([column])
@@ -174,7 +191,7 @@ class ForexADXSignals:
     def adx_comprehensive_signals(
         self,
         strong_threshold: int =25,
-        columns: list[str] = ['trend_adx', 'trend_adx_pos', 'trend_adx_neg'],
+        columns: list[str] = ['trend_adx', 'trend_plus_di', 'trend_minus_di'],
     ):
         
         """
@@ -182,6 +199,9 @@ class ForexADXSignals:
         2 = Strong Bullish Trend (ADX > 25 & +DI > -DI)
         1 = Strong Bearish Trend (ADX > 25 & -DI > +DI)
         0 = Weak/No clear trend
+        
+        Parameters:
+        columns (list[str]): List of column names for ADX, +DI, and -DI
         
         """
         

@@ -190,6 +190,7 @@ class ForexTrendIndicators:
         )
         
         self.data['trend_parabolic_sar'] = sar
+        self.data['trend_parabolic_sar_slope'] = self.data['trend_parabolic_sar'].diff()
                    
         return self.data     
          

@@ -44,6 +44,9 @@ class ForexMACDSignals:
         
         """
         Validate that required indicator columns exist
+        
+        Parameters:
+        columns (list[str]): List of column names to validate
             
         """
         
@@ -65,6 +68,12 @@ class ForexMACDSignals:
         
         """
         MACD Line vs Signal Line Crossover
+        2 = MACD crosses above Signal
+        1 = MACD crosses below Signal
+        0 = No crossover
+        
+        Parameters:
+        columns (list[str]): List of column names for MACD and Signal
         
         """
         
@@ -95,6 +104,12 @@ class ForexMACDSignals:
         
         """
         MACD Histogram Signals
+        2 = Histogram is positive and increasing (bullish momentum)
+        1 = Histogram is negative and decreasing (bearish momentum)
+        0 = No clear momentum
+        
+        Parameters:
+        column (str): Column name for MACD histogram
         
         """
 
@@ -129,6 +144,12 @@ class ForexMACDSignals:
         
         """
         MACD Zero Line Crossover Signals
+        2 = MACD crosses above Zero Line (bullish)
+        1 = MACD crosses below Zero Line (bearish)
+        0 = No crossover
+        
+        Parameters:
+        column (str): Column name for MACD
         
         """
         
