@@ -161,6 +161,9 @@ class ForexTrendIndicators:
         self.data['trend_adx'] = adx
         self.data['trend_plus_di'] = plus_di
         self.data['trend_minus_di'] = minus_di
+        
+        # ADX Slope
+        self.data['trend_adx_slope'] = self.data['trend_adx'].diff()
                 
         return self.data
         
