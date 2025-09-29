@@ -12,6 +12,7 @@ class ForexRSISignals:
         data: pd.DataFrame,
         close_col: str = 'close',
     ):
+        
         """
         Class for RSI signals
         
@@ -41,6 +42,7 @@ class ForexRSISignals:
         self, 
         columns: list[str] = None,
     ):  
+        
         """
         Validate that required indicator columns exist
         
@@ -98,6 +100,7 @@ class ForexRSISignals:
         self,
         columns: List[str] = ['rsi_14', 'rsi_21', 'rsi_28']
     ):
+        
         """
         RSI Centerline (50) Crossover Signals
         2 = Bullish (RSI crosses above 50)
@@ -280,6 +283,7 @@ class ForexRSISignals:
         oversold: int = 30,
         overbought: int = 70
     ):
+        
         """
         RSI Trend Reversal Signals (Exit from overbought/oversold)
         2 = Bullish Reversal (RSI exits oversold <30 to >30)

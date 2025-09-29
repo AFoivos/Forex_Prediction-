@@ -74,8 +74,6 @@ class ForexMomentumIndicators:
         fastk_period: int = 14,
         slowk_period: int = 3,
         slowd_period: int = 3,
-        overbought: int = 80,
-        oversold: int = 20
     ):
         
         """
@@ -101,13 +99,10 @@ class ForexMomentumIndicators:
             slowd_matype = 0
         )
         
-        stochastic_columns = [
-            'stoch_slowk', 'stoch_slowd', 'stoch_crossover',
-            'stoch_overbought', 'stoch_oversold', 'stoch_signal'
-        ]
-        
         self.data['momen_stoch_slowk'] = slowk
         self.data['momen_stoch_slowd'] = slowd
+        self.data['momen_stoch_slowk_slope'] = self.data['momen_stoch_slowk'].diff()
+        self.data['momen_stoch_slowd_slope'] = self.data['momen_stoch_slowd'].diff()
                 
         return self.data
     
