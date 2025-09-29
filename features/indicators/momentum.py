@@ -63,11 +63,9 @@ class ForexMomentumIndicators:
         """
                 
         for period in periods:
-            col_name = f'momen_rsi_{period}'
-            self.data[col_name] = talib.RSI(self.data[self.close_col], timeperiod=period)
-            
-            # RSI divergence
-            self.data[f'{col_name}_trend'] = self.data[col_name].diff()
+            self.data[f'rsi_{period}'] = talib.RSI(self.data[self.close_col], timeperiod=period)
+            #RSI Slope
+            self.data[f'rsi_{period}_slope'] = self.data[f'rsi_{period}'].diff()
         
         return self.data
     

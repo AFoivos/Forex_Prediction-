@@ -5,9 +5,14 @@ from .trend import (
     ForexADXSignals,
 )
 
+from .momentum import(
+    ForexRSISignals,
+)
+
 __all__ = [
     "ForexMASignals",
     "ForexMACDSignals",
     "ForexParabolicSARSiganls",
     "ForexADXSignals",
+    "ForexRSISignals",
 ]
