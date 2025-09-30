@@ -43,6 +43,8 @@ class ForexCustomIndicators:
         self.close_col = close_col
         self.volume_col = volume_col
         
+        self.parameters = {}
+        
         self.custom_data = pd.DataFrame(
             {self.close_col: self.data[self.close_col]},
             index=self.data.index
@@ -78,7 +80,7 @@ class ForexCustomIndicators:
             raise ValueError(f"Missing columns in DataFrame: {missing_cols}")
     
     def _is_nested_list(
-        self,
+        self, 
         lst
     ):
         
@@ -90,7 +92,10 @@ class ForexCustomIndicators:
         
         """
         
-        return all(isinstance(item, list) for item in lst)
+        if not all(isinstance(item, list) for item in lst):
+            return [lst]
+        else:
+            return lst
     
     def add_returns_indicators(
         self, 
@@ -104,6 +109,8 @@ class ForexCustomIndicators:
         periods (List[int]): List of periods for returns calculation
         
         """
+        
+        self.parameters['ret_params'] = periods
                 
         for period in periods:
             # Simple returns
@@ -144,6 +151,9 @@ class ForexCustomIndicators:
         periods (List[int]): List of periods for volatility calculation
         
         """
+        
+        self.parameters['volatility_mesures_params'] = periods
+        
         if 'log_ret_1' not in self.custom_data.columns:
             self.add_returns_indicators(periods=[1])
         
@@ -263,7 +273,7 @@ class ForexCustomIndicators:
         Advanced Time-based indicators
         
         """
-        
+                
         time_df = pd.DataFrame(index=self.data.index)
         
         if 'day_of_week' not in self.custom_data.columns or 'hour' not in self.custom_data.columns:
@@ -303,7 +313,7 @@ class ForexCustomIndicators:
         Custom Derived indicators
         
         """
-                
+                        
         # Price momentum features
         if 'ret_5' not in self.custom_data.columns:
             self.add_returns_indicators(periods = [5])
@@ -373,4 +383,4 @@ class ForexCustomIndicators:
         print(f'{count_removed_rows} rows removed')
         print('='*50)
         
-        return self.custom_data
+        return self.custom_data, self.parameters

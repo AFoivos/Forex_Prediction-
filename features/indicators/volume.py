@@ -43,6 +43,8 @@ class ForexVolumeIndicators:
         self.close_col = close_col
         self.volume_col = volume_col
         
+        self.parameters = {}
+        
         self.volume_data = pd.DataFrame(
             {self.close_col: self.data[self.close_col]},
             index=self.data.index
@@ -78,7 +80,7 @@ class ForexVolumeIndicators:
             raise ValueError(f"Missing columns in DataFrame: {missing_cols}")
     
     def _is_nested_list(
-        self,
+        self, 
         lst
     ):
         
@@ -90,7 +92,10 @@ class ForexVolumeIndicators:
         
         """
         
-        return all(isinstance(item, list) for item in lst)
+        if not all(isinstance(item, list) for item in lst):
+            return [lst]
+        else:
+            return lst
     
     def add_obv(self):
         
@@ -98,6 +103,8 @@ class ForexVolumeIndicators:
         On-Balance Volume
         
         """
+        
+        self.parameters['obv_params'] = None
         
         # Calculate OBV
         self.volume_data['obv'] = talib.OBV(
@@ -125,6 +132,8 @@ class ForexVolumeIndicators:
         
         """
         
+        self.parameters['volume_sma_params'] = periods
+        
         for period in periods:
             col_name = f'volume_sma_{period}'
             self.volume_data[col_name] = self.data[self.volume_col].rolling(window=period).mean()
@@ -146,6 +155,8 @@ class ForexVolumeIndicators:
         periods (List[int]): List of periods for Volume ROC
         
         """
+        
+        self.parameters['volume_roc_params'] = periods
             
         for period in periods:
             col_name = f'volume_roc_{period}'
@@ -188,5 +199,7 @@ class ForexVolumeIndicators:
         print(f'{count_removed_rows} rows removed')
         print('='*50)
         
-        return self.volume_data
+        return self.volume_data, self.parameters
+        
+        
     

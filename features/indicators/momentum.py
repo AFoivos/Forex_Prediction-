@@ -43,6 +43,8 @@ class ForexMomentumIndicators:
         self.close_col = close_col
         self.volume_col = volume_col
         
+        self.parameters = {}
+        
         self.momentum_data = pd.DataFrame(
             {self.close_col: self.data[self.close_col]},
             index=self.data.index
@@ -78,7 +80,7 @@ class ForexMomentumIndicators:
             raise ValueError(f"Missing columns in DataFrame: {missing_cols}")
     
     def _is_nested_list(
-        self,
+        self, 
         lst
     ):
         
@@ -90,7 +92,10 @@ class ForexMomentumIndicators:
         
         """
         
-        return all(isinstance(item, list) for item in lst)
+        if not all(isinstance(item, list) for item in lst):
+            return [lst]
+        else:
+            return lst
     
     def add_rsi(
         self, 
@@ -104,6 +109,8 @@ class ForexMomentumIndicators:
         periods (List[int]): List of periods for RSI
         
         """
+        
+        self.parameters['rsi_params'] = periods
          
         for period in periods:
             col_name = f'rsi_{period}'
@@ -132,39 +139,14 @@ class ForexMomentumIndicators:
         
         """
         
-        is_nested = self._is_nested_list(fk_sk_sd_periods)
+        self.parameters['stochastic_params'] = fk_sk_sd_periods
         
-        if is_nested:
-            for lst in fk_sk_sd_periods:
-                fast_k = lst[0]
-                slow_k = lst[1]
-                slow_d = lst[2]
-                
-                slowk, slowd = talib.STOCH(
-                    self.data[self.high_col],
-                    self.data[self.low_col],
-                    self.data[self.close_col],
-                    fastk_period = fast_k,
-                    slowk_period = slow_k,
-                    slowk_matype = 0,
-                    slowd_period = slow_d,
-                    slowd_matype = 0
-                )
-                
-                col_namek = f'stoch_slowk_{slow_k}'
-                col_named = f'stoch_slowd_{slow_d}'
-                
-                # Stochastic
-                self.momentum_data[col_namek] = slowk
-                self.momentum_data[col_named] = slowd
-                
-                # Stochastic slope
-                self.momentum_data[f'{col_namek}_slope'] = self.momentum_data[col_namek].diff()
-                self.momentum_data[f'{col_named}_slope'] = self.momentum_data[col_named].diff()
-        else:
-            fast_k = fk_sk_sd_periods[0]
-            slow_k = fk_sk_sd_periods[1]
-            slow_d = fk_sk_sd_periods[2]
+        fk_sk_sd_periods = self._is_nested_list(fk_sk_sd_periods)
+        
+        for lst in fk_sk_sd_periods:
+            fast_k = lst[0]
+            slow_k = lst[1]
+            slow_d = lst[2]
             
             slowk, slowd = talib.STOCH(
                 self.data[self.high_col],
@@ -203,6 +185,8 @@ class ForexMomentumIndicators:
         
         """
         
+        self.parameters['williams_r_params'] = periods
+        
         for period in periods:
             willr = talib.WILLR(
                 self.data[self.high_col],
@@ -234,6 +218,8 @@ class ForexMomentumIndicators:
         
         """
         
+        self.parameters['cci_params'] = periods
+        
         for period in periods:
             cci = talib.CCI(
                 self.data[self.high_col],
@@ -264,6 +250,8 @@ class ForexMomentumIndicators:
         periods (List[int]): List of periods for Momentum
         
         """
+        
+        self.parameters['momentum_params'] = periods
         
         for period in periods:
             
@@ -319,4 +307,4 @@ class ForexMomentumIndicators:
         print(f'{count_removed_rows} rows removed')
         print('='*50)
         
-        return self.momentum_data
+        return self.momentum_data, self.parameters

@@ -1,7 +1,7 @@
 from .trend import (
     ForexMASignals,
     ForexMACDSignals,
-    ForexParabolicSARSiganls,
+    ForexParabolicSARSignals,
     ForexADXSignals,
 )
 

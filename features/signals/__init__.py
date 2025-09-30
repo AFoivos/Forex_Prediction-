@@ -1,7 +1,7 @@
 from .indicators_signals import (
     ForexMASignals,
     ForexMACDSignals,
-    ForexParabolicSARSiganls,
+    ForexParabolicSARSignals,
     ForexADXSignals,
     ForexRSISignals,
     ForexStochasticSignals,
@@ -10,7 +10,7 @@ from .indicators_signals import (
 __all__ = [
     "ForexMASignals",
     "ForexMACDSignals",
-    "ForexParabolicSARSiganls",
+    "ForexParabolicSARSignals",
     "ForexADXSignals",
     "ForexRSISignals",
     "ForexStochasticSignals",

@@ -42,6 +42,8 @@ class ForexTrendIndicators:
         self.close_col = close_col
         self.volume_col = volume_col
         
+        self.parameters = {}
+        
         self.trend_data = pd.DataFrame(
             {self.close_col: self.data[self.close_col]},
             index=self.data.index
@@ -78,7 +80,7 @@ class ForexTrendIndicators:
             raise ValueError(f"Missing columns in DataFrame: {missing_cols}")
         
     def _is_nested_list(
-        self,
+        self, 
         lst
     ):
         
@@ -90,7 +92,10 @@ class ForexTrendIndicators:
         
         """
         
-        return all(isinstance(item, list) for item in lst)
+        if not all(isinstance(item, list) for item in lst):
+            return [lst]
+        else:
+            return lst
         
     def add_sma(
         self, 
@@ -104,6 +109,8 @@ class ForexTrendIndicators:
         periods (List[int]): List of periods for SMA
         
         """ 
+        
+        self.parameters['sma_params'] = periods
         
         for period in periods:
             col_name = f"sma_{period}"
@@ -132,6 +139,8 @@ class ForexTrendIndicators:
         
         """
         
+        self.parameters['ema_params'] = periods
+        
         for period in periods:
             col_name = f'ema_{period}'
             
@@ -159,45 +168,26 @@ class ForexTrendIndicators:
         
         """
         
-        is_nested = self._is_nested_list(fast_slow_signal_periods)
+        self.parameters['macd_params'] = fast_slow_signal_periods
         
-        if is_nested:
-            for lst in fast_slow_signal_periods:
-                fast = lst[0]
-                slow = lst[1]
-                signal = lst[2]
-                
-                macd, macd_signal, macd_hist = talib.MACD(
-                self.data[self.close_col],
-                fastperiod=fast,
-                slowperiod=slow,
-                signalperiod=lst[2]
-            )
-
-                # MACD
-                self.trend_data[f'macd_{fast}'] = macd
-                self.trend_data[f'macd_signal_{signal}'] = macd_signal
-                self.trend_data[f'macd_hist_fast_{fast}_slow{slow}_sig{signal}'] = macd_hist
-                
-                # MACD slopes
-                self.trend_data[f"macd_{fast}_slope"] = macd.diff()
-                self.trend_data[f"macd_signal_{signal}_signal_slope"] = macd_signal.diff()
-        else:
-            fast = fast_slow_signal_periods[0]
-            slow = fast_slow_signal_periods[1]
-            signal = fast_slow_signal_periods[2]
+        fast_slow_signal_periods = self._is_nested_list(fast_slow_signal_periods)
+        
+        for lst in fast_slow_signal_periods:
+            fast = lst[0]
+            slow = lst[1]
+            signal = lst[2]
             
             macd, macd_signal, macd_hist = talib.MACD(
-                self.data[self.close_col],
-                fastperiod=fast,
-                slowperiod=slow,
-                signalperiod=signal
-            )
-            
+            self.data[self.close_col],
+            fastperiod=fast,
+            slowperiod=slow,
+            signalperiod=lst[2]
+        )
+
             # MACD
             self.trend_data[f'macd_{fast}'] = macd
             self.trend_data[f'macd_signal_{signal}'] = macd_signal
-            self.trend_data[f'macd_hist_fast_{fast}_slow{slow}_{signal}'] = macd_hist
+            self.trend_data[f'macd_hist_fast_{fast}_slow{slow}_sig{signal}'] = macd_hist
             
             # MACD slopes
             self.trend_data[f"macd_{fast}_slope"] = macd.diff()
@@ -217,7 +207,9 @@ class ForexTrendIndicators:
         periods (List[int]): List of periods for ADX
         
         """  
-
+        
+        self.parameters['adx_params'] = periods
+       
         for period in periods:
             # Average Directional Movement Index
             adx = talib.ADX(
@@ -259,7 +251,7 @@ class ForexTrendIndicators:
         
     def add_parabolic_sar(
         self, 
-        acc_max: List[int] = [0.02, 0.2],
+        acc_max: List[float] = [0.02, 0.2],
     ):
         
         """
@@ -270,32 +262,19 @@ class ForexTrendIndicators:
         
         """
         
-        is_nested = self._is_nested_list(acc_max)
+        self.parameters['sar_params'] = acc_max
         
-        if is_nested:
-            for lst in acc_max:
-                sar = talib.SAR(
-                    self.data[self.high_col],
-                    self.data[self.low_col],
-                    acceleration=lst[0],
-                    maximum=lst[1]
-                )
-                col_name = f'sar_{lst[0]}_{lst[1]}'
-
-                # Parabolic sar
-                self.trend_data[col_name] = sar
-                
-                # Parabolic sar slope
-                self.trend_data[f"{col_name}_slope"] = self.trend_data[col_name].diff()
-        else:        
+        acc_max = self._is_nested_list(acc_max)
+        
+        for lst in acc_max:
             sar = talib.SAR(
                 self.data[self.high_col],
                 self.data[self.low_col],
-                acceleration=acc_max[0],
-                maximum=acc_max[1]
+                acceleration=lst[0],
+                maximum=lst[1]
             )
-            col_name = f'sar_{acc_max[0]}_{acc_max[1]}'
-            
+            col_name = f'sar_{lst[0]}_{lst[1]}'
+
             # Parabolic sar
             self.trend_data[col_name] = sar
             
@@ -342,5 +321,5 @@ class ForexTrendIndicators:
         print(f'{count_removed_rows} rows removed')
         print('='*50)
         
-        return self.trend_data
+        return self.trend_data, self.parameters
         
