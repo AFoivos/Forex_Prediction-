@@ -33,7 +33,7 @@ class ForexVolumeIndicators:
         print("="*50)
         print("VOLUME INDICATORS")
         print("="*50)
-        print(" Available Fuctions \n1 add_obv \n2 add_volume_sma \n3 add_volume_roc \n4 get_all_volume_indicators")
+        print(" Available Fuctions \n1 add_obv \n2 add_volume_sma \n3 add_volume_roc \n4 generate_all_volume_indicators")
         print("="*50)
         
         self.data = data.copy()
@@ -43,11 +43,54 @@ class ForexVolumeIndicators:
         self.close_col = close_col
         self.volume_col = volume_col
         
-        # Validate data_cols
-        required_cols = [self.open_col, self.high_col, self.low_col, self.close_col, self.volume_col]
+        self.volume_data = pd.DataFrame(
+            {self.close_col: self.data[self.close_col]},
+            index=self.data.index
+        )
+        
+        self._validate_columns()
+        
+    def _validate_columns(
+        self, 
+        columns: list[str] = None,
+    ):  
+        """
+        Validate that required indicator columns exist
+        
+        Parameters:
+        columns (list[str]): List of column names to validate
+            
+        """
+        
+        required_cols = [
+            self.close_col,
+            self.high_col,
+            self.low_col,
+            self.open_col,
+            self.volume_col
+        ]
+        
+        if columns is not None:
+            required_cols.extend(columns)
+        
         missing_cols = [col for col in required_cols if col not in self.data.columns]
         if missing_cols:
             raise ValueError(f"Missing columns in DataFrame: {missing_cols}")
+    
+    def _is_nested_list(
+        self,
+        lst
+    ):
+        
+        """
+        Check if a list is nested or not
+        
+        Parameters:
+        lst (list): List to check
+        
+        """
+        
+        return all(isinstance(item, list) for item in lst)
     
     def add_obv(self):
         
@@ -57,14 +100,17 @@ class ForexVolumeIndicators:
         """
         
         # Calculate OBV
-        self.data['volu_obv'] = talib.OBV(self.data[self.close_col], self.data[self.volume_col])
+        self.volume_data['obv'] = talib.OBV(
+            self.data[self.close_col], 
+            self.data[self.volume_col]
+        )
            
         # OBV to moving average ratio
         if len(self.data) > 20:
-            obv_ma = self.data['volu_obv'].rolling(window=20).mean()
-            self.data['volu_obv_ma_ratio'] = self.data['volu_obv'] / obv_ma
+            obv_ma = self.volume_data['obv'].rolling(window=20).mean()
+            self.volume_data['obv_ma_ratio'] = self.volume_data['obv'] / obv_ma
         
-        return self.data
+        return self.volume_data
     
     def add_volume_sma(
         self, 
@@ -80,13 +126,13 @@ class ForexVolumeIndicators:
         """
         
         for period in periods:
-            col_name = f'volu_volume_sma_{period}'
-            self.data[col_name] = self.data[self.volume_col].rolling(window=period).mean()
+            col_name = f'volume_sma_{period}'
+            self.volume_data[col_name] = self.data[self.volume_col].rolling(window=period).mean()
             
             # Volume SMA ratios and signals
-            self.data[f'{col_name}_ratio'] = self.data[self.volume_col] / self.data[col_name]
+            self.volume_data[f'{col_name}_ratio'] = self.data[self.volume_col] / self.volume_data[col_name]
             
-        return self.data
+        return self.volume_data
     
     def add_volume_roc(
         self,
@@ -102,20 +148,20 @@ class ForexVolumeIndicators:
         """
             
         for period in periods:
-            col_name = f'volu_volume_roc_{period}'
+            col_name = f'volume_roc_{period}'
             
             # Calculate Volume ROC
-            self.data[col_name] = (
+            self.volume_data[col_name] = (
                 (self.data[self.volume_col] - self.data[self.volume_col].shift(period)) / 
                 self.data[self.volume_col].shift(period)
             ) * 100
         
-        return self.data
+        return self.volume_data
     
-    def get_all_volume_indicators(
+    def generate_all_volume_indicators(
         self,
-        volume_sma_periods: List[int] = [5, 10, 20, 50],
-        volume_roc_periods: List[int] = [5, 10, 14, 21],
+        sma_periods: List[int] = [5, 10, 20, 50],
+        roc_periods: List[int] = [5, 10, 14, 21],
     ):
         
         """
@@ -128,8 +174,19 @@ class ForexVolumeIndicators:
         """
         
         self.add_obv()
-        self.add_volume_sma(volume_sma_periods)
-        self.add_volume_roc(volume_roc_periods)
-
-        return self.data
+        self.add_volume_sma(periods = sma_periods)
+        self.add_volume_roc(periods = roc_periods)
+        
+        count_removed_rows = self.data.shape[0] - self.volume_data.shape[0]
+        
+        print('='*50)
+        print('Data Info')
+        print(self.volume_data.info())
+        print('='*50)
+        print(f'Shape of data {self.volume_data.shape}')
+        print('='*50)
+        print(f'{count_removed_rows} rows removed')
+        print('='*50)
+        
+        return self.volume_data
     

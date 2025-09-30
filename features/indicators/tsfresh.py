@@ -10,7 +10,7 @@ from typing import List, Dict, Optional, Union
 import warnings
 warnings.filterwarnings('ignore')
 
-class ForexTSFeatures:
+class ForexTSIndicators:
     def __init__(
         self, 
         data: pd.DataFrame,
@@ -119,7 +119,7 @@ class ForexTSFeatures:
         
         return self.long_format_data
     
-    def extract_ts_features(
+    def extract_ts_indicators(
         self, 
         n_jobs: int = 1,
         feature_settings: Optional[Dict] = None,
@@ -169,7 +169,7 @@ class ForexTSFeatures:
         
         return self.extracted_features
     
-    def select_relevant_features(
+    def select_relevant_indicators(
         self, 
         fdr_level: float = 0.05, 
         ml_task: str = 'regression',
@@ -245,7 +245,7 @@ class ForexTSFeatures:
         
         return self.selected_features
     
-    def get_feature_importance(
+    def get_indicators_importance(
         self,
         top_n: int = 20
     ):
@@ -326,12 +326,13 @@ class ForexTSFeatures:
                 
         return X_train, X_test, y_train, y_test
     
-    def get_all_features(
+    def generate_all_indicators(
         self,
         feature_columns: Optional[List[str]] = None,
         window_size: int = 50,
         test_size: float = 0.2,
         scale_features: bool = True,
+        train_test = False
     ):
         
         """
@@ -349,19 +350,22 @@ class ForexTSFeatures:
         self.prepare_ts_data(feature_columns=feature_columns, window_size=window_size)
         
         # Step 2: Extract features
-        self.extract_ts_features()
+        self.extract_ts_indicators()
         
         # Step 3: Select relevant features
-        self.select_relevant_features()
+        self.select_relevant_indicators()
         
         # Step 4: Get feature importance
-        self.get_feature_importance()
+        self.get_indicators_importance()
         
-        # Step 5: Train/test split
-        X_train, X_test, y_train, y_test = self.get_train_test_split(
-            test_size=test_size, 
-            scale_features=scale_features
-        )
-        
-        return X_train, X_test, y_train, y_test
+        if train_test:
+            # Step 5: Train/test split
+            X_train, X_test, y_train, y_test = self.get_train_test_split(
+                test_size=test_size, 
+                scale_features=scale_features
+            )
+            
+            return X_train, X_test, y_train, y_test
+        else:
+            return self.selected_features
 

@@ -33,7 +33,7 @@ class ForexVolatilityIndicators:
         print("="*50)
         print("VOLATILITY INDICATORS")
         print("="*50)
-        print(" Available Fuctions \n1 add_atr \n2 add_bollinger_bands \n3 add_keltner_channels \n4 add_standard_deviation  \n5 get_all_volatility_indicators")
+        print(" Available Fuctions \n1 add_atr \n2 add_bollinger_bands \n3 add_keltner_channels \n4 add_standard_deviation  \n5 generate_all_volatility_indicators")
         print("="*50)
         
         self.data = data.copy()
@@ -43,15 +43,59 @@ class ForexVolatilityIndicators:
         self.close_col = close_col
         self.volume_col = volume_col
         
-        # Validate data_cols
-        required_cols = [self.open_col, self.high_col, self.low_col, self.close_col]
+        self.volatility_data = pd.DataFrame(
+            {self.close_col: self.data[self.close_col]},
+            index=self.data.index
+        )
+        
+        self._validate_columns()
+        
+    def _validate_columns(
+        self, 
+        columns: list[str] = None,
+    ):  
+        
+        """
+        Validate that required indicator columns exist
+        
+        Parameters:
+        columns (list[str]): List of column names to validate
+            
+        """
+        
+        required_cols = [
+            self.close_col,
+            self.high_col,
+            self.low_col,
+            self.open_col,
+            self.volume_col
+        ]
+        
+        if columns is not None:
+            required_cols.extend(columns)
+            
         missing_cols = [col for col in required_cols if col not in self.data.columns]
         if missing_cols:
             raise ValueError(f"Missing columns in DataFrame: {missing_cols}")
+        
+    def _is_nested_list(
+        self,
+        lst
+    ):
+        
+        """
+        Check if a list is nested or not
+        
+        Parameters:
+        lst (list): List to check
+        
+        """
+        
+        return all(isinstance(item, list) for item in lst)
     
     def add_atr(
         self, 
-        periods: List[int] = [14, 21, 28],
+        periods: List[int] = [10, 14, 21, 28],
     ):
         
         """
@@ -63,86 +107,126 @@ class ForexVolatilityIndicators:
         """
 
         for period in periods:
-            col_name = f'vol_atr_{period}'
-            self.data[col_name] = talib.ATR(
+            col_name = f'atr_{period}'
+            
+            self.volatility_data[col_name] = talib.ATR(
                 self.data[self.high_col],
                 self.data[self.low_col],
                 self.data[self.close_col],
                 timeperiod=period
             )
 
-        return self.data
+        return self.volatility_data
     
     def add_bollinger_bands(
         self,
-        periods: List[int] = [20, 50],
-        nbdevup: float = 2.0,
-        nbdevdn: float = 2.0,
+        period_nbdevup_nbdevdn: List = [20, 2.0, 2.0],
     ):
 
         """
         Bollinger Bands
         
         Parameters:
-        periods (List[int]): List of periods for Bollinger Bands
-        nbdevup (float): Number of standard deviations for upper band
-        nbdevdn (float): Number of standard deviations for lower band
+        period_nbdevup_nbdevdn (List[int, float, float]): List nested or not, [period, nbdevup, nbdevdn]
         
         """
         
-        for period in periods:
+        is_nested = self._is_nested_list(period_nbdevup_nbdevdn)
+        
+        if is_nested:
+            for lst in period_nbdevup_nbdevdn:
+                timeperiod = lst[0]
+                nbdevup = lst[1]
+                nbdevdn = lst[2]
+                
+                upper, middle, lower = talib.BBANDS(
+                    self.data[self.close_col],
+                    timeperiod=timeperiod,
+                    nbdevup=nbdevup,
+                    nbdevdn=nbdevdn
+                )
+                
+                col_name = f'bb_{timeperiod}'
+                
+                self.volatility_data[f'{col_name}_upper'] = upper
+                self.volatility_data[f'{col_name}_middle'] = middle
+                self.volatility_data[f'{col_name}_lower'] = lower
+        else:   
+            timeperiod = period_nbdevup_nbdevdn[0]
+            nbdevup = period_nbdevup_nbdevdn[1]
+            nbdevdn = period_nbdevup_nbdevdn[2]
             
             upper, middle, lower = talib.BBANDS(
                 self.data[self.close_col],
-                timeperiod=period,
+                timeperiod=timeperiod,
                 nbdevup=nbdevup,
-                nbdevdn=nbdevdn
-            )
+                nbdevdn=nbdevdn 
+            )   
             
-            self.data[f'vol_bb_upper_{period}'] = upper
-            self.data[f'vol_bb_middle_{period}'] = middle
-            self.data[f'vol_bb_lower_{period}'] = lower
+            col_name = f'bb_{timeperiod}'
+            
+            self.volatility_data[f'{col_name}_upper'] = upper
+            self.volatility_data[f'{col_name}_middle'] = middle
+            self.volatility_data[f'{col_name}_lower'] = lower
         
-        return self.data
+        return self.volatility_data
     
     def add_keltner_channels(
         self,
-        ema_period: int = 20,
-        atr_period: int = 10,
-        atr_multiplier: float = 2.0,
+        ema_atr_multiplier: List = [20, 10, 2.0],
     ):
 
         """
-        Keltner Channels
+        keltner Channels
         
         Parameters:
-        ema_period (int): Period for EMA
-        atr_period (int): Period for ATR
-        atr_multiplier (float): Multiplier for ATR
+        ema_atr_multiplier (List): List nested or not, [EMA period, ATR period, ATR multiplier]
         
         """
         
-        # Calculate EMA middle line
-        ema = talib.EMA(self.data[self.close_col], timeperiod=ema_period)
+        is_nested = self._is_nested_list(ema_atr_multiplier)
         
-        # Calculate ATR for channel width
-        atr = talib.ATR(
-            self.data[self.high_col],
-            self.data[self.low_col],
-            self.data[self.close_col],
-            timeperiod=atr_period
-        )
-        
-        keltner_columns = [
-            'keltner_upper', 'keltner_middle', 'keltner_lower',
-            'keltner_width', 'keltner_pct_b', 'keltner_signal'
-        ]
-        
-        self.data['vol_keltner_middle'] = ema
-        self.data['vol_keltner_upper'] = ema + (atr * atr_multiplier)
-        self.data['vol_keltner_lower'] = ema - (atr * atr_multiplier)
+        if is_nested:
+            for lst in ema_atr_multiplier:
+                ema_col = f'ema_{lst[0]}'
+                atr_col = f'atr_{lst[1]}'
+                multiplier = lst[2]
                 
-        return self.data
+                if ema_col not in self.data.columns:            
+                    self.data[ema_col] = talib.EMA(
+                        self.data[self.close_col], 
+                        timeperiod=lst[0]
+                    )
+
+                if atr_col not in self.volatility_data.columns:
+                    self.add_atr(periods=[lst[1]])
+                
+                col_name = f'keltner_{ema_col}_{atr_col}'
+
+                self.volatility_data[f'{col_name}_middle'] = self.data[ema_col]
+                self.volatility_data[f'{col_name}_upper'] = self.data[ema_col] + (self.volatility_data[atr_col] * multiplier) 
+                self.volatility_data[f'{col_name}_lower'] = self.data[ema_col] - (self.volatility_data[atr_col] * multiplier)
+        else:
+            
+            ema_col = f'ema_{ema_atr_multiplier[0]}'
+            atr_col = f'atr_{ema_atr_multiplier[1]}'
+            multiplier = ema_atr_multiplier[2]
+            if ema_col not in self.data.columns:            
+                self.data[ema_col] = talib.EMA(
+                    self.data[self.close_col], 
+                    timeperiod=ema_atr_multiplier[0]
+                )
+                    
+            if atr_col not in self.volatility_data.columns:
+                    self.add_atr(periods=[ema_atr_multiplier[1]])
+            
+            col_name = f'keltner_{ema_col}_{atr_col}'
+            
+            self.volatility_data[f'{col_name}_middle'] = self.data[ema_col]
+            self.volatility_data[f'{col_name}_upper'] = self.data[ema_col] + (self.volatility_data[atr_col] * multiplier) 
+            self.volatility_data[f'{col_name}_lower'] = self.data[ema_col] - (self.volatility_data[atr_col] * multiplier)
+                
+        return self.volatility_data
     
     def add_standard_deviation(
         self, 
@@ -159,21 +243,20 @@ class ForexVolatilityIndicators:
         
         for period in periods:
             col_name = f'vol_std_dev_{period}'
-            self.data[col_name] = talib.STDDEV(
+            
+            self.volatility_data[col_name] = talib.STDDEV(
                 self.data[self.close_col],
                 timeperiod=period,
                 nbdev=1
             )
         
-        return self.data
+        return self.volatility_data
     
-    def get_all_volatility_indicators(
+    def generate_all_volatility_indicators(
         self,
         atr_periods: List[int] = [14, 21, 28],
-        bb_periods: List[int] = [20, 50],
-        keltner_ema_period: int = 20,
-        keltner_atr_period: int = 10,
-        keltner_multiplier: float = 2.0,
+        bb_period_nbdevup_nbdevdn: List = [20, 2.0, 2.0],
+        kethlner_ema_atr_multiplier: List = [20, 10, 2.0],
         std_periods: List[int] = [20, 50, 100],
     ):
         
@@ -182,17 +265,26 @@ class ForexVolatilityIndicators:
         
         Parameters:
         atr_periods (List[int]): List of periods for ATR
-        bb_periods (List[int]): List of periods for Bollinger Bands
-        keltner_ema_period (int): EMA period for Keltner Channels
-        keltner_atr_period (int): ATR period for Keltner Channels
-        keltner_multiplier (float): Multiplier for Keltner Channels
+        bb_period_nbdevup_nbdevdn (List[int, float, float]): List nested or not, [period, nbdevup, nbdevdn]
+        kethlner_ema_atr_multiplier (List[int, int, float]): List nested or not, [EMA period, ATR period, ATR multiplier]
         std_periods (List[int]): List of periods for Standard Deviation
         
         """
         
-        self.add_atr(atr_periods)
-        self.add_bollinger_bands(bb_periods)
-        self.add_keltner_channels(keltner_ema_period, keltner_atr_period, keltner_multiplier)
-        self.add_standard_deviation(std_periods)
+        self.add_atr(periods = atr_periods)
+        self.add_bollinger_bands(period_nbdevup_nbdevdn = bb_period_nbdevup_nbdevdn )
+        self.add_keltner_channels(ema_atr_multiplier = kethlner_ema_atr_multiplier)
+        self.add_standard_deviation(periods = std_periods)
         
-        return self.data
+        count_removed_rows = self.data.shape[0] - self.volatility_data.shape[0]
+        
+        print('='*50)
+        print('Data Info')
+        print(self.volatility_data.info())
+        print('='*50)
+        print(f'Shape of data {self.volatility_data.shape}')
+        print('='*50)
+        print(f'{count_removed_rows} rows removed')
+        print('='*50)
+        
+        return self.volatility_data
