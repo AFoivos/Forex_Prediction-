@@ -155,11 +155,8 @@ class ForexMACDSignals:
                 [2, 1],
                 default=0
             )
-            
-            print('macd_crossover_signals')
-            
+                        
         return self.signals
-        
         
         # self._validate_columns(columns = columns)
         
@@ -217,7 +214,6 @@ class ForexMACDSignals:
                 [2, 1],
                 default=0
             )
-            print('macd_histogram_signals')
         
         return self.signals
 
@@ -276,9 +272,7 @@ class ForexMACDSignals:
                 [2, 1],
                 default=0
             )
-            
-            print('macd_zero_line_signals')
-        
+                    
         return self.signals
         
         # self._validate_columns(columns = [column])
