@@ -3,6 +3,8 @@ import numpy as np
 import talib
 from typing import Dict, List, Optional, Union
 
+from itertools import product
+
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -11,6 +13,7 @@ class ForexADXSignals:
         self, 
         data: pd.DataFrame,
         close_col: str = 'close',
+        parameters: List = None,
     ):
         """
         Class for ADX signals
@@ -35,7 +38,17 @@ class ForexADXSignals:
             index=self.data.index
         )
         
+        self.adx_names  = []
+        self.adx_plus = []
+        self.adx_minus = []
+        self.adx_slopes = []
+        self.adx_plus_slopes = []
+        self.adx_minus_slopes = []
+        
+        self.adx_parameters = [14, 21, 28] if parameters is None else parameters
+        
         self._validate_columns()
+        self._extract_column_names(parameters = self.adx_parameters)
     
     def _validate_columns(
         self, 
@@ -61,11 +74,92 @@ class ForexADXSignals:
         if missing_cols:
             raise ValueError(f"Missing columns in DataFrame: {missing_cols}")
         
+    def _is_nested_list(
+        self, 
+        lst
+    ):
+        
+        """
+        Check if a list is nested or not
+        
+        Parameters:
+        lst (list): List to check
+        
+        """
+        
+        return all(isinstance(item, list) for item in lst)
+    
+    def _extract_column_names(
+        self,
+        parameters: List = None,
+    ):
+        
+        """
+        Extract MA column names based on parameters
+        
+        """
+        
+        is_nested = self._is_nested_list(parameters)
+        
+        def _validate():
+            self._validate_columns(
+                        [self.adx_names[-1], 
+                        self.adx_plus[-1],
+                        self.adx_minus[-1], 
+                        self.adx_slopes[-1],
+                        self.adx_plus_slopes[-1], 
+                        self.adx_minus_slopes[-1]]
+                    )
+
+        
+        if is_nested:
+            for sublist in parameters:
+                for period in sublist:
+                    self.adx_names.extend([f'adx_{period}'])
+                    self.adx_plus.extend([f'adx_{period}_plus'])
+                    self.adx_minus.extend([f'adx_{period}_minus'])
+                    self.adx_slopes.extend([f'adx_{period}_slope'])
+                    self.adx_plus_slopes.extend([f'adx_{period}_plus_di_slope'])
+                    self.adx_minus_slopes.extend([f'adx_{period}_minus_di_slope'])
+                    _validate()
+        else:
+            for period in parameters:
+                self.adx_names.extend([f'adx_{period}'])
+                self.adx_plus.extend([f'adx_{period}_plus'])
+                self.adx_minus.extend([f'adx_{period}_minus'])
+                self.adx_slopes.extend([f'adx_{period}_slope'])
+                self.adx_plus_slopes.extend([f'adx_{period}_plus_di_slope'])
+                self.adx_minus_slopes.extend([f'adx_{period}_minus_di_slope'])
+                _validate()
+                        
+        
+        # is_nested = self._is_nested_list(parameters)
+        
+        # if is_nested:
+        #     for sublist in parameters:
+        #         fast = sublist[0]
+        #         slow = sublist[1]
+        #         signal = sublist[2]
+        #         self.macds.extend([f'macd_{fast}_{slow}'])
+        #         self.macd_signals.extend([f'macd_signal_{signal}'])
+        #         self.macd_hists.extend([f'macd_hist_fast_{fast}_slow{slow}_sig{signal}'])
+        #         self.macd_slopes.extend([f'macd_{fast}_{slow}_slope'])
+        #         self.macd_signal_slopes.extend([f'macd_signal_{signal}_slope'])
+        # else:
+        #     fast = parameters[0]
+        #     slow = parameters[1]
+        #     signal = parameters[2]
+        #     self.macds.extend([f'macd_{fast}_{slow}']) 
+        #     self.macd_signals.extend([f'macd_signal_{signal}'])
+        #     self.macd_hists.extend([f'macd_hist_fast_{fast}_slow{slow}_sig{signal}'])
+        #     self.macd_slopes.extend([f'macd_{fast}_{slow}_slope'])
+        #     self.macd_signal_slopes.extend([f'macd_signal_{signal}_slope'])
+        
     def adx_trend_strength_signals(
         self, 
         strong_threshold: int = 25, 
         weak_threshold: int = 20,
-        column: str = 'trend_adx',
+        # column: str = 'trend_adx',
     ):
         
         """
@@ -77,26 +171,42 @@ class ForexADXSignals:
         Parameters:
         strong_threshold (int): Threshold for strong trend (default: 25)
         weak_threshold (int): Threshold for weak trend (default: 20)
-        column (str): Column name for ADX
+
         
         """
         
-        self._validate_columns([column]) # Validate the ADX column
-        
-        strong_trend = self.data[column] > strong_threshold
-        weak_trend = self.data[column] < weak_threshold
-        
-        self.signals['adx_trend_strength'] = np.select(
-            [strong_trend, weak_trend],
-            [2, 1],
-            default=0
-        )
+        for name in self.adx_names:
+            self._validate_columns(columns = [name])
+
+            strong_trend = self.data[name] > strong_threshold
+            weak_trend = self.data[name] < weak_threshold
+
+            self.signals[f'{name}_trend_strength'] = np.select(
+                [strong_trend, weak_trend],
+                [2, 1],
+                default=0
+            )
+            
+            print('adx_trend_strength_signals')
         
         return self.signals
+        
+        # self._validate_columns([column]) # Validate the ADX column
+        
+        # strong_trend = self.data[column] > strong_threshold
+        # weak_trend = self.data[column] < weak_threshold
+        
+        # self.signals['adx_trend_strength'] = np.select(
+        #     [strong_trend, weak_trend],
+        #     [2, 1],
+        #     default=0
+        # )
+        
+        # return self.signals
     
     def adx_direction_signals(
         self,
-        columns: list[str] = ['trend_plus_di', 'trend_minus_di'],
+        # columns: list[str] = ['trend_plus_di', 'trend_minus_di'],
     ):
         
         """
@@ -104,28 +214,41 @@ class ForexADXSignals:
         2 = Bullish (+DI > -DI)
         1 = Bearish (-DI > +DI)
         0 = Neutral
-        
-        Parameters:
-        columns (list[str]): List of column names for +DI and -DI
-        
+            
         """
         
-        self._validate_columns(columns)
-        
-        bullish = self.data[columns[0]] > self.data[columns[1]]
-        bearish = self.data[columns[1]] > self.data[columns[0]]
-        
-        self.signals['adx_direction'] = np.select(
-            [bullish, bearish],
-            [2, 1],
-            default=0
-        )
+        for name1, name2 in product(self.adx_plus, self.adx_minus):
+            self._validate_columns(columns = [name1, name2])
+            
+            bullish = self.data[name1] > self.data[name2]
+            bearish = self.data[name2] > self.data[name1]
+
+            self.signals[f'{name1}_{name2}_direction'] = np.select(
+                [bullish, bearish],
+                [2, 1],
+                default=0
+            )
+            
+            print('adx_direction_signals')
         
         return self.signals
+        
+        # self._validate_columns(columns)
+        
+        # bullish = self.data[columns[0]] > self.data[columns[1]]
+        # bearish = self.data[columns[1]] > self.data[columns[0]]
+        
+        # self.signals['adx_direction'] = np.select(
+        #     [bullish, bearish],
+        #     [2, 1],
+        #     default=0
+        # )
+        
+        # return self.signals
     
     def adx_di_crossover_signals(
         self,
-        columns: list[str] = ['trend_plus_di', 'trend_minus_di'],
+        # columns: list[str] = ['trend_plus_di', 'trend_minus_di'],
     ):
         
         """
@@ -134,30 +257,50 @@ class ForexADXSignals:
         1 = -DI crosses above +DI (Bearish)
         0 = No crossover
         
-        Parameters:
-        columns (list[str]): List of column names for +DI and -DI
-        
         """
         
-        self._validate_columns(columns)
-        
-        bullish_cross = (
-            (self.data[columns[0]] > self.data[columns[1]]) & 
-            (self.data[columns[0]].shift(1) <= self.data[columns[1]].shift(1))
-        )
-        
-        bearish_cross = (
-            (self.data[columns[1]] > self.data[columns[0]]) & 
-            (self.data[columns[1]].shift(1) <= self.data[columns[0]].shift(1))
-        )
-        
-        self.signals['adx_di_crossover'] = np.select(
-            [bullish_cross, bearish_cross],
-            [2, 1],
-            default=0
-        )
+        for name1, name2 in product(self.adx_plus, self.adx_minus):
+            self._validate_columns(columns = [name1, name2])
+            
+            bullish_cross = (
+                (self.data[name1] > self.data[name2]) & 
+                (self.data[name1].shift(1) <= self.data[name2].shift(1))
+            )
+
+            bearish_cross = (
+                (self.data[name1] < self.data[name2]) & 
+                (self.data[name1].shift(1) >= self.data[name2].shift(1))    
+            )
+            
+            self.signals[f'{name1}_{name2}_crossover'] = np.select(
+                [bullish_cross, bearish_cross],
+                [2, 1],
+                default=0
+            )
+            
+            print('adx_di_crossover_signals')
         
         return self.signals
+        
+        # self._validate_columns(columns)
+        
+        # bullish_cross = (
+        #     (self.data[columns[0]] > self.data[columns[1]]) & 
+        #     (self.data[columns[0]].shift(1) <= self.data[columns[1]].shift(1))
+        # )
+        
+        # bearish_cross = (
+        #     (self.data[columns[1]] > self.data[columns[0]]) & 
+        #     (self.data[columns[1]].shift(1) <= self.data[columns[0]].shift(1))
+        # )
+        
+        # self.signals['adx_di_crossover'] = np.select(
+        #     [bullish_cross, bearish_cross],
+        #     [2, 1],
+        #     default=0
+        # )
+        
+        # return self.signals
     
     def adx_slope_signals(
         self,
@@ -175,23 +318,39 @@ class ForexADXSignals:
         
         """
         
-        self._validate_columns([column])
+        for name in self.adx_slopes:
+            self._validate_columns(columns = [name])
+            
+            increasing = self.data[name] > 0
+            decreasing = self.data[name] < 0
+            
+            self.signals[f'{name}_slope'] = np.select(
+                [increasing, decreasing],
+                [2, 1],
+                default=0
+            )
+            
+            print('adx_slope_signals')
         
-        increasing = self.data[column] > 0
-        decreasing = self.data[column] < 0
-        
-        self.signals['adx_slope'] = np.select(
-            [increasing, decreasing],
-            [2, 1],
-            default=0
-        )
-
         return self.signals
+        
+        # self._validate_columns([column])
+        
+        # increasing = self.data[column] > 0
+        # decreasing = self.data[column] < 0
+        
+        # self.signals['adx_slope'] = np.select(
+        #     [increasing, decreasing],
+        #     [2, 1],
+        #     default=0
+        # )
+
+        # return self.signals
     
     def adx_comprehensive_signals(
         self,
         strong_threshold: int =25,
-        columns: list[str] = ['trend_adx', 'trend_plus_di', 'trend_minus_di'],
+        # columns: list[str] = ['trend_adx', 'trend_plus_di', 'trend_minus_di'],
     ):
         
         """
@@ -205,26 +364,49 @@ class ForexADXSignals:
         
         """
         
-        
-        self._validate_columns(columns)
-        
-        strong_bullish = (
-            (self.data[columns[0]] > strong_threshold) & 
-            (self.data[columns[1]] > self.data[columns[2]])
-        )
-        
-        strong_bearish = (
-            (self.data[columns[0]] > strong_threshold) & 
-            (self.data[columns[2]] > self.data[columns[1]])
-        )
-        
-        self.signals['adx_comprehensive'] = np.select(
-            [strong_bullish, strong_bearish],
-            [2, 1],
-            default=0
-        )
+        for name1, name2, name3 in product(self.adx_names, self.adx_plus, self.adx_minus):
+            self._validate_columns(columns = [name1, name2, name3])
+
+            strong_bullish = (
+                (self.data[name1] > strong_threshold) & 
+                (self.data[name2] > self.data[name3])
+            )
+            
+            strong_bearish = (
+                (self.data[name1] > strong_threshold) & 
+                (self.data[name3] > self.data[name2])
+            )
+            
+            self.signals[f'{name1}_{name2}_{name3}_comprehensive'] = np.select(
+                [strong_bullish, strong_bearish],
+                [2, 1],
+                default=0
+            )
+            
+            print('adx_comprehensive_signals')
         
         return self.signals
+        
+        
+        # self._validate_columns(columns)
+        
+        # strong_bullish = (
+        #     (self.data[columns[0]] > strong_threshold) & 
+        #     (self.data[columns[1]] > self.data[columns[2]])
+        # )
+        
+        # strong_bearish = (
+        #     (self.data[columns[0]] > strong_threshold) & 
+        #     (self.data[columns[2]] > self.data[columns[1]])
+        # )
+        
+        # self.signals['adx_comprehensive'] = np.select(
+        #     [strong_bullish, strong_bearish],
+        #     [2, 1],
+        #     default=0
+        # )
+        
+        # return self.signals
     
     def generate_all_adx_signals(self): #add parameters
         
@@ -238,5 +420,16 @@ class ForexADXSignals:
         self.adx_di_crossover_signals()
         self.adx_slope_signals()
         self.adx_comprehensive_signals()
-        print(self.signals.tail(10), "\n", self.signals.shape)
+
+        count_removed_rows = self.signals.shape[0] - self.data.shape[0]
+        
+        print('='*50)
+        print('Data Info')
+        print(self.signals.info())
+        print('='*50)   
+        print(f'Shape of data {self.signals.shape}')
+        print('='*50)   
+        print(f'{count_removed_rows} rows removed')
+        print('='*50)
+
         return self.signals

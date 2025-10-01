@@ -6,12 +6,12 @@ from typing import Dict, List, Optional, Union
 import warnings
 warnings.filterwarnings('ignore')
 
-class ForexParabolicSARSignals:  # Διόρθωση ονόματος (SIGnals -> SIGnals)
+class ForexParabolicSARSignals:  
     def __init__(
         self, 
         data: pd.DataFrame,
         close_col: str = 'close',
-        parameters: List = None,  # Διόρθωση typo (parametars -> parameters)
+        parameters: List = None, 
     ):
         
         """
@@ -45,7 +45,7 @@ class ForexParabolicSARSignals:  # Διόρθωση ονόματος (SIGnals ->
             self.parameters = [[0.02, 0.2]] 
         
         self._validate_columns()
-        self._extract_sar_column_names()
+        self._extract_column_names()
     
     def _validate_columns(
         self,

@@ -185,13 +185,13 @@ class ForexTrendIndicators:
         )
 
             # MACD
-            self.trend_data[f'macd_{fast}'] = macd
+            self.trend_data[f'macd_{fast}_{slow}'] = macd
             self.trend_data[f'macd_signal_{signal}'] = macd_signal
             self.trend_data[f'macd_hist_fast_{fast}_slow{slow}_sig{signal}'] = macd_hist
             
             # MACD slopes
-            self.trend_data[f"macd_{fast}_slope"] = macd.diff()
-            self.trend_data[f"macd_signal_{signal}_signal_slope"] = macd_signal.diff()
+            self.trend_data[f"macd_{fast}_{slow}_slope"] = macd.diff()
+            self.trend_data[f"macd_signal_{signal}_slope"] = macd_signal.diff()
             
         return self.trend_data
     
