@@ -186,9 +186,7 @@ class ForexADXSignals:
                 [2, 1],
                 default=0
             )
-            
-            print('adx_trend_strength_signals')
-        
+                    
         return self.signals
         
         # self._validate_columns([column]) # Validate the ADX column
@@ -228,9 +226,7 @@ class ForexADXSignals:
                 [2, 1],
                 default=0
             )
-            
-            print('adx_direction_signals')
-        
+                    
         return self.signals
         
         # self._validate_columns(columns)
@@ -277,9 +273,7 @@ class ForexADXSignals:
                 [2, 1],
                 default=0
             )
-            
-            print('adx_di_crossover_signals')
-        
+                    
         return self.signals
         
         # self._validate_columns(columns)
@@ -329,9 +323,7 @@ class ForexADXSignals:
                 [2, 1],
                 default=0
             )
-            
-            print('adx_slope_signals')
-        
+                    
         return self.signals
         
         # self._validate_columns([column])
@@ -382,11 +374,8 @@ class ForexADXSignals:
                 [2, 1],
                 default=0
             )
-            
-            print('adx_comprehensive_signals')
-        
+                    
         return self.signals
-        
         
         # self._validate_columns(columns)
         
