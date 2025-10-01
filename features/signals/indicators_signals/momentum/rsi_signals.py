@@ -107,9 +107,6 @@ class ForexRSISignals:
         1 = Bearish (RSI crosses below 50)
         0 = No crossover
         
-        Parameters:
-        columns (list[str]): List of column names for RSI signals
-        
         """
         
         self._validate_columns(columns = columns)
