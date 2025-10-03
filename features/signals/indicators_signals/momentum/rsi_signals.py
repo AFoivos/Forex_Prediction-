@@ -45,6 +45,8 @@ class ForexRSISignals:
         self._validate_columns()
         self._extract_column_names(parameters = parameters)
         
+        
+        
     def _validate_columns(
         self, 
         columns: list[str] = None,
@@ -109,7 +111,6 @@ class ForexRSISignals:
         self,
         overbought: int = 70,
         oversold: int = 30,
-        columns: List[str] = ['rsi_14', 'rsi_21', 'rsi_28'],
     ):
         
         """
@@ -124,24 +125,22 @@ class ForexRSISignals:
         oversold (int): Oversold threshold
 
         """
-
-        self._validate_columns(columns = columns)
         
-        for col in columns:
-            overbought_condition = self.data[col] > overbought
-            oversold_condition = self.data[col] < oversold
+        for name in self.rsi:
+            self._validate_columns(columns = [name])
+            overbought_condition = self.data[name] > overbought
+            oversold_condition = self.data[name] < oversold
             
-            self.signals[f'{col}_overbought'] = np.select(
+            self.signals[f'{name}_overbought'] = np.select(
                 [overbought_condition, oversold_condition],
-                [2,1],
-                default=0
+                [2, 1],
+                default = 0
             )
             
         return self.signals
         
     def rsi_centerline_signals(
         self,
-        columns: List[str] = ['rsi_14', 'rsi_21', 'rsi_28']
     ):
         
         """
@@ -152,24 +151,23 @@ class ForexRSISignals:
         
         """
         
-        self._validate_columns(columns = columns)
-        
-        for col in columns:
+        for name in self.rsi:
+            self._validate_columns(columns = [name])
             
             bullish_centerline = (
-                (self.data[col] > 50) & 
-                (self.data[col].shift(1) <= 50)
+                (self.data[name] > 50) &
+                (self.data[name] <= 50)
             )
-
+            
             bearish_centerline = (
-                (self.data[col] < 50) & 
-                (self.data[col].shift(1) >= 50)
+                (self.data[name] < 50) &
+                (self.data[name] >= 50)
             )
-        
-            self.signals[f"{col}_centerline"] = np.select(
+            
+            self.signals[f'{name}_centerline'] = np.select(
                 [bullish_centerline, bearish_centerline],
                 [2, 1],
-                default=0
+                default = 0
             )
             
         return self.signals
@@ -177,7 +175,6 @@ class ForexRSISignals:
     def rsi_divergence_signals(
         self,
         lookback: int = 4,
-        columns: List[str] = ['rsi_14', 'rsi_21', 'rsi_28']
     ):
         
         """
@@ -188,51 +185,46 @@ class ForexRSISignals:
         
         Parameters:
         lookback (int): Lookback period for RSI
-        columns (list[str]): List of column names for RSI signals
         
         """
         
-        self._validate_columns(columns = columns)
-
-        for col in columns:
+        for name in self.rsi:
+            self._validate_columns(columns = [name])
             
-            # Bullish Divergence: Price makes lower low, RSI makes higher low
             price_lower_low = (
                 (self.data[self.close_col] < self.data[self.close_col].shift(lookback)) &
-                (self.data[self.close_col].shift(1) < self.data[self.close_col].shift(lookback + 1))
+                (self.data[self.close_col].shift(1) > self.data[self.close_col].shift(lookback + 1))
             )
             
             rsi_higher_low = (
-                (self.data[col] > self.data[col].shift(lookback)) &
-                (self.data[col].shift(1) > self.data[col].shift(lookback + 1))
+                (self.data[name] > self.data[name].shift(lookback)) &
+                (self.data[name].shift(1) > self.data[name].shift(lookback + 1))
             )
             
             bullish_divergence = price_lower_low & rsi_higher_low
             
-            # Bearish Divergence: Price makes higher high, RSI makes lower high
             price_higher_high = (
                 (self.data[self.close_col] > self.data[self.close_col].shift(lookback)) &
-                (self.data[self.close_col].shift(1) > self.data[self.close_col].shift(lookback + 1))
+                (self.data[self.close_col].shift(1) < self.data[self.close_col].shift(lookback + 1))
             )
             
             rsi_lower_high = (
-                (self.data[col] < self.data[col].shift(lookback)) &
-                (self.data[col].shift(1) < self.data[col].shift(lookback + 1))
+                (self.data[name] < self.data[name].shift(lookback)) &
+                (self.data[name].shift(1) < self.data[name].shift(lookback + 1))
             )
             
             bearish_divergence = price_higher_high & rsi_lower_high
             
-            self.signals[f"{col}_divergence"] = np.select(
+            self.signals[f'{name}_divergence'] = np.select(
                 [bullish_divergence, bearish_divergence],
                 [2, 1],
                 default = 0
             )
-    
+            
         return self.signals
     
     def rsi_momentum_signals(
         self,
-        columns: List[str] = ['rsi_14', 'rsi_21', 'rsi_28']
     ):
         
         """
@@ -247,17 +239,13 @@ class ForexRSISignals:
         
         """
         
-        self._validate_columns(columns = columns)
-        
-        for col in columns:
+        for name in self.rsi_slope:
+            self._validate_columns(columns = [name])
             
-            slope_col = f"{col}_slope"
-            self._validate_columns(columns = [slope_col])
+            rsi_increasing = self.data[name] > 0
+            rsi_decreasing = self.data[name] < 0
             
-            rsi_increasing = self.data[slope_col] > 0
-            rsi_decreasing = self.data[slope_col] < 0
-            
-            self.signals[f"{col}_momentum"] = np.select(
+            self.signals[f'{name}_momentum'] = np.select(
                 [rsi_increasing, rsi_decreasing],
                 [2, 1],
                 default = 0
@@ -267,7 +255,6 @@ class ForexRSISignals:
     
     def rsi_failure_swing_signals(
         self,
-        columns: List[str] = ['rsi_14', 'rsi_21', 'rsi_28'],
         oversold: int = 30,
         overbought: int = 70
     ):
@@ -279,39 +266,35 @@ class ForexRSISignals:
         0 = No failure swing
         
         Parameters:
-        columns (list[str]): List of column names for RSI signals
         overbought (int): Overbought threshold
         oversold (int): Oversold threshold
         
         """
         
-        self._validate_columns(columns)
-
-        for col in columns:
+        for name in self.rsi:
+            self._validate_columns(columns = [name])
             
-            # Bullish Failure
-            rsi_oversold = self.data[col].shift(2) < oversold
-            rsi_bounce = self.data[col].shift(1) > self.data[col].shift(2)
+            rsi_oversold = self.data[name].shift(2) < oversold  
+            rsi_bounce = self.data[name].shift(1) > self.data[name].shift(2)  
             rsi_retest_higher_low = (
-                (self.data[col] > oversold) &
-                (self.data[col] > self.data[col].shift(2))
+                (self.data[name] > oversold) &  
+                (self.data[name] > self.data[name].shift(2))  
             )
             
-            bullish_faillure_swing = rsi_oversold & rsi_bounce & rsi_retest_higher_low
+            bullish_failure_swing = rsi_oversold & rsi_bounce & rsi_retest_higher_low
             
-            # Bearish Faillure Swing
-            rsi_overbought = self.data[col].shift(2) > overbought
-            rsi_pullback = self.data[col].shift(1) < self.data[col].shift(2)
+            rsi_overbought = self.data[name].shift(2) > overbought  
+            rsi_pullback = self.data[name].shift(1) < self.data[name].shift(2)  
             rsi_retest_lower_high = (
-                (self.data[col] < overbought) &
-                (self.data[col] < self.data[col].shift(2))
+                (self.data[name] < overbought) &  
+                (self.data[name] < self.data[name].shift(2))  
             )
             
-            bearish_faillure_swing = rsi_overbought & rsi_pullback & rsi_retest_lower_high
+            bearish_failure_swing = rsi_overbought & rsi_pullback & rsi_retest_lower_high
             
-            self.signals[f"{col}_swing_fail"] = np.select(
-                [bullish_faillure_swing, bearish_faillure_swing],
-                [2,1],
+            self.signals[f"{name}_swing_fail"] = np.select(
+                [bullish_failure_swing, bearish_failure_swing],
+                [2, 1],
                 default = 0
             )
             
@@ -319,7 +302,6 @@ class ForexRSISignals:
             
     def rsi_trend_reversal_signals(
         self,
-        columns: List[str] = ['rsi_14', 'rsi_21', 'rsi_28'],
         oversold: int = 30,
         overbought: int = 70
     ):
@@ -337,40 +319,70 @@ class ForexRSISignals:
         
         """
         
-        self._validate_columns(columns = columns)
-        
-        for col in columns:
+        for name in self.rsi:
+            self._validate_columns(columns = [name])
             
             bullish_reversal = (
-                (self.data[col] > oversold) &
-                (self.data[col].shift(1) <= oversold)
+                (self.data[name] > oversold) &
+                (self.data[name].shift(1) <= oversold)
             )
             
             bearish_reversal = (
-                (self.data[col] < overbought) &
-                (self.data[col].shift(1) >= overbought)
+                (self.data[name] < overbought) &
+                (self.data[name].shift(1) >= overbought)
             )
             
-            self.signals[f"{col}_reversal"] = np.select(
+            self.signals[f'{name}_reversal'] = np.select(
                 [bullish_reversal, bearish_reversal],
                 [2, 1],
                 default = 0
             )
         
         return self.signals
+        
     
-    def generate_all_rsi_signals(self): # add parameters
+    def generate_all_rsi_signals(
+        self,
+        oversold: int = 30,
+        overbought: int = 70,
+        lookback: int = 4
+    ): 
         
         """
         Generate all RSI signals
         
+        Parameters:
+        oversold (int) 
+        overbought (int)
+        lookback (int) 
+        
         """
         
-        self.rsi_overbought_oversold_signals()
+        self.rsi_overbought_oversold_signals(
+            overbought = overbought,
+            oversold = oversold 
+        )
         self.rsi_centerline_signals()
-        self.rsi_divergence_signals()
+        self.rsi_divergence_signals(lookback = lookback)
         self.rsi_momentum_signals()
-        self.rsi_failure_swing_signals()
-        self.rsi_trend_reversal_signals()
-        print(self.signals.tail(10), "\n", self.signals.shape)
+        self.rsi_failure_swing_signals(
+            overbought = overbought,
+            oversold = oversold 
+        )
+        self.rsi_trend_reversal_signals(
+            overbought = overbought,
+            oversold = oversold 
+        )
+        
+        count_removed_rows = self.signals.shape[0] - self.data.shape[0]
+        
+        print('='*50)
+        print('Data Info')
+        print(self.signals.info())
+        print('='*50)   
+        print(f'Shape of data {self.signals.shape}')
+        print('='*50)
+        print(f'{count_removed_rows} rows removed')
+        print('='*50)
+        
         return self.signals

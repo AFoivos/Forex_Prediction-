@@ -123,7 +123,6 @@ class ForexMACDSignals:
           
     def macd_crossover_signals(
         self,
-        # columns = ['trend_macd', 'trend_macd_signal'],
     ):
         
         """
@@ -157,30 +156,9 @@ class ForexMACDSignals:
             )
                         
         return self.signals
-        
-        # self._validate_columns(columns = columns)
-        
-        # bullish_cross = ( # MACD crosses above Signal
-        #     (self.data[columns[0]] > self.data[columns[1]]) & 
-        #     (self.data[columns[0]].shift(1) <= self.data[columns[1]].shift(1))
-        # )
-        
-        # bearish_cross = ( # MACD crosses below Signal
-        #     (self.data[columns[0]] < self.data[columns[1]]) & 
-        #     (self.data[columns[0]].shift(1) >= self.data[columns[1]].shift(1))
-        # )
-        
-        # self.signals['macd_crossover'] = np.select(
-        #     [bullish_cross, bearish_cross],
-        #     [2, 1],
-        #     default=0
-        # )
-        
-        # return self.signals
     
     def macd_histogram_signals(
         self,
-        # column: str = 'trend_macd_hist',
     ):
         
         """
@@ -216,34 +194,9 @@ class ForexMACDSignals:
             )
         
         return self.signals
-
-        # self._validate_columns(columns = [column])
-        
-        # # Histogram positive/negative
-        # hist_positive = self.data[column] > 0
-        # hist_negative = self.data[column] < 0
-        
-        # self.signals['macd_histogram_direction'] = np.select(
-        #     [hist_positive, hist_negative],
-        #     [2, 1],
-        #     default=0
-        # )
-        
-        # # Histogram momentum
-        # hist_increasing = self.data[column] > self.data[column].shift(1)
-        # hist_decreasing = self.data[column] < self.data[column].shift(1)
-        
-        # self.signals['macd_histogram_momentum'] = np.select(
-        #     [hist_increasing, hist_decreasing],
-        #     [2, 1],
-        #     default=0
-        # )
-        
-        # return self.signals
     
     def macd_zero_line_signals(
         self,
-        # column: str = 'trend_macd'
     ):
         
         """
@@ -275,26 +228,6 @@ class ForexMACDSignals:
                     
         return self.signals
         
-        # self._validate_columns(columns = [column])
-        
-        # above_zero = (
-        #     (self.data[column] > 0) & 
-        #     (self.data[column].shift(1) <= 0)
-        # )
-        
-        # below_zero = (
-        #     (self.data[column] < 0) & 
-        #     (self.data[column].shift(1) >= 0)
-        # )
-        
-        # self.signals['macd_zero_cross'] = np.select(
-        #     [above_zero, below_zero],
-        #     [2, 1],
-        #     default=0
-        # )
-        
-        # return self.signals
-    
     def generate_all_macd_signals(self):
        
         """

@@ -114,18 +114,19 @@ class ForexMomentumIndicators:
         
         periods = self._is_nested_list(periods)
         
-        for period in periods:
-            col_name = f'rsi_{period}'
+        for sublist in periods:
+            for period in sublist:
+                col_name = f'rsi_{period}'
+                
+                # RSI
+                self.momentum_data[col_name] = talib.RSI(
+                    self.data[self.close_col], 
+                    timeperiod=period
+                )
+                
+                #RSI slope
+                self.momentum_data[f'{col_name}_slope'] = self.momentum_data[col_name].diff()
             
-            # RSI
-            self.momentum_data[col_name] = talib.RSI(
-                self.data[self.close_col], 
-                timeperiod=period[0]
-            )
-            
-            #RSI slope
-            self.momentum_data[f'{col_name}_slope'] = self.momentum_data[col_name].diff()
-        
         return self.momentum_data
     
     def add_stochastic(
@@ -191,21 +192,22 @@ class ForexMomentumIndicators:
         
         periods = self._is_nested_list(periods)
         
-        for period in periods:
-            willr = talib.WILLR(
-                self.data[self.high_col],
-                self.data[self.low_col],
-                self.data[self.close_col],
-                timeperiod = period[0]
-            )
-            
-            col_name = f'williams_r_{period}'
-            
-            # Williams %R
-            self.momentum_data[col_name] = willr
-            
-            #Williams %R slope
-            self.momentum_data[f'{col_name}_slope'] = willr.diff()
+        for sublist in periods:
+            for period in sublist:
+                willr = talib.WILLR(
+                    self.data[self.high_col],
+                    self.data[self.low_col],
+                    self.data[self.close_col],
+                    timeperiod = period
+                )
+                
+                col_name = f'williams_r_{period}'
+                
+                # Williams %R
+                self.momentum_data[col_name] = willr
+                
+                #Williams %R slope
+                self.momentum_data[f'{col_name}_slope'] = willr.diff()
                     
         return self.momentum_data
     
@@ -226,21 +228,22 @@ class ForexMomentumIndicators:
         
         periods = self._is_nested_list(periods)
         
-        for period in periods:
-            cci = talib.CCI(
-                self.data[self.high_col],
-                self.data[self.low_col],
-                self.data[self.close_col],
-                timeperiod = period[0]
-            )
-            
-            col_name = f'cci_{period}'
-            
-            # CCI
-            self.momentum_data[col_name] = cci
-            
-            # CCI slope
-            self.momentum_data[f'{col_name}_slope'] = cci.diff()
+        for sublist in periods:
+            for period in sublist:
+                cci = talib.CCI(
+                    self.data[self.high_col],
+                    self.data[self.low_col],
+                    self.data[self.close_col],
+                    timeperiod = period
+                )
+                
+                col_name = f'cci_{period}'
+                
+                # CCI
+                self.momentum_data[col_name] = cci
+                
+                # CCI slope
+                self.momentum_data[f'{col_name}_slope'] = cci.diff()
                 
         return self.momentum_data
     
@@ -261,18 +264,18 @@ class ForexMomentumIndicators:
         
         periods = self._is_nested_list(periods)
         
-        for period in periods:
-            
-            col_name = f'momentum_{period}'
-            
-            # Momentum
-            self.momentum_data[col_name] = talib.MOM(
-                self.data[self.close_col], 
-                timeperiod=period[0]
-            )
-            
-            # Momentum slope
-            self.momentum_data[f'{col_name}_slope'] = self.momentum_data[col_name].diff()
+        for sublist in periods:
+            for period in sublist:
+                col_name = f'momentum_{period}'
+                
+                # Momentum
+                self.momentum_data[col_name] = talib.MOM(
+                    self.data[self.close_col], 
+                    timeperiod = period
+                )
+                
+                # Momentum slope
+                self.momentum_data[f'{col_name}_slope'] = self.momentum_data[col_name].diff()
         
         return self.momentum_data
     
