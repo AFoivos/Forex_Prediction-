@@ -11,6 +11,7 @@ class ForexRSISignals:
         self, 
         data: pd.DataFrame,
         close_col: str = 'close',
+        parameters: List = None,
     ):
         
         """
@@ -36,7 +37,13 @@ class ForexRSISignals:
             index=self.data.index
         )
         
+        self.rsi = []
+        self.rsi_slope = []
+        
+        self.parameters = [14, 21, 28] if parameters is None else parameters
+        
         self._validate_columns()
+        self._extract_column_names(parameters = parameters)
         
     def _validate_columns(
         self, 
@@ -61,6 +68,42 @@ class ForexRSISignals:
         missing_cols = [col for col in required_cols if col not in self.data.columns]
         if missing_cols:
             raise ValueError(f"Missing columns in DataFrame: {missing_cols}")
+        
+    def _is_nested_list(
+        self, 
+        lst
+    ):
+        
+        """
+        Check if a list is nested or not
+        
+        Parameters:
+        lst (list): List to check
+        
+        """
+        
+        return all(isinstance(item, list) for item in lst)
+    
+    def _extract_column_names(
+        self,
+        parameters: List = None,
+    ):
+        
+        """
+        Extract MA column names based on parameters
+        
+        """
+        is_nested = self._is_nested_list(parameters)
+        
+        if is_nested:
+            for sublist in parameters:
+                for period in sublist:
+                    self.rsi.extend([f'rsi_{period}'])
+                    self.rsi_slope.extend([f'rsi_{period}_slope'])
+        else:
+            for period in parameters:
+                    self.rsi.extend([f'rsi_{period}'])
+                    self.rsi_slope.extend([f'rsi_{period}_slope'])
             
     def rsi_overbought_oversold_signals(
         self,
