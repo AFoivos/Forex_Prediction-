@@ -110,15 +110,17 @@ class ForexMomentumIndicators:
         
         """
         
-        self.parameters['rsi_params'] = periods
-         
+        self.parameters['rsi_paramas'] = periods
+        
+        periods = self._is_nested_list(periods)
+        
         for period in periods:
             col_name = f'rsi_{period}'
             
             # RSI
             self.momentum_data[col_name] = talib.RSI(
                 self.data[self.close_col], 
-                timeperiod=period
+                timeperiod=period[0]
             )
             
             #RSI slope
@@ -187,12 +189,14 @@ class ForexMomentumIndicators:
         
         self.parameters['williams_r_params'] = periods
         
+        periods = self._is_nested_list(periods)
+        
         for period in periods:
             willr = talib.WILLR(
                 self.data[self.high_col],
                 self.data[self.low_col],
                 self.data[self.close_col],
-                timeperiod = period
+                timeperiod = period[0]
             )
             
             col_name = f'williams_r_{period}'
@@ -220,12 +224,14 @@ class ForexMomentumIndicators:
         
         self.parameters['cci_params'] = periods
         
+        periods = self._is_nested_list(periods)
+        
         for period in periods:
             cci = talib.CCI(
                 self.data[self.high_col],
                 self.data[self.low_col],
                 self.data[self.close_col],
-                timeperiod = period
+                timeperiod = period[0]
             )
             
             col_name = f'cci_{period}'
@@ -253,6 +259,8 @@ class ForexMomentumIndicators:
         
         self.parameters['momentum_params'] = periods
         
+        periods = self._is_nested_list(periods)
+        
         for period in periods:
             
             col_name = f'momentum_{period}'
@@ -260,7 +268,7 @@ class ForexMomentumIndicators:
             # Momentum
             self.momentum_data[col_name] = talib.MOM(
                 self.data[self.close_col], 
-                timeperiod=period
+                timeperiod=period[0]
             )
             
             # Momentum slope
