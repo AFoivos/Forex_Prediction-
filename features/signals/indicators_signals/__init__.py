@@ -10,6 +10,7 @@ from .momentum import(
     ForexStochasticSignals,
     ForexWilliamsRSignals,
     ForexCCISignals,
+    ForexMomentumSignals,
 )
 
 __all__ = [
@@ -21,5 +22,5 @@ __all__ = [
     "ForexStochasticSignals",
     "ForexWilliamsRSignals",
     "ForexCCISignals",
-
+    "ForexMomentumSignals",
 ]
