@@ -8,6 +8,7 @@ from .indicators_signals import (
     ForexWilliamsRSignals,
     ForexCCISignals,
     ForexMomentumSignals,
+    ForexATRSignals
 )
 
 __all__ = [
@@ -19,5 +20,6 @@ __all__ = [
     "ForexStochasticSignals",
     "ForexWilliamsRSignals",
     "ForexCCISignals",
-    "ForexMomentumSignals"
+    "ForexMomentumSignals",
+    "ForexATRSignals"
 ]

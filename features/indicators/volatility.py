@@ -110,18 +110,21 @@ class ForexVolatilityIndicators:
         periods (List[int]): List of periods for ATR
         
         """
-        
+        print(periods)
         self.parameters['atr_params'] = periods
-
-        for period in periods:
-            col_name = f'atr_{period}'
-            
-            self.volatility_data[col_name] = talib.ATR(
-                self.data[self.high_col],
-                self.data[self.low_col],
-                self.data[self.close_col],
-                timeperiod=period
-            )
+        print(self.parameters)
+        periods = self._is_nested_list(periods)
+        
+        for sublist in periods:
+            for period in sublist:
+                col_name = f'atr_{period}'
+                
+                self.volatility_data[col_name] = talib.ATR(
+                    self.data[self.high_col],
+                    self.data[self.low_col],
+                    self.data[self.close_col],
+                    timeperiod=period
+                )
 
         return self.volatility_data
     
@@ -134,7 +137,7 @@ class ForexVolatilityIndicators:
         Bollinger Bands
         
         Parameters:
-        period_nbdevup_nbdevdn (List[int, float, float]): List nested or not, [period, nbdevup, nbdevdn]
+        period_nbdevup_nbdevdn (List): List nested or not, [period, nbdevup, nbdevdn]
         
         """
         
@@ -216,15 +219,18 @@ class ForexVolatilityIndicators:
         
         self.parameters['std_params'] = periods
         
-        for period in periods:
-            col_name = f'vol_std_dev_{period}'
-            
-            self.volatility_data[col_name] = talib.STDDEV(
-                self.data[self.close_col],
-                timeperiod=period,
-                nbdev=1
-            )
+        periods = self._is_nested_list(periods)
         
+        for sublist in periods:
+            for period in sublist:
+                col_name = f'vol_std_dev_{period}'
+                
+                self.volatility_data[col_name] = talib.STDDEV(
+                    self.data[self.close_col],
+                    timeperiod=period,
+                    nbdev=1
+                )
+
         return self.volatility_data
     
     def generate_all_volatility_indicators(
