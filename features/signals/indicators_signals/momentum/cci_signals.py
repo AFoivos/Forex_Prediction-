@@ -1,14 +1,13 @@
-# williams_r_signals.py
+# cci_signals.py
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Optional, Union
-
 from itertools import product
 
 import warnings
 warnings.filterwarnings('ignore')
 
-class ForexWilliamsRSignals:
+class ForexCCISignals:
     def __init__(
         self, 
         data: pd.DataFrame,
@@ -17,7 +16,7 @@ class ForexWilliamsRSignals:
     ):
         
         """
-        Class for Williams %R signals
+        Class for CCI signals
         
         Parameters:
         data (pd.DataFrame): DataFrame containing the data    
@@ -26,9 +25,9 @@ class ForexWilliamsRSignals:
         """
         
         print("="*50)
-        print("WILLIAMS %R SIGNAL GENERATION")
+        print("CCI SIGNAL GENERATION")
         print("="*50)
-        print("Available functions: \n1 williams_overbought_oversold_signals \n2 williams_momentum_signals \n3 williams_reversal_signals \n4 williams_divergence_signals \n5 generate_all_williams_signals")
+        print("Available functions: \n1 cci_overbought_oversold_signals \n2 cci_momentum_signals \n3 cci_reversal_signals \n4 cci_divergence_signals \n5 cci_zero_line_signals \n6 generate_all_cci_signals")
         print("="*50)
         
         self.close_col = close_col
@@ -36,11 +35,11 @@ class ForexWilliamsRSignals:
         
         self.signals = pd.DataFrame(
             {self.close_col: self.data[self.close_col]},
-            index=self.data.index
+            index = self.data.index
         )
         
-        self.williams_r = []
-        self.williams_r_slope = []
+        self.cci = []
+        self.cci_slope = []
         
         self.parameters = [14, 21, 28] if parameters is None else parameters
         
@@ -50,7 +49,7 @@ class ForexWilliamsRSignals:
     def _validate_columns(
         self, 
         columns: list[str] = None,
-    ):   
+    ):  
         
         """
         Validate that required indicator columns exist
@@ -92,7 +91,7 @@ class ForexWilliamsRSignals:
     ):
         
         """
-        Extract Williams %R column names based on parameters
+        Extract CCI column names based on parameters
         
         """
         is_nested = self._is_nested_list(parameters)
@@ -100,97 +99,101 @@ class ForexWilliamsRSignals:
         if is_nested:
             for sublist in parameters:
                 for period in sublist:
-                    self.williams_r.extend([f'williams_r_{period}'])
-                    self.williams_r_slope.extend([f'williams_r_{period}_slope'])
+                    self.cci.extend([f'cci_{period}'])
+                    self.cci_slope.extend([f'cci_{period}_slope'])
         else:
             for period in parameters:
-                self.williams_r.extend([f'williams_r_{period}'])
-                self.williams_r_slope.extend([f'williams_r_{period}_slope'])
+                self.cci.extend([f'cci_{period}'])
+                self.cci_slope.extend([f'cci_{period}_slope'])
     
-    def williams_overbought_oversold_signals(
+    def cci_overbought_oversold_signals(
         self, 
-        overbought: int = -20, 
-        oversold: int = -80
+        overbought: int = 100, 
+        oversold: int = -100
     ):
         
         """
-        Williams %R Overbought/Oversold Signals
-        2 = Overbought (Williams %R > -20)
-        1 = Oversold (Williams %R < -80)
-        0 = Normal (-80 <= Williams %R <= -20)
+        CCI Overbought/Oversold Signals
+        2 = Overbought (CCI > +100)
+        1 = Oversold (CCI < -100)
+        0 = Normal (-100 <= CCI <= +100)
         
         Parameters:
-        overbought (int): Overbought threshold (default: -20)
-        oversold (int): Oversold threshold (default: -80)
+        overbought (int): Overbought threshold (default: +100)
+        oversold (int): Oversold threshold (default: -100)
         
         """
         
-        for name in self.williams_r:
-            self._validate_columns(columns = [name])
+        for name in self.cci:
+            self._validate_columns(columns=[name])
         
-            overbought_condition = self.data[name] > overbought  
-            oversold_condition = self.data[name] < oversold      
+            overbought_condition = self.data[name] > overbought
+            oversold_condition = self.data[name] < oversold
             
             self.signals[f'{name}_overbought_oversold'] = np.select(
                 [overbought_condition, oversold_condition],
                 [2, 1],
-                default = 0
+                default=0
             )
          
         return self.signals
     
-    def williams_momentum_signals(
+    def cci_momentum_signals(
         self
     ):
         
         """
-        Williams %R Momentum Signals
-        2 = Williams %R Rising (Bullish Momentum - moving toward 0)
-        1 = Williams %R Falling (Bearish Momentum - moving toward -100)
-        0 = Williams %R Stable
+        CCI Momentum Signals
+        2 = CCI Rising (Bullish Momentum)
+        1 = CCI Falling (Bearish Momentum)
+        0 = CCI Stable
         
         """
         
-        for name in self.williams_r_slope:
-            self._validate_columns(columns = [name])
+        for name in self.cci_slope:
+            self._validate_columns(columns=[name])
          
-            williams_rising = self.data[name] > 0
-            williams_falling = self.data[name] < 0
+            # Rising: slope > 0 (bullish momentum)
+            cci_rising = self.data[name] > 0
+            # Falling: slope < 0 (bearish momentum)
+            cci_falling = self.data[name] < 0
             
             self.signals[f'{name}_momentum'] = np.select(
-                [williams_rising, williams_falling],
+                [cci_rising, cci_falling],
                 [2, 1],
-                default = 0
+                default=0
             )
      
         return self.signals
     
-    def williams_reversal_signals(
+    def cci_reversal_signals(
         self,
-        overbought: int = -20,
-        oversold: int = -80
+        overbought: int = 100,
+        oversold: int = -100
     ):
         
         """
-        Williams %R Trend Reversal Signals
-        2 = Bullish Reversal (Williams %R exits oversold <-80 to >-80)
-        1 = Bearish Reversal (Williams %R exits overbought >-20 to <-20)
+        CCI Trend Reversal Signals
+        2 = Bullish Reversal (CCI exits oversold <-100 to >-100)
+        1 = Bearish Reversal (CCI exits overbought >+100 to <+100)
         0 = No reversal
         
         Parameters:
-        overbought (int): Overbought threshold (default: -20)
-        oversold (int): Oversold threshold (default: -80)
+        overbought (int): Overbought threshold (default: +100)
+        oversold (int): Oversold threshold (default: -100)
         
         """
         
-        for name in self.williams_r:
-            self._validate_columns(columns = [name])
+        for name in self.cci:
+            self._validate_columns(columns=[name])
           
+            # Bullish: exits oversold zone
             bullish_reversal = (
                 (self.data[name] > oversold) &
                 (self.data[name].shift(1) <= oversold)
             )
             
+            # Bearish: exits overbought zone  
             bearish_reversal = (
                 (self.data[name] < overbought) &
                 (self.data[name].shift(1) >= overbought)
@@ -199,20 +202,20 @@ class ForexWilliamsRSignals:
             self.signals[f'{name}_reversal'] = np.select(
                 [bullish_reversal, bearish_reversal],
                 [2, 1],
-                default = 0
+                default=0
             )
             
         return self.signals
     
-    def williams_divergence_signals(
+    def cci_divergence_signals(
         self,
         lookback: int = 10
     ):
         
         """
-        Williams %R Divergence Signals
-        2 = Bullish Divergence (Price Lower Low, Williams %R Higher Low)
-        1 = Bearish Divergence (Price Higher High, Williams %R Lower High)
+        CCI Divergence Signals
+        2 = Bullish Divergence (Price Lower Low, CCI Higher Low)
+        1 = Bearish Divergence (Price Higher High, CCI Lower High)
         0 = No Divergence
         
         Parameters:
@@ -220,61 +223,95 @@ class ForexWilliamsRSignals:
         
         """
         
-        for name in self.williams_r:
-            self._validate_columns(columns = [name])
+        for name in self.cci:
+            self._validate_columns(columns=[name])
            
+            # Bullish Divergence: Price Lower Low, CCI Higher Low
             price_lower_low = (
                 (self.data[self.close_col] < self.data[self.close_col].shift(lookback)) &
                 (self.data[self.close_col].shift(1) < self.data[self.close_col].shift(lookback + 1))
             )
             
-            williams_higher_low = (
-                (self.data[name] > self.data[name].shift(lookback)) & 
+            cci_higher_low = (
+                (self.data[name] > self.data[name].shift(lookback)) &
                 (self.data[name].shift(1) > self.data[name].shift(lookback + 1))
             )
             
-            bullish_divergence = price_lower_low & williams_higher_low
+            bullish_divergence = price_lower_low & cci_higher_low
             
+            # Bearish Divergence: Price Higher High, CCI Lower High
             price_higher_high = (
                 (self.data[self.close_col] > self.data[self.close_col].shift(lookback)) &
                 (self.data[self.close_col].shift(1) > self.data[self.close_col].shift(lookback + 1))
             )
             
-            williams_lower_high = (
-                (self.data[name] < self.data[name].shift(lookback)) &  
+            cci_lower_high = (
+                (self.data[name] < self.data[name].shift(lookback)) &
                 (self.data[name].shift(1) < self.data[name].shift(lookback + 1))
             )
             
-            bearish_divergence = price_higher_high & williams_lower_high
+            bearish_divergence = price_higher_high & cci_lower_high
             
             self.signals[f'{name}_divergence'] = np.select(
                 [bullish_divergence, bearish_divergence],
                 [2, 1],
-                default = 0
+                default=0
             )
        
         return self.signals
     
-    def williams_extreme_signals(
-        self,
-        extreme_overbought: int = -10,
-        extreme_oversold: int = -90
+    def cci_zero_line_signals(
+        self
     ):
         
         """
-        Williams %R Extreme Zone Signals
-        2 = Extreme Overbought (Williams %R > -10)
-        1 = Extreme Oversold (Williams %R < -90)  
-        0 = Not in extreme zone
-        
-        Parameters:
-        extreme_overbought (int): Extreme overbought threshold (default: -10)
-        extreme_oversold (int): Extreme oversold threshold (default: -90)
+        CCI Zero Line Crossover Signals
+        2 = CCI crosses above Zero Line (bullish)
+        1 = CCI crosses below Zero Line (bearish)
+        0 = No crossover
         
         """
         
-        for name in self.williams_r:
-            self._validate_columns(columns = [name])
+        for name in self.cci:
+            self._validate_columns(columns=[name])
+
+            above_zero = (
+                (self.data[name] > 0) & 
+                (self.data[name].shift(1) <= 0)
+            )
+
+            below_zero = (
+                (self.data[name] < 0) & 
+                (self.data[name].shift(1) >= 0)
+            )
+
+            self.signals[f'{name}_zero_cross'] = np.select(
+                [above_zero, below_zero],
+                [2, 1],
+                default=0
+            )
+                    
+        return self.signals
+    
+    def cci_extreme_signals(
+        self,
+        extreme_overbought: int = 200,
+        extreme_oversold: int = -200
+    ):
+        """
+        CCI Extreme Zone Signals
+        2 = Extreme Overbought (CCI > +200)
+        1 = Extreme Oversold (CCI < -200)  
+        0 = Not in extreme zone
+        
+        Parameters:
+        extreme_overbought (int): Extreme overbought threshold (default: +200)
+        extreme_oversold (int): Extreme oversold threshold (default: -200)
+        
+        """
+        
+        for name in self.cci:
+            self._validate_columns(columns=[name])
         
             extreme_overbought_condition = self.data[name] > extreme_overbought
             extreme_oversold_condition = self.data[name] < extreme_oversold
@@ -282,38 +319,39 @@ class ForexWilliamsRSignals:
             self.signals[f'{name}_extreme'] = np.select(
                 [extreme_overbought_condition, extreme_oversold_condition],
                 [2, 1],
-                default = 0
+                default=0
             )
          
         return self.signals
         
-    def generate_all_williams_signals(
+    def generate_all_cci_signals(
         self,
-        overbought: int = -20,
-        oversold: int = -80,
-        extreme_overbought: int = -10,
-        extreme_oversold: int = -90,
+        overbought: int = 100,
+        oversold: int = -100,
+        extreme_overbought: int = 200,
+        extreme_oversold: int = -200,
         lookback: int = 10
     ):
         
         """
-        Generate all Williams %R signals
+        Generate all CCI signals
         
         """
         
-        self.williams_overbought_oversold_signals(
-            overbought = overbought,
-            oversold = oversold
+        self.cci_overbought_oversold_signals(
+            overbought=overbought,
+            oversold=oversold
         )
-        self.williams_momentum_signals()
-        self.williams_reversal_signals(
-            overbought = overbought,
-            oversold = oversold
+        self.cci_momentum_signals()
+        self.cci_reversal_signals(
+            overbought=overbought,
+            oversold=oversold
         )
-        self.williams_divergence_signals(lookback=lookback)
-        self.williams_extreme_signals(
-            extreme_overbought = extreme_overbought,
-            extreme_oversold = extreme_oversold
+        self.cci_divergence_signals(lookback=lookback)
+        self.cci_zero_line_signals()
+        self.cci_extreme_signals(
+            extreme_overbought=extreme_overbought,
+            extreme_oversold=extreme_oversold
         )
         
         count_removed_rows = self.signals.shape[0] - self.data.shape[0]
