@@ -46,6 +46,10 @@ class ForexPlotter:
     
     if cols is None:
         cols = self.data.drop(columns = self.close_col).columns
+    else:
+        if self.close_col in cols:
+            cols = cols.tolist()
+            cols.remove(self.close_col)
         
     self._validate_columns(columns = cols)
         
@@ -58,20 +62,29 @@ class ForexPlotter:
         colors = ['blue' if x == 0 else 'red' if x == 1 else 'green' for x in plot_data[col]]
 
         for i in range(len(plot_data) - 1):
-            plt.plot(plot_data.index[i:i+2], plot_data[self.close_col].iloc[i:i+2], 
-                    color=colors[i], linewidth=2)
+            plt.plot(
+                plot_data.index[i:i+2],
+                plot_data[self.close_col].iloc[i:i+2], 
+                color=colors[i], 
+                linewidth=2
+            )
 
         for color, value in [ ('red', 1), ('green', 2)]:
             mask = plot_data[col] == value
             if mask.any():
-                plt.scatter(plot_data.index[mask], plot_data[self.close_col][mask], 
-                        color=color, s=400, label=f'Cross = {value}')
+                plt.scatter(
+                    plot_data.index[mask],
+                    plot_data[self.close_col][mask], 
+                    color = color, 
+                    s = 50, 
+                    label = f'Cross = {value}'
+                )
                 
-        plt.title(col,fontsize=20)
+        plt.title(col, fontsize=20)
         plt.xlabel('DateTime', fontsize=12)
         plt.ylabel(self.close_col, fontsize=12)
         plt.legend()
-        plt.grid(True, alpha=0.3)
+        plt.grid(True, alpha = 0.3)
         plt.tight_layout()
         plt.show()
     

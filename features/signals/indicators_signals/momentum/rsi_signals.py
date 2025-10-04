@@ -92,7 +92,7 @@ class ForexRSISignals:
     ):
         
         """
-        Extract MA column names based on parameters
+        Extract RSI column names based on parameters
         
         """
         is_nested = self._is_nested_list(parameters)
