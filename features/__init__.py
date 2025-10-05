@@ -3,7 +3,7 @@ from .indicators import (
     ForexTrendIndicators,
     ForexVolumeIndicators,
     ForexVolatilityIndicators,
-    ForexCustomIndicators,
+    #ForexCustomIndicators,
     ForexTSIndicators,
 )
 from .signals import (
@@ -23,7 +23,7 @@ from .signals import (
 )
 
 __all__ = [
-    "ForexCustomFeatures",
+    #"ForexCustomFeatures",
     "ForexTSFeatures",
     "ForexMomentumIndicators",
     "ForexTrendIndicators",
