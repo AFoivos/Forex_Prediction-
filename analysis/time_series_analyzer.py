@@ -17,6 +17,7 @@ class ForexTimeSeriesAnalyzer:
         self, 
         data: pd.DataFrame,
         close_col: str = 'close',
+        period: int = None
     ):
         
         """
@@ -34,7 +35,7 @@ class ForexTimeSeriesAnalyzer:
         print(" Available Functions \n1 basic_descriptive_stats \n2 stationarity_tests \n3 distribution_analysis \n4 autocorrelation_analysis \n5 volatility_analysis \n6 drawdown_analysis \n7 seasonal_decomposition \n8 run_complete_analysis")
         print("="*50)
         
-        self.data = data.copy()
+        self.data = data.copy() if period == None else data.tail(period).copy()
         self.close_col = close_col
         
         self.parameters = {}
