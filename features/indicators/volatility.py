@@ -47,7 +47,7 @@ class ForexVolatilityIndicators:
         
         self.volatility_data = pd.DataFrame(
             {self.close_col: self.data[self.close_col]},
-            index=self.data.index
+            index = self.data.index
         )
         
         self._validate_columns()
@@ -101,6 +101,7 @@ class ForexVolatilityIndicators:
     def add_atr(
         self, 
         periods: List[int] = [10, 14, 21, 28],
+        params_change = True
     ):
         
         """
@@ -111,7 +112,8 @@ class ForexVolatilityIndicators:
         
         """
         print(periods)
-        self.parameters['atr_params'] = periods
+        if params_change:
+            self.parameters['atr_params'] = periods
         print(self.parameters)
         periods = self._is_nested_list(periods)
         
@@ -125,6 +127,8 @@ class ForexVolatilityIndicators:
                     self.data[self.close_col],
                     timeperiod=period
                 )
+                
+                self.volatility_data[f'{col_name}_slope'] = self.volatility_data[col_name].diff() 
 
         return self.volatility_data
     
@@ -157,7 +161,7 @@ class ForexVolatilityIndicators:
                 nbdevdn=nbdevdn
             )
             
-            col_name = f'bb_{timeperiod}'
+            col_name = f'bb_{timeperiod}_{nbdevup}_{nbdevdn}'
             
             self.volatility_data[f'{col_name}_upper'] = upper
             self.volatility_data[f'{col_name}_middle'] = middle
@@ -190,11 +194,14 @@ class ForexVolatilityIndicators:
             if ema_col not in self.data.columns:            
                 self.data[ema_col] = talib.EMA(
                     self.data[self.close_col], 
-                    timeperiod=lst[0]
+                    timeperiod=lst[0],
                 )
 
             if atr_col not in self.volatility_data.columns:
-                self.add_atr(periods=[lst[1]])
+                self.add_atr(
+                    periods=[lst[1]],
+                    params_change = False
+                )
             
             col_name = f'keltner_{ema_col}_{atr_col}'
 

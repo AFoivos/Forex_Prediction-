@@ -109,7 +109,7 @@ class ForexATRSignals:
     
     def atr_volatility_signals(
         self, 
-        high_volatility_multiplier: float = 2.0,
+        high_volatility_multiplier: float = 1.5,
         low_volatility_multiplier: float = 0.5
     ):
         
@@ -128,8 +128,8 @@ class ForexATRSignals:
         for name in self.atr:
             self._validate_columns(columns = [name])
             
-            atr_ma = self.data[name].rolling(window=20).mean()
-            
+            atr_ma = self.data[name].rolling(window = 10).mean()
+
             high_volatility = self.data[name] > (atr_ma * high_volatility_multiplier)
             low_volatility = self.data[name] < (atr_ma * low_volatility_multiplier)
             
@@ -309,7 +309,7 @@ class ForexATRSignals:
         
     def generate_all_atr_signals(
         self,
-        high_volatility_multiplier: float = 2.0,
+        high_volatility_multiplier: float = 1.5,
         low_volatility_multiplier: float = 0.5,
         lookback_period: int = 20,
         strong_trend_threshold: float = 1.5,

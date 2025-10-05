@@ -15,6 +15,7 @@ from .momentum import(
 
 from .volatility import(
     ForexATRSignals,
+    ForexBollingerBandsSignals,
 )
 
 __all__ = [
@@ -28,4 +29,5 @@ __all__ = [
     "ForexCCISignals",
     "ForexMomentumSignals",
     "ForexATRSignals",
+    "ForexBollingerBandsSignals"
 ]

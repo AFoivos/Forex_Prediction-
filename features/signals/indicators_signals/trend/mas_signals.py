@@ -161,34 +161,6 @@ class ForexMASignals:
             )
                 
         return self.signals
-        
-        # columns = f'trend_sma_{fast_col}', f'trend_sma_{slow_col}'
-        # self._validate_columns(columns = columns)
-        
-        # for name1 in self.sma_names:
-        #     for name2 in self.sma_names:
-        #         period1 = int(name1.split('_')[1])
-        #         period2 = int(name2.split('_')[1])
-        #         if name1 != name2 and period1 < period2 :
-        #             # Golden Cross: fast crosses above slow
-        #             golden_condition = (
-        #                 (self.data[name1] > self.data[name2]) & 
-        #                 (self.data[name1].shift(1) <= self.data[name2].shift(1))
-        #             )
-                    
-        #             # Death Cross: fast crosses below slow  
-        #             death_condition = (
-        #                 (self.data[name1] < self.data[name2]) & 
-        #                 (self.data[name1].shift(1) >= self.data[name2].shift(1))
-        #             )
-                    
-        #             # Create signal for entire series: 1=Golden, 0=Death, NaN=No signal
-        #             self.signals[f'{name1}_{name2}_golden_death_cross'] = np.select(
-        #                 [golden_condition, death_condition],
-        #                 [2, 1],
-        #                 default = 0
-                
-        # return self.signals
     
     def ema_crossover(
         self,
@@ -256,29 +228,6 @@ class ForexMASignals:
                 )
         
         return self.signals
-        
-        # columns = []
-        # for period in periods:
-        #     columns.append(f'trend_ema_{period}')
-            
-        # self._validate_columns(columns = columns)
-        
-        # bullish_condition = True
-        # bearish_condition = True
-        
-        # for i in range(len(columns)-1):
-        #     if columns[i] > columns[i+1]:
-        #         bullish = False
-        #     elif columns[i] < columns[i+1]:
-        #         bearish = False
-
-        # self.signals['bearish_bullish_hierarchy'] = np.select(
-        #     [bullish_condition, bearish_condition],
-        #     [2, 1],
-        #     default = 0
-        # )
-    
-        # return self.signals
     
     def ma_bounce_signals(
         self, 
@@ -315,36 +264,9 @@ class ForexMASignals:
                 )
                 
                 return self.signals
-        
-        # column = f'trend_{ma_type}_{period}'
-        # self._validate_columns(columns = [column])
-        
-        # touch_threshold = self.data[column] * 0.001
-        # price_touches_ma = abs(self.data[self.close_col] - self.data[column]) <= touch_threshold
-        
-        # bearish_bounce = (
-        #     (self.data[self.close_col].shift(1) > self.data[column].shift(1)) &
-        #     price_touches_ma &
-        #     (self.data[self.close_col] < self.data[column])
-        # )
-        
-        # bullish_bounce = (
-        #     (self.data[self.close_col].shift(1) < self.data[column].shift(1)) &
-        #     price_touches_ma &
-        #     (self.data[self.close_col] > self.data[column])
-        # )
-        
-        # self.signals['bounce_bearish_bullish'] = np.select(
-        #     [bearish_bounce, bullish_bounce],
-        #     [1, 2],
-        #     default = 0
-        # )
-        
-        # return self.signals
-        
+
     def ma_slope_signals(
         self,  
-        # lookback: int = 3
     ):
         
         """
@@ -386,40 +308,6 @@ class ForexMASignals:
                 
         return self.signals 
         
-        # columns = [f"trend_{ma_type}_{period}", f"trend_{ma_type}_{period}_slope"]
-        # self._validate_columns(columns = columns)
-    
-        # # Positive/Negative slope 
-        # positive_slope = self.data[columns[1]] > 0
-        # negative_slope = self.data[columns[1]] < 0
-        
-        # self.signals['slope_direction'] = np.select(
-        #     [positive_slope, negative_slope],
-        #     [2, 1],
-        #     default = 0
-        # )
-        
-        # # Slope acceleration
-        # slope_increasing = self.data[columns[1]] > self.data[columns[1]].shift(1)
-        # slope_decreasing = self.data[columns[1]] < self.data[columns[1]].shift(1)
-
-        # self.signals['slope_acceleration'] = np.select(
-        #     [slope_increasing, slope_decreasing],
-        #     [2, 1],  
-        #     default = 0  
-        # )
-        
-        # # Strong trend signals
-          
-        # strong_uptrend = (self.data[self.close_col] > self.data[columns[0]]) & (self.data[columns[1]] > 0)
-        # strong_downtrend = (self.data[self.close_col] < self.data[columns[0]]) & (self.data[columns[1]] < 0)
-
-        # self.signals['trend_strong'] = np.select(
-        #     [strong_uptrend, strong_downtrend],
-        #     [2, 1],  
-        #     default = 0  
-        # )
-        
     def price_extension_signals(
         self, 
         deviation: float = 0.02
@@ -454,32 +342,6 @@ class ForexMASignals:
                 )
                 
         return self.signals
-        
-        # column = f'trend_{ma_type}_{period}'
-        # self._validate_columns(columns = [column])
-        
-        # # Calculate percentage deviation from MA
-        # deviation_pct = abs(self.data[self.close_col] - self.data[column]) / self.data[column]
-        
-        # # Overbought: Price significantly above MA
-        # overbought = ( 
-        #     (self.data[self.close_col] > self.data[column]) & 
-        #     (deviation_pct > deviation)
-        # )
-        
-        # # Oversold: Price significantly below MA    
-        # oversold = (
-        #     (self.data[self.close_col] < self.data[column]) & 
-        #     (deviation_pct > deviation)
-        # )
-        
-        # self.signals["overbought_oversold"] = np.select(
-        #     [overbought, oversold],
-        #     [2, 1],
-        #     default = 0
-        # )
-        
-        # return self.signals
         
     def generate_all_signals(
         self,
