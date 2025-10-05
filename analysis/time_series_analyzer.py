@@ -12,7 +12,7 @@ from typing import Dict, List, Optional, Union
 import warnings
 warnings.filterwarnings('ignore')
 
-class TimeSeriesAnalyzer:
+class ForexTimeSeriesAnalyzer:
     def __init__(
         self, 
         data: pd.DataFrame,
@@ -103,23 +103,24 @@ class TimeSeriesAnalyzer:
         
         stats_data = {
             'Price': self.data[self.close_col],
-            'Returns': self.analysis_results['returns'].dropna()
+            'Returns': self.analysis_results['returns'].dropna(),
+            #we add some indicators too
         }
         
         descriptive_stats = {}
         
         for name, series in stats_data.items():
             print(f"\n{name}:")
-            print(f"  Count: {series.count():,.0f}")
-            print(f"  Mean: {series.mean():.6f}")
-            print(f"  Std: {series.std():.6f}")
-            print(f"  Min: {series.min():.6f}")
-            print(f"  25%: {series.quantile(0.25):.6f}")
-            print(f"  50%: {series.quantile(0.50):.6f}")
-            print(f"  75%: {series.quantile(0.75):.6f}")
-            print(f"  Max: {series.max():.6f}")
-            print(f"  Skewness: {series.skew():.4f}")
-            print(f"  Kurtosis: {series.kurtosis():.4f}")
+            print(f"  Count: {series.count():,.2f}")
+            print(f"  Mean: {series.mean():.2f}")
+            print(f"  Std: {series.std():.2f}")
+            print(f"  Min: {series.min():.2f}")
+            print(f"  25%: {series.quantile(0.25):.2f}")
+            print(f"  50%: {series.quantile(0.50):.2f}")
+            print(f"  75%: {series.quantile(0.75):.2f}")
+            print(f"  Max: {series.max():.2f}")
+            print(f"  Skewness: {series.skew():.2f}")
+            print(f"  Kurtosis: {series.kurtosis():.2f}")
             
             descriptive_stats[name] = {
                 'count': series.count(),
@@ -147,9 +148,6 @@ class TimeSeriesAnalyzer:
         
         """
         
-        print("\n STATIONARITY TESTS")
-        print("-" * 40)
-        
         series_to_test = {
             'Price': self.data[self.close_col].dropna(),
             'Returns': self.analysis_results['returns'].dropna()
@@ -158,14 +156,13 @@ class TimeSeriesAnalyzer:
         stationarity_results = {}
         
         for name, series in series_to_test.items():
-            print(f"\n{name}:")
-            
+
             adf_result = adfuller(series)
             
             try:
                 kpss_result = kpss(series, regression='c')
             except Exception as e:
-                print(f"  KPSS Test: Could not compute - {e}")
+                raise ValueError(f'Error: {e}')
             
             stationarity_results[name] = {
                 'adf_statistic': adf_result[0],
