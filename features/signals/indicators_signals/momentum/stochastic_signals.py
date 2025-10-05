@@ -35,7 +35,7 @@ class ForexStochasticSignals:
         self.data = data.copy()
         
         self.signals = pd.DataFrame(
-            {self.close_col: self.data['close']},
+            {self.close_col: self.data[self.close_col]},
             index=self.data.index
         )
         
