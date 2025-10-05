@@ -391,7 +391,6 @@ class ForexBollingerBandsSignals:
         count_removed_rows = self.signals.shape[0] - self.data.shape[0]
         
         print('='*50)
-        print('Bollinger Bands Signals - Data Info')
         print(self.signals.info())
         print('='*50)   
         print(f'Shape of data {self.signals.shape}')

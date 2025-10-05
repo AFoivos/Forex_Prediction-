@@ -203,7 +203,7 @@ class ForexVolatilityIndicators:
                     params_change = False
                 )
             
-            col_name = f'keltner_{ema_col}_{atr_col}'
+            col_name = f'keltner_{ema_col}_{atr_col}_{multiplier}'
 
             self.volatility_data[f'{col_name}_middle'] = self.data[ema_col]
             self.volatility_data[f'{col_name}_upper'] = self.data[ema_col] + (self.volatility_data[atr_col] * multiplier) 

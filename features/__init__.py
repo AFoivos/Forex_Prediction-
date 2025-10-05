@@ -18,6 +18,7 @@ from .signals import (
     ForexMomentumSignals,
     ForexATRSignals,
     ForexBollingerBandsSignals,
+    ForexKeltnerSignals,
 )
 
 __all__ = [
@@ -39,5 +40,6 @@ __all__ = [
     "ForexCCISignals",
     "ForexMomentumSignals",
     "ForexATRSignals",
-    "ForexBollingerBandsSignals"
+    "ForexBollingerBandsSignals",
+    "ForexKeltnerSignals"
 ]
