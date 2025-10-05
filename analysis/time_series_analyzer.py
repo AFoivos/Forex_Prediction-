@@ -89,16 +89,14 @@ class ForexTimeSeriesAnalyzer:
     
     def basic_descriptive_stats(
         self,
+        prints = True
     ):
         
         """
         Basic Descriptive Statistics
         
         """
-        
-        print("BASIC DESCRIPTIVE STATISTICS")
-        print("-" * 50)
-        
+    
         self.analysis_results['returns'] = self.data[self.close_col].pct_change()
         
         stats_data = {
@@ -110,29 +108,30 @@ class ForexTimeSeriesAnalyzer:
         descriptive_stats = {}
         
         for name, series in stats_data.items():
-            print(f"\n{name}:")
-            print(f"  Count: {series.count():,.2f}")
-            print(f"  Mean: {series.mean():.2f}")
-            print(f"  Std: {series.std():.2f}")
-            print(f"  Min: {series.min():.2f}")
-            print(f"  25%: {series.quantile(0.25):.2f}")
-            print(f"  50%: {series.quantile(0.50):.2f}")
-            print(f"  75%: {series.quantile(0.75):.2f}")
-            print(f"  Max: {series.max():.2f}")
-            print(f"  Skewness: {series.skew():.2f}")
-            print(f"  Kurtosis: {series.kurtosis():.2f}")
+            if prints:
+                print(f"\n{name}:")
+                print(f"  Count: {series.count():,.2f}")
+                print(f"  Mean: {series.mean():.2f}")
+                print(f"  Std: {series.std():.2f}")
+                print(f"  Min: {series.min():.2f}")
+                print(f"  25%: {series.quantile(0.25):.2f}")
+                print(f"  50%: {series.quantile(0.50):.2f}")
+                print(f"  75%: {series.quantile(0.75):.2f}")
+                print(f"  Max: {series.max():.2f}")
+                print(f"  Skewness: {series.skew():.2f}")
+                print(f"  Kurtosis: {series.kurtosis():.2f}")
             
             descriptive_stats[name] = {
                 'count': series.count(),
-                'mean': series.mean(),
-                'std': series.std(),
-                'min': series.min(),
-                '25%': series.quantile(0.25),
-                '50%': series.quantile(0.50),
-                '75%': series.quantile(0.75),
-                'max': series.max(),
-                'skewness': series.skew(),
-                'kurtosis': series.kurtosis()
+                'mean': round(series.mean(), 4),
+                'std': round(series.std(), 4),
+                'min': round(series.min(), 4),
+                '25%': round(series.quantile(0.25), 4),
+                '50%': round(series.quantile(0.50), 4),
+                '75%': round(series.quantile(0.75), 4),
+                'max': round(series.max(), 4),
+                'skewness': round(series.skew(), 4),
+                'kurtosis': round(series.kurtosis(), 4)
             }
         
         self.parameters['descriptive_stats'] = descriptive_stats
@@ -369,7 +368,7 @@ class ForexTimeSeriesAnalyzer:
         
         """
         
-        self.basic_descriptive_stats()
+        self.basic_descriptive_stats(prints = False)
         self.stationarity_tests()
         self.distribution_analysis()
         self.autocorrelation_analysis(lags=autocorrelation_lags)
@@ -380,7 +379,6 @@ class ForexTimeSeriesAnalyzer:
         count_removed_rows = self.data.shape[0] - self.analysis_results.shape[0]
         
         print('='*50)
-        print('Analysis Results Info')
         print(self.analysis_results.info())
         print('='*50)
         print(f'Shape of analysis results {self.analysis_results.shape}')
