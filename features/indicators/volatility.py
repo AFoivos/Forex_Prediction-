@@ -230,7 +230,7 @@ class ForexVolatilityIndicators:
         
         for sublist in periods:
             for period in sublist:
-                col_name = f'vol_std_dev_{period}'
+                col_name = f'std_dev_{period}'
                 
                 self.volatility_data[col_name] = talib.STDDEV(
                     self.data[self.close_col],

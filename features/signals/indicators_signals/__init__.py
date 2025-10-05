@@ -17,6 +17,7 @@ from .volatility import(
     ForexATRSignals,
     ForexBollingerBandsSignals,
     ForexKeltnerSignals,
+    ForexSTDSignals
 )
 
 __all__ = [
@@ -32,4 +33,5 @@ __all__ = [
     "ForexATRSignals",
     "ForexBollingerBandsSignals",
     "ForexKeltnerSignals",
+    "ForexSTDSignals"
 ]
