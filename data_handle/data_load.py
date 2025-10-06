@@ -90,6 +90,8 @@ class ForexDataLoad:
                 print("\n" + "="*50)
         except Exception as e:
             raise ValueError(f"Error loading file: {e}")
+        
+        return self.data
     
     def load_dataframe(self):
         
@@ -111,6 +113,8 @@ class ForexDataLoad:
                 raise ValueError("Input is not a valid DataFrame.")
         except Exception as e:
             raise ValueError(f"Error loading DataFrame: {e}")
+        
+        return self.data
             
     def load_from_database(
         self, 

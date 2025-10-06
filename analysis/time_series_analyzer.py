@@ -70,23 +70,23 @@ class ForexTimeSeriesAnalyzer:
         if missing_cols:
             raise ValueError(f"Missing columns in DataFrame: {missing_cols}")
     
-    def _is_nested_list(
-        self, 
-        lst
-    ):
+    # def _is_nested_list(
+    #     self, 
+    #     lst
+    # ):
         
-        """
-        Check if a list is nested or not
+    #     """
+    #     Check if a list is nested or not
         
-        Parameters:
-        lst (list): List to check
+    #     Parameters:
+    #     lst (list): List to check
         
-        """
+    #     """
         
-        if not all(isinstance(item, list) for item in lst):
-            return [lst]
-        else:
-            return lst
+    #     if not all(isinstance(item, list) for item in lst):
+    #         return [lst]
+    #     else:
+    #         return lst
     
     def basic_descriptive_stats(
         self,
