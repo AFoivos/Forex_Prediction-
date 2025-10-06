@@ -160,7 +160,10 @@ class ForexTimeSeriesAnalyzer:
             adf_result = adfuller(series)
             
             try:
-                kpss_result = kpss(series, regression='c')
+                kpss_result = kpss(
+                    series, 
+                    regression='c'
+                )
             except Exception as e:
                 raise ValueError(f'Error: {e}')
             
@@ -225,12 +228,22 @@ class ForexTimeSeriesAnalyzer:
 
         returns = self.analysis_results['returns'].dropna()
         
-        lb_test = acorr_ljungbox(returns, lags=lags, return_df=True)
+        lb_test = acorr_ljungbox(
+            returns, 
+            lags=lags, 
+            return_df=True
+        )
+        
         for lag in lags:
             pval = lb_test.loc[lb_test['lb_stat'].index == lag, 'lb_pvalue'].values[0]
         
         squared_returns = returns ** 2
-        lb_test_squared = acorr_ljungbox(squared_returns, lags=lags, return_df=True)
+        lb_test_squared = acorr_ljungbox(
+            squared_returns, 
+            lags=lags, 
+            return_df=True
+        )
+        
         for lag in lags:
             pval = lb_test_squared.loc[lb_test_squared['lb_stat'].index == lag, 'lb_pvalue'].values[0]
         
@@ -330,7 +343,11 @@ class ForexTimeSeriesAnalyzer:
         
         if len(returns) > period * 2:
             try:
-                decomposition = seasonal_decompose(returns, model='additive', period=period)
+                decomposition = seasonal_decompose(
+                    returns, 
+                    model='additive', 
+                    period=period
+                )
                 
                 seasonal_strength = decomposition.seasonal.std() / returns.std()
                 residual_strength = decomposition.resid.std() / returns.std()
@@ -346,9 +363,9 @@ class ForexTimeSeriesAnalyzer:
                 self.parameters['seasonal_decomposition'] = decomposition_results
                 
             except Exception as e:
-                print(f"  Decomposition failed: {e}")
+                print(f"Decomposition failed: {e}")
         else:
-            print("  Insufficient data for seasonal decomposition")
+            print("Insufficient data for seasonal decomposition")
         
         return self.analysis_results
     
