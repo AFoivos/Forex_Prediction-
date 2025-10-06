@@ -207,7 +207,10 @@ class ForexQuickLook():
         else:
             print(f"Column '{self.column}' not found in dataset")
     
-    def get_summary(self):
+    def get_summary(
+        self,
+        prints = True
+    ):
         
         """
         Get a comprehensive summary of the dataset
@@ -227,7 +230,7 @@ class ForexQuickLook():
         }
         self.summary = summary
         
-        if self.prints == True:
+        if prints == True:
             print("DATASET SUMMARY")
             print("="*50)
             
@@ -250,6 +253,6 @@ class ForexQuickLook():
             self.plot_candlestick()
             self.plot_time_series()
             
-        self.get_summary() 
+        self.get_summary(prints = False) 
         
         return self.data, self.summary
