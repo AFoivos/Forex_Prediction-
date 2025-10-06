@@ -111,16 +111,16 @@ class ForexTimeSeriesAnalyzer:
         for name, series in stats_data.items():
             if prints:
                 print(f"\n{name}:")
-                print(f"  Count: {series.count():,.2f}")
-                print(f"  Mean: {series.mean():.2f}")
-                print(f"  Std: {series.std():.2f}")
-                print(f"  Min: {series.min():.2f}")
-                print(f"  25%: {series.quantile(0.25):.2f}")
-                print(f"  50%: {series.quantile(0.50):.2f}")
-                print(f"  75%: {series.quantile(0.75):.2f}")
-                print(f"  Max: {series.max():.2f}")
-                print(f"  Skewness: {series.skew():.2f}")
-                print(f"  Kurtosis: {series.kurtosis():.2f}")
+                print(f"Count: {series.count():,.2f}")
+                print(f"Mean: {series.mean():.2f}")
+                print(f"Std: {series.std():.2f}")
+                print(f"Min: {series.min():.2f}")
+                print(f"25%: {series.quantile(0.25):.2f}")
+                print(f"50%: {series.quantile(0.50):.2f}")
+                print(f"75%: {series.quantile(0.75):.2f}")
+                print(f"Max: {series.max():.2f}")
+                print(f"Skewness: {series.skew():.2f}")
+                print(f"Kurtosis: {series.kurtosis():.2f}")
             
             descriptive_stats[name] = {
                 'count': series.count(),
