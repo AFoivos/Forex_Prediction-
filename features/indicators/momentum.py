@@ -15,6 +15,7 @@ class ForexMomentumIndicators:
         low_col: str = 'low', 
         close_col: str = 'close',
         volume_col: str = 'volume',
+        prints = True
     ):
         
         """
@@ -30,11 +31,14 @@ class ForexMomentumIndicators:
         
         """
         
-        print("="*50)
-        print("MOMENTUM INDICATORS")
-        print("="*50)
-        print(" Available Fuctions \n1 add_rsi \n2 add_stochastic \n3 add_williams_r \n4 add_cci \n5 add_momentum \n6 generate_all_momentum_indicators")
-        print("="*50) 
+        self.prints = prints
+        
+        if self.prints:
+            print("="*50)
+            print("MOMENTUM INDICATORS")
+            print("="*50)
+            print(" Available Fuctions \n1 add_rsi \n2 add_stochastic \n3 add_williams_r \n4 add_cci \n5 add_momentum \n6 generate_all_momentum_indicators")
+            print("="*50) 
         
         self.data = data.copy()
         self.open_col = open_col
@@ -99,7 +103,7 @@ class ForexMomentumIndicators:
     
     def add_rsi(
         self, 
-        periods: List[int] = [14, 21, 28],
+        rsi_periods: List[int] = [14, 21, 28],
     ):
         
         """
@@ -110,28 +114,26 @@ class ForexMomentumIndicators:
         
         """
         
-        self.parameters['rsi_paramas'] = periods
+        self.parameters['rsi_paramas'] = rsi_periods
         
-        periods = self._is_nested_list(periods)
+        periods = self._is_nested_list(rsi_periods)
         
         for sublist in periods:
             for period in sublist:
                 col_name = f'rsi_{period}'
                 
-                # RSI
                 self.momentum_data[col_name] = talib.RSI(
                     self.data[self.close_col], 
                     timeperiod=period
                 )
                 
-                #RSI slope
                 self.momentum_data[f'{col_name}_slope'] = self.momentum_data[col_name].diff()
             
         return self.momentum_data
     
     def add_stochastic(
         self,
-        fk_sk_sd_periods: List[int] = [14, 3, 3],
+        stoch_fk_sk_sd_periods: List[int] = [14, 3, 3],
     ):
         
         """
@@ -142,9 +144,9 @@ class ForexMomentumIndicators:
         
         """
         
-        self.parameters['stochastic_params'] = fk_sk_sd_periods
+        self.parameters['stochastic_params'] = stoch_fk_sk_sd_periods
         
-        fk_sk_sd_periods = self._is_nested_list(fk_sk_sd_periods)
+        fk_sk_sd_periods = self._is_nested_list(stoch_fk_sk_sd_periods)
         
         for lst in fk_sk_sd_periods:
             fast_k = lst[0]
@@ -165,11 +167,9 @@ class ForexMomentumIndicators:
             col_namek = f'stoch_slowk_{slow_k}'
             col_named = f'stoch_slowd_{slow_d}'
             
-            # Stochastic
             self.momentum_data[col_namek] = slowk
             self.momentum_data[col_named] = slowd
             
-            # Stochastic slope
             self.momentum_data[f'{col_namek}_slope'] = self.momentum_data[col_namek].diff()
             self.momentum_data[f'{col_named}_slope'] = self.momentum_data[col_named].diff()
                 
@@ -177,7 +177,7 @@ class ForexMomentumIndicators:
     
     def add_williams_r(
         self,
-        periods: List[int] = [14, 21, 28],
+        williams_periods: List[int] = [14, 21, 28],
     ):
         
         """
@@ -188,9 +188,9 @@ class ForexMomentumIndicators:
         
         """
         
-        self.parameters['williams_r_params'] = periods
+        self.parameters['williams_r_params'] = williams_periods
         
-        periods = self._is_nested_list(periods)
+        periods = self._is_nested_list(williams_periods)
         
         for sublist in periods:
             for period in sublist:
@@ -203,17 +203,15 @@ class ForexMomentumIndicators:
                 
                 col_name = f'williams_r_{period}'
                 
-                # Williams %R
                 self.momentum_data[col_name] = willr
                 
-                #Williams %R slope
                 self.momentum_data[f'{col_name}_slope'] = willr.diff()
                     
         return self.momentum_data
     
     def add_cci(
         self,
-        periods: List[int] = [14, 21, 28],
+        cci_periods: List[int] = [14, 21, 28],
     ):
         
         """
@@ -224,9 +222,9 @@ class ForexMomentumIndicators:
         
         """
         
-        self.parameters['cci_params'] = periods
+        self.parameters['cci_params'] = cci_periods
         
-        periods = self._is_nested_list(periods)
+        periods = self._is_nested_list(cci_periods)
         
         for sublist in periods:
             for period in sublist:
@@ -239,17 +237,15 @@ class ForexMomentumIndicators:
                 
                 col_name = f'cci_{period}'
                 
-                # CCI
                 self.momentum_data[col_name] = cci
                 
-                # CCI slope
                 self.momentum_data[f'{col_name}_slope'] = cci.diff()
                 
         return self.momentum_data
     
     def add_momentum(
         self, 
-        periods: List[int] = [10, 14, 20],
+        momentum_periods: List[int] = [10, 14, 20],
     ):
         
         """
@@ -260,21 +256,19 @@ class ForexMomentumIndicators:
         
         """
         
-        self.parameters['momentum_params'] = periods
+        self.parameters['momentum_params'] = momentum_periods
         
-        periods = self._is_nested_list(periods)
+        periods = self._is_nested_list(momentum_periods)
         
         for sublist in periods:
             for period in sublist:
                 col_name = f'momentum_{period}'
                 
-                # Momentum
                 self.momentum_data[col_name] = talib.MOM(
                     self.data[self.close_col], 
                     timeperiod = period
                 )
                 
-                # Momentum slope
                 self.momentum_data[f'{col_name}_slope'] = self.momentum_data[col_name].diff()
         
         return self.momentum_data
@@ -282,7 +276,7 @@ class ForexMomentumIndicators:
     def generate_all_momentum_indicators(
         self,
         rsi_periods: List[int] = [14, 21, 28],
-        stochastic_periods: List[int] = [14, 3, 3],
+        stoch_fk_sk_sd_periods: List[int] = [14, 3, 3],
         williams_periods: List[int] = [14, 21, 28],
         cci_periods: List[int] = [14, 21, 28],
         momentum_periods: List[int] = [10, 14, 20],
@@ -301,21 +295,22 @@ class ForexMomentumIndicators:
         
         """
         
-        self.add_rsi(periods = rsi_periods)
-        self.add_stochastic(fk_sk_sd_periods = stochastic_periods)
-        self.add_williams_r(periods = williams_periods)
-        self.add_cci(periods = cci_periods)
-        self.add_momentum(periods = momentum_periods)
+        self.add_rsi(rsi_periods = rsi_periods)
+        self.add_stochastic(stoch_fk_sk_sd_periods = stoch_fk_sk_sd_periods)
+        self.add_williams_r(williams_periods = williams_periods)
+        self.add_cci(cci_periods = cci_periods)
+        self.add_momentum(momentum_periods = momentum_periods)
         
         count_removed_rows = self.data.shape[0] - self.momentum_data.shape[0]
         
-        print('='*50)
-        print('Data Info')
-        print(self.momentum_data.info())
-        print('='*50)
-        print(f'Shape of data {self.momentum_data.shape}')
-        print('='*50)
-        print(f'{count_removed_rows} rows removed')
-        print('='*50)
+        if self.prints:
+            print('='*50)
+            print('Data Info')
+            print(self.momentum_data.info())
+            print('='*50)
+            print(f'Shape of data {self.momentum_data.shape}')
+            print('='*50)
+            print(f'{count_removed_rows} rows removed')
+            print('='*50)
         
         return self.momentum_data, self.parameters

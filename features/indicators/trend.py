@@ -15,6 +15,7 @@ class ForexTrendIndicators:
         low_col: str = 'low', 
         close_col: str = 'close',
         volume_col: str = 'volume',
+        prints = True
     ):
         
         """
@@ -29,11 +30,14 @@ class ForexTrendIndicators:
         
         """
         
-        print("="*50)
-        print("TREND INDICATORS")
-        print("="*50)
-        print(" Available Fuctions: \n1 add_sma \n2 add_ema \n3 add_macd \n4 add_adx \n5 add_parabolic_sar \n6 generate_all_trend_indicators")
-        print("="*50)
+        self.prints = prints
+        
+        if self.prints:
+            print("="*50)
+            print("TREND INDICATORS")
+            print("="*50)
+            print(" Available Fuctions: \n1 add_sma \n2 add_ema \n3 add_macd \n4 add_adx \n5 add_parabolic_sar \n6 generate_all_trend_indicators")
+            print("="*50)
         
         self.data = data.copy()
         self.open_col = open_col
@@ -311,15 +315,16 @@ class ForexTrendIndicators:
         self.add_parabolic_sar(acc_max = parabolic_sar)
         
         count_removed_rows = self.data.shape[0] - self.trend_data.shape[0]
-    
-        print('='*50)
-        print('Data Info')
-        print(self.trend_data.info())
-        print('='*50)
-        print(f'Shape of data {self.trend_data.shape}')
-        print('='*50)
-        print(f'{count_removed_rows} rows removed')
-        print('='*50)
+
+        if self.prints:
+            print('='*50)
+            print('Data Info')
+            print(self.trend_data.info())
+            print('='*50)
+            print(f'Shape of data {self.trend_data.shape}')
+            print('='*50)
+            print(f'{count_removed_rows} rows removed')
+            print('='*50)
         
         return self.trend_data, self.parameters
         

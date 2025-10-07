@@ -15,6 +15,7 @@ class ForexVolatilityIndicators:
         low_col: str = 'low', 
         close_col: str = 'close',
         volume_col: str = 'volume',
+        prints = True
     ):
         
         """
@@ -30,11 +31,14 @@ class ForexVolatilityIndicators:
         
         """
         
-        print("="*50)
-        print("VOLATILITY INDICATORS")
-        print("="*50)
-        print(" Available Fuctions \n1 add_atr \n2 add_bollinger_bands \n3 add_keltner_channels \n4 add_standard_deviation  \n5 generate_all_volatility_indicators")
-        print("="*50)
+        self.prints = prints
+        
+        if self.prints:
+            print("="*50)
+            print("VOLATILITY INDICATORS")
+            print("="*50)
+            print(" Available Fuctions \n1 add_atr \n2 add_bollinger_bands \n3 add_keltner_channels \n4 add_standard_deviation  \n5 generate_all_volatility_indicators")
+            print("="*50)
         
         self.data = data.copy()
         self.open_col = open_col
@@ -111,10 +115,9 @@ class ForexVolatilityIndicators:
         periods (List[int]): List of periods for ATR
         
         """
-        print(periods)
-        if params_change:
-            self.parameters['atr_params'] = periods
-        print(self.parameters)
+       
+        self.parameters['atr_params'] = periods
+        
         periods = self._is_nested_list(periods)
         
         for sublist in periods:
@@ -266,13 +269,14 @@ class ForexVolatilityIndicators:
         
         count_removed_rows = self.data.shape[0] - self.volatility_data.shape[0]
         
-        print('='*50)
-        print('Data Info')
-        print(self.volatility_data.info())
-        print('='*50)
-        print(f'Shape of data {self.volatility_data.shape}')
-        print('='*50)
-        print(f'{count_removed_rows} rows removed')
-        print('='*50)
-        
+        if self.prints:
+            print('='*50)
+            print('Data Info')
+            print(self.volatility_data.info())
+            print('='*50)
+            print(f'Shape of data {self.volatility_data.shape}')
+            print('='*50)
+            print(f'{count_removed_rows} rows removed')
+            print('='*50)
+            
         return self.volatility_data, self.parameters

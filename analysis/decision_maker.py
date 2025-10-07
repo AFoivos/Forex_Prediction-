@@ -225,11 +225,11 @@ class ForexTimeSeriesDecisionMaker:
         vol_stats = self.results['volatility_analysis']
         dist_stats = self.results['distribution_analysis']
         
-        print(f"Avg Volatility: {vol_stats['avg_volatility']:.6f}")
-        print(f"Vol of Vol: {vol_stats['vol_of_vol']:.6f}")
+        print(f"Avg Volatility: {vol_stats['avg_volatility']:.4f}")
+        print(f"Vol of Vol: {vol_stats['vol_of_vol']:.4f}")
         print(f"Max Drawdown: {self.results['drawdown_analysis']['max_drawdown']:.4f}")
         print(f"Skewness: {dist_stats['skewness']:.4f}")
         print(f"Kurtosis: {dist_stats['kurtosis']:.4f}")
-        print(f"Extreme Returns: {dist_stats['extreme_returns_pct']:.2f}%")
+        print(f"Extreme Returns: {dist_stats['extreme_returns_pct']:.4f}%")
         
         print("=" * 50)

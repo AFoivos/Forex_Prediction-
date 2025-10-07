@@ -22,8 +22,11 @@ from .signals import (
     ForexSTDSignals
 )
 
+from .extract_all_features import ForexFeauturesExtractor
+
 __all__ = [
     #"ForexCustomFeatures",
+    "ForexFeauturesExtractor",
     "ForexTSFeatures",
     "ForexMomentumIndicators",
     "ForexTrendIndicators",
