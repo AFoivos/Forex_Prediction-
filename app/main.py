@@ -8,32 +8,27 @@ from app.routers import (
     plots_router,
 )
 
-app = FastAPI(title="Forex Analysis API")
+app = FastAPI(title = "Forex Analysis API")
 
 app.include_router(
     data_handle_router.router, 
     prefix = "/api/v1/data", 
-    tags = ["Data"]
+    tags = ["Data"],
 )
 app.include_router(
     features_router.router, 
     prefix = "/api/v1/features", 
-    tags = ["Features"]
+    tags = ["Indicators & Signals"]
 )
 app.include_router(
     analysis_router.router, 
-    prefix = "/api/v1/signals", 
-    tags = ["Signals"]
-)
-app.include_router(
-    models_router.router, 
     prefix = "/api/v1/analysis", 
     tags = ["Analysis"]
 )
 app.include_router(
-    plots_router.router, 
-    prefix = "/api/v1/predict", 
-    tags = ["Predictions"]
+    models_router.router, 
+    prefix = "/api/v1/blackbox", 
+    tags = ["Dive in Black Box"]
 )
 
 @app.get("/")
