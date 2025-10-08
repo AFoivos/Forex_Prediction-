@@ -1,7 +1,5 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.pylab import date2num
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -22,11 +20,12 @@ class ForexDataLoad:
 
         """
         
-        print("="*50)
-        print("FOREX DATA LOADER")
-        print("="*50)
-        print(" Available Fuctions \n1 load_csv \n2 load_from_database")
-        print("="*50)
+        if prints:
+            print("="*50)
+            print("FOREX DATA LOADER")
+            print("="*50)
+            print(" Available Fuctions \n1 load_csv \n2 load_from_database")
+            print("="*50)
         
         self.file_path = file_path
         
@@ -46,9 +45,10 @@ class ForexDataLoad:
                 print("No data loaded yet. Please load data using one of the methods.")
         except Exception as e:
             print(f"Error during initialization: {e}")
-
         
-    def load_csv(self):
+    def load_csv(
+        self
+    ):
         
         """
         Load data from a CSV file
@@ -59,7 +59,6 @@ class ForexDataLoad:
         """ 
         
         try:
-            # Load the CSV file
             new_column_names = ['date', 'time', 'open', 'high', 'low', 'close', 'tickvol', 'volume', 'spread']
             self.data = pd.read_csv(
                 self.file_path,
@@ -71,7 +70,6 @@ class ForexDataLoad:
 
             self.data['datetime'] = pd.to_datetime(self.data['date'] + ' ' + self.data['time'])
             
-            # Remove unnecessary columns
             self.data.drop(
                 columns=['tickvol', 'spread', 'date', 'time'],
                 inplace=True
@@ -90,8 +88,6 @@ class ForexDataLoad:
         
         return self.data
     
-    
-            
     def load_from_database(
         self, 
         connection_string: str , 

@@ -4,14 +4,17 @@ import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
 
-#ADD PRINTS AND EXPLANATIONS 
-
 class ForexDataClean:
     def __init__(
         self, 
         data: pd.DataFrame, 
         columns: list = None,
-        fast_clean: bool = False, 
+        open_col: str = 'open',
+        high_col: str = 'high', 
+        low_col: str = 'low', 
+        close_col: str = 'close',
+        volume_col: str = 'volume',
+        prints: bool = True,
     ):
         
         """
@@ -23,24 +26,30 @@ class ForexDataClean:
         fast_clean (bool): Whether to perform fast cleaning upon initialization
         
         """
-        print("="*50)
-        print("FOREX DATA CLEANER")
-        print("="*50)
-        print(" Available Fuctions \n1 remove_duplicates \n2 handle_missing_values \n3 validate_ohlc_integrity \n4 handle_outliers")
-        print("="*50)
+        
+        self.prints = prints
+        
+        if self.prints:
+            print("="*50)
+            print("FOREX DATA CLEANER")
+            print("="*50)
+            print(" Available Fuctions \n1 remove_duplicates \n2 handle_missing_values \n3 validate_ohlc_integrity \n4 handle_outliers \n5 fast_cleaner")
+            print("="*50)
     
         self.data = data.copy()
         self.original_data = data.copy()
         
-        if columns is not None:
-            self.columns = columns
-        else:
-            self.columns = self.data.columns
-            
-        if fast_clean:
-            self.fast_cleaner()
+        self.open_col = open_col
+        self.high_col = high_col
+        self.low_col = low_col
+        self.close_col = close_col
+        self.volume_col = volume_col
         
-    def reset_data(self):
+        self.columns = columns if columns is not None else data.columns
+        
+    def reset_data(
+        self
+    ):
         
         """
         Reset the data to its original state
@@ -54,7 +63,7 @@ class ForexDataClean:
     def remove_duplicates(
         self, 
         subset: list = None, 
-        keep='first'
+        keep: str = 'first'
     ):
         
         """
@@ -78,9 +87,12 @@ class ForexDataClean:
                 self.data = self.data.drop_duplicates(subset = subset, keep = keep) 
         after_drop = len(self.data)
 
-        print("="*50)
-        print(f"Keep = {keep} and subset = {subset}")
-        print(f"Removed {before_drop - after_drop} duplicate entries")
+        if self.prints:
+            print("="*50)
+            print(f"Keep = {keep} and subset = {subset}")
+            print(f"Removed {before_drop - after_drop} duplicate entries")
+        
+        self._validate_ohlc_integrity()
         
         return self.data
             
@@ -104,10 +116,8 @@ class ForexDataClean:
         
         numeric_cols = [col for col in columns if pd.api.types.is_numeric_dtype(self.data[col])]
         
-        # Count Missing values
         missing_values = self.data[columns].isnull().sum().sum()
 
-        # Working with the Missing values with the sellected method
         if missing_values == 0:
             print("No missing values found")
         else:
@@ -141,97 +151,55 @@ class ForexDataClean:
     
         return self.data    
             
-    def validate_ohlc_integrity(
+    def _validate_ohlc_integrity(
         self, 
-        fix_errors = False
     ):
         
         """
         Validate OHLC data integrity and optionally fix errors
         
-        Parameters:
-        fix_errors: Whether to automatically fix detected errors
-        
         """
         
-        # Check for various types of OHLC violations
-        high_low_violations = (self.data['high'] < self.data['low'])
-        open_low_violations = (self.data['open'] < self.data['low'])
-        open_high_violations = (self.data['open'] > self.data['high'])
-        close_low_violations = (self.data['close'] < self.data['low'])
-        close_high_violations = (self.data['close'] > self.data['high'])
+        high_low_violations = (self.data[self.high_col] < self.data[self.low_col])
+        open_low_violations = (self.data[self.open_col] < self.data[self.low_col])
+        open_high_violations = (self.data[self.open_col] > self.data[self.high_col])
+        close_low_violations = (self.data[self.close_col] < self.data[self.low_col])
+        close_high_violations = (self.data[self.close_col] > self.data[self.high_col])
         
         open_violations = open_low_violations | open_high_violations
         close_violations = close_low_violations | close_high_violations
         
         violation_count = high_low_violations.sum() +  open_violations.sum() +  close_violations.sum()    
-        
-        print("=" * 50)
-        print("OHLC DATA INTEGRITY VALIDATION")
-        print("=" * 50)
+        if self.prints:
+            print("=" * 50)
+            print("OHLC DATA INTEGRITY VALIDATION")
+            print("=" * 50)
         
         if violation_count == 0:
             print("No OHLC integrity violations found")
             print("All OHLC values are consistent")
             return violation_count
         
-        # Detailed violation report
-
-        print(f"Found {violation_count} OHLC integrity violations:")
-        print(f"-High < Low violations: {high_low_violations.sum()}")
-        print(f"-Open price violations: {open_violations.sum()}")
-        print(f"     • Open < Low: {open_low_violations.sum()}")
-        print(f"     • Open > High: {open_high_violations.sum()}")
-        print(f"- Close price violations: {close_violations.sum()}")
-        print(f"     • Close < Low: {close_low_violations.sum()}")
-        print(f"     • Close > High: {close_high_violations.sum()}")
+        if self.prints:
+            print(f"Found {violation_count} OHLC integrity violations:")
+            print(f"-High < Low violations: {high_low_violations.sum()}")
+            print(f"-Open price violations: {open_violations.sum()}")
+            print(f"     • Open < Low: {open_low_violations.sum()}")
+            print(f"     • Open > High: {open_high_violations.sum()}")
+            print(f"- Close price violations: {close_violations.sum()}")
+            print(f"     • Close < Low: {close_low_violations.sum()}")
+            print(f"     • Close > High: {close_high_violations.sum()}")
                                  
         if violation_count > 0:
             print(f"Found {violation_count} OHLC integrity violations")
-            
-        #if fix_errors:
-        #     print(f"\n Attempting to fix {violation_count} violations...")
-            
-        #     # Fix High < Low violations by swapping
-        #     hl_fix_count = high_low_violations.sum()
-        #     if hl_fix_count > 0:
-        #         self.data.loc[high_low_violations, ['high', 'low']] = self.data.loc[high_low_violations, ['low', 'high']].values
-        #         print(f"Fixed {hl_fix_count} High < Low violations by swapping values")
-            
-        #     # Fix Open price violations by clamping to [low, high] range
-        #     open_fix_count = open_violations.sum()
-        #     if open_fix_count > 0:
-        #         self.data.loc[open_low_violations, 'open'] = self.data.loc[open_low_violations, 'low']
-        #         self.data.loc[open_high_violations, 'open'] = self.data.loc[open_high_violations, 'high']
-        #         print(f"Fixed {open_fix_count} Open price violations by clamping to valid range")
-            
-        #     # Fix Close price violations by clamping to [low, high] range
-        #     close_fix_count = close_violations.sum()
-        #     if close_fix_count > 0:
-        #         self.data.loc[close_low_violations, 'close'] = self.data.loc[close_low_violations, 'low']
-        #         self.data.loc[close_high_violations, 'close'] = self.data.loc[close_high_violations, 'high']
-        #         print(f"Fixed {close_fix_count} Close price violations by clamping to valid range")
-            
-        #     # Verify fixes
-        #     remaining_violations = self.validate_ohlc_integrity(fix_errors=False)
-        #     if remaining_violations == 0:
-        #         print(" All violations successfully fixed!")
-        #     else:
-        #         print(f"Could not fix all violations. {remaining_violations} remain.")
-            
-        #     return remaining_violations
-        # else:
-        #     print(f"\n Use fix_errors=True to automatically fix these violations")
-        
-        # return violation_count
     
     def handle_outliers(
         self, 
-        method='quantile', 
-        threshold=3.0, 
-        strategy='cap', 
+        method: str =' quantile', 
+        threshold: float = 3.0, 
+        strategy: str = 'cap', 
         columns: list = None,
-        remove: bool = False
+        remove: bool = True
     ):
         
         """
@@ -248,32 +216,28 @@ class ForexDataClean:
         
         if columns is None:
             columns = self.columns
-        
-        print("=" * 50)
-        print("OUTLIER DETECTION AND HANDLING")
-        print("=" * 50)
-        print(f"Method: {method}, Strategy: {strategy}, Threshold: {threshold}")
-        print(f"Remove outliers: {remove}")
-        print("-" * 50)
+            
+        if self.prints:
+            print("=" * 50)
+            print("OUTLIER DETECTION AND HANDLING")
+            print("=" * 50)
+            print(f"Method: {method}, Strategy: {strategy}, Threshold: {threshold}")
+            print(f"Remove outliers: {remove}")
+            print("-" * 50)
         
         total_outliers = 0
         total_rows_before = len(self.data)
         
         for col in columns:
             
-            # Skip non-numeric columns
             if not pd.api.types.is_numeric_dtype(self.data[col]):
-
-                print(f"⏭️  Skipping non-numeric column: {col}")
                 continue
             
-            # Store original stats
             original_min = self.data[col].min()
             original_max = self.data[col].max()
             original_mean = self.data[col].mean()
             original_std = self.data[col].std()
             
-            # Calculate bounds based on method
             if method == 'iqr':
                 Q1 = self.data[col].quantile(0.25)
                 Q3 = self.data[col].quantile(0.75)
@@ -293,7 +257,6 @@ class ForexDataClean:
                 upper_bound = self.data[col].quantile(0.99)
                 method_desc = f"Quantile (1%-99%)"
             
-            # Identify outliers
             lower_outliers = (self.data[col] < lower_bound).sum()
             upper_outliers = (self.data[col] > upper_bound).sum()
             col_outliers = lower_outliers + upper_outliers
@@ -303,16 +266,19 @@ class ForexDataClean:
                 continue
             
             total_outliers += col_outliers
-            print(f"{col}: Found {col_outliers} outliers ({lower_outliers} low, {upper_outliers} high)")
-            print(f"Bounds: [{lower_bound:.5f} - {upper_bound:.5f}]")
-            print(f"Original range: [{original_min:.5f} - {original_max:.5f}]")
-            print(f"Method: {method_desc}")
+            
+            if self.prints:
+                print(f"{col}: Found {col_outliers} outliers ({lower_outliers} low, {upper_outliers} high)")
+                print(f"Bounds: [{lower_bound:.5f} - {upper_bound:.5f}]")
+                print(f"Original range: [{original_min:.5f} - {original_max:.5f}]")
+                print(f"Method: {method_desc}")
             
             if remove:
-                # Apply outlier handling strategy
                 if strategy == 'remove':
                     rows_before = len(self.data)
-                    self.data = self.data[(self.data[col] >= lower_bound) & (self.data[col] <= upper_bound)]
+                    self.data = self.data[(self.data[col] >= lower_bound) & 
+                                          (self.data[col] <= upper_bound)]
+                    
                     rows_removed = rows_before - len(self.data)
                     print(f"Removed {rows_removed} rows containing outliers")
                     
@@ -338,7 +304,6 @@ class ForexDataClean:
                     self.data.loc[self.data[col] > upper_bound, col] = median_val
                     print(f"Replaced {low_replace + high_replace} outliers with median ({median_val:.5f})")
                 
-                # Show after stats
                 new_min = self.data[col].min()
                 new_max = self.data[col].max()
                 print(f"New range: [{new_min:.5f} - {new_max:.5f}]")
@@ -347,37 +312,74 @@ class ForexDataClean:
             
             print()
         
-        print("=" * 50)
-        if total_outliers == 0:
-            print("No outliers found in any numeric columns!")
-        else:
-            rows_after = len(self.data)
-            rows_removed_total = total_rows_before - rows_after
-            
-            if remove:
-                if strategy == 'remove':
-                    print(f"SUMMARY: Removed {rows_removed_total} rows containing {total_outliers} outliers")
-                else:
-                    print(f"SUMMARY: Processed {total_outliers} outliers across all columns")
-                    print(f"   Rows before: {total_rows_before}, Rows after: {rows_after}")
+        if self.prints:
+            print("=" * 50)
+            if total_outliers == 0:
+                print("No outliers found in any numeric columns!")
             else:
-                print(f"SUMMARY: Found {total_outliers} outliers (not removed)")
-                print(f"Use remove=True to handle these outliers")
-        
-        print("=" * 50)
+                rows_after = len(self.data)
+                rows_removed_total = total_rows_before - rows_after
+                
+                if remove:
+                    if strategy == 'remove':
+                        print(f"SUMMARY: Removed {rows_removed_total} rows containing {total_outliers} outliers")
+                    else:
+                        print(f"SUMMARY: Processed {total_outliers} outliers across all columns")
+                        print(f"   Rows before: {total_rows_before}, Rows after: {rows_after}")
+                else:
+                    print(f"SUMMARY: Found {total_outliers} outliers (not removed)")
+                    print(f"Use remove=True to handle these outliers")
+            
+            print("=" * 50)
+            
         return self.data
         
-    def fast_cleaner(self):
+    def fast_cleaner(
+        self,
+        missing_method: str = 'drop', 
+        missing_columns: list = None,
+        duplicates_columns: list = None, 
+        duplicates_method: str='first',
+        outlier_method: str = 'quantile', 
+        outlier_threshold: float=3.0, 
+        outlier_strategy: str ='cap', 
+        outlier_columns: list = None,
+        Handle_outliers: bool = False,
+        prints: bool = False
+    ):
         
         """
         Fast clean 
+        
+        Parameters:
+        missing_method: 'drop', 'interpolate', 'ffill', 'bfill', 'zero'
+        missing_columns: Specific columns to handle (None for all OHLCV)
+        duplicates_columns: Columns to check for duplicates
+        duplicates_method: 'first', 'last', False
+        outlier_method: 'iqr', 'zscore', 'quantile'
+        outlier_threshold: Threshold for outlier detection
+        outlier_strategy: 'remove', 'cap', 'mean', 'median'
+        outlier_columns: Specific columns to process
+        Handle_outliers: Whether to actually handle outliers or just detect them
          
         """
         
-        self.remove_duplicates()
-        self.handle_missing_values()
-        self.handle_outliers()
-        self.validate_ohlc_integrity()
+        self.remove_duplicates(
+            subset = duplicates_columns, 
+            keep = duplicates_method
+        )
+        if Handle_outliers:
+            self.handle_outliers(
+                method = outlier_method, 
+                threshold = outlier_threshold, 
+                strategy = outlier_strategy, 
+                columns = outlier_columns
+            )
+        self.handle_missing_values(
+            method = missing_method, 
+            columns = missing_columns
+        )
+        self._validate_ohlc_integrity()
         
         return self.data
 
