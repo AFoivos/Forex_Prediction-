@@ -104,7 +104,7 @@ class ForexVolatilityIndicators:
     
     def add_atr(
         self, 
-        periods: List[int] = [10, 14, 21, 28],
+        atr_periods: List[int] = [10, 14, 21, 28],
         params_change = True
     ):
         
@@ -115,10 +115,11 @@ class ForexVolatilityIndicators:
         periods (List[int]): List of periods for ATR
         
         """
-       
-        self.parameters['atr_params'] = periods
         
-        periods = self._is_nested_list(periods)
+        if params_change:
+            self.parameters['atr_params'] = atr_periods
+        
+        periods = self._is_nested_list(atr_periods)
         
         for sublist in periods:
             for period in sublist:
@@ -137,7 +138,7 @@ class ForexVolatilityIndicators:
     
     def add_bollinger_bands(
         self,
-        period_nbdevup_nbdevdn: List = [20, 2.0, 2.0],
+        bb_period_nbdevup_nbdevdn: List = [20, 2.0, 2.0],
     ):
 
         """
@@ -148,9 +149,9 @@ class ForexVolatilityIndicators:
         
         """
         
-        self.parameters['bb_params'] = period_nbdevup_nbdevdn
+        self.parameters['bb_params'] = bb_period_nbdevup_nbdevdn
         
-        period_nbdevup_nbdevdn = self._is_nested_list(period_nbdevup_nbdevdn)
+        period_nbdevup_nbdevdn = self._is_nested_list(bb_period_nbdevup_nbdevdn)
         
         for lst in period_nbdevup_nbdevdn:
             timeperiod = lst[0]
@@ -174,7 +175,7 @@ class ForexVolatilityIndicators:
     
     def add_keltner_channels(
         self,
-        ema_atr_multiplier: List = [20, 10, 2.0],
+        keltner_ema_atr_multiplier: List = [20, 10, 2.0],
     ):
 
         """
@@ -185,9 +186,9 @@ class ForexVolatilityIndicators:
         
         """
         
-        self.parameters['keltner_params'] = ema_atr_multiplier
+        self.parameters['keltner_params'] = keltner_ema_atr_multiplier
         
-        ema_atr_multiplier = self._is_nested_list(ema_atr_multiplier)
+        ema_atr_multiplier = self._is_nested_list(keltner_ema_atr_multiplier)
         
         for lst in ema_atr_multiplier:
             ema_col = f'ema_{lst[0]}'
@@ -202,7 +203,7 @@ class ForexVolatilityIndicators:
 
             if atr_col not in self.volatility_data.columns:
                 self.add_atr(
-                    periods=[lst[1]],
+                    atr_periods=[lst[1]],
                     params_change = False
                 )
             
@@ -216,7 +217,7 @@ class ForexVolatilityIndicators:
     
     def add_standard_deviation(
         self, 
-        periods: List[int] = [20, 50, 100],
+        std_periods: List[int] = [20, 50, 100],
     ):
         
         """
@@ -227,9 +228,9 @@ class ForexVolatilityIndicators:
         
         """
         
-        self.parameters['std_params'] = periods
+        self.parameters['std_params'] = std_periods
         
-        periods = self._is_nested_list(periods)
+        periods = self._is_nested_list(std_periods)
         
         for sublist in periods:
             for period in sublist:
@@ -247,7 +248,7 @@ class ForexVolatilityIndicators:
         self,
         atr_periods: List[int] = [14, 21, 28],
         bb_period_nbdevup_nbdevdn: List = [20, 2.0, 2.0],
-        kethlner_ema_atr_multiplier: List = [20, 10, 2.0],
+        keltner_ema_atr_multiplier: List = [20, 10, 2.0],
         std_periods: List[int] = [20, 50, 100],
     ):
         
@@ -262,10 +263,10 @@ class ForexVolatilityIndicators:
         
         """
         
-        self.add_atr(periods = atr_periods)
-        self.add_bollinger_bands(period_nbdevup_nbdevdn = bb_period_nbdevup_nbdevdn )
-        self.add_keltner_channels(ema_atr_multiplier = kethlner_ema_atr_multiplier)
-        self.add_standard_deviation(periods = std_periods)
+        self.add_atr(atr_periods = atr_periods)
+        self.add_bollinger_bands(bb_period_nbdevup_nbdevdn = bb_period_nbdevup_nbdevdn )
+        self.add_keltner_channels(keltner_ema_atr_multiplier = keltner_ema_atr_multiplier)
+        self.add_standard_deviation(std_periods = std_periods)
         
         count_removed_rows = self.data.shape[0] - self.volatility_data.shape[0]
         

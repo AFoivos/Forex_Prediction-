@@ -44,14 +44,14 @@ class ForexFeauturesExtractor:
             'sma_periods': [10, 20, 50, 100, 200],
             'ema_periods': [10, 20, 50, 100, 200],
             'macd_fast_slow_signal': [12, 26, 9],
-            'adx_params': [14, 21, 28],
-            'sar_params': [0.02, 0.2]   
+            'adx_periods': [14, 21, 28],
+            'sar_acc_max': [0.02, 0.2]   
         },
         volatility_parameters: Dict = {
-            'atr_params': [14, 21, 28],
-            'bb_params': [20, 2],
-            'keltner_params': [14, 21, 28],
-            'std_params': [14, 21, 28]
+            'atr_periods': [14, 21, 28],
+            'bb_period_nbdevup_nbdevdn': [20, 2.0, 2.0],
+            'keltner_ema_atr_multiplier': [20, 10, 2.0],
+            'std_periods': [20, 50, 100]
         },        
         open_col: str = 'open',
         high_col: str = 'high', 
@@ -81,9 +81,9 @@ class ForexFeauturesExtractor:
         
         self._validate_columns()
         
-        self.momentum_parameters = {}
-        self.trend_parameters = {} 
-        self.volatility_parameters = {} 
+        self.momentum_parameters = momentum_parameters
+        self.trend_parameters = trend_parameters
+        self.volatility_parameters = volatility_parameters
         
         
     def _validate_columns(
@@ -142,33 +142,28 @@ class ForexFeauturesExtractor:
             **self.trend_parameters
         )
         
-        # volatility_data, _ = ForexVolatilityIndicators(
-        #     data = self.data,
-        #     open_col = self.open_col,
-        #     high_col = self.high_col,
-        #     low_col = self.low_col,
-        #     close_col = self.close_col,
-        #     volume_col = self.volume_col,
-        #     prints = False
-        #     ).generate_all_volatility_indicators(
-        #     **self.volatility_parameters
-        # )
+        volatility_data, self.volatility_parameters = ForexVolatilityIndicators(
+            data = self.data,
+            open_col = self.open_col,
+            high_col = self.high_col,
+            low_col = self.low_col,
+            close_col = self.close_col,
+            volume_col = self.volume_col,
+            prints = False
+            ).generate_all_volatility_indicators(
+            **self.volatility_parameters
+        )
         
-        # self.indicators_data = pd.concat(
-        #     [
-        #         momentum_data,
-        #         trend_data,
-        #         volatility_data
-        #     ], 
-        #     axis=1
-        # )
-        
-        # return self.indicators_data
-        print(momentum_data.info())
-        print(trend_data.info())
-        # print(volatility_data.info())
-        
-    
+        self.indicators_data = pd.concat(
+            [
+                momentum_data,
+                trend_data,
+                volatility_data
+            ], 
+            axis=1
+        )
+                
+        return self.indicators_data
 
     def _extract_signals(
         self
@@ -298,7 +293,7 @@ class ForexFeauturesExtractor:
         #     axis=1
         # )
         
-        # return self.indicators_data, self.signals_data, data_with_signals_and_indicators
+        return self.indicators_data#, self.signals_data, data_with_signals_and_indicators
                     
                         
         
