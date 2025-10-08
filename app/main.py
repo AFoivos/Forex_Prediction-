@@ -5,7 +5,6 @@ from app.routers import (
     features_router,
     analysis_router,
     models_router,
-    plots_router,
 )
 
 app = FastAPI(title = "Forex Analysis API")
