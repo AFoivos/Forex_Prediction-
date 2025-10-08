@@ -8,14 +8,18 @@ import textwrap
 class ForexTimeSeriesDecisionMaker:
     def __init__(
         self, 
-        analysis_results: Dict[str, Any]
+        analysis_results: Dict[str, Any],
+        prints = True
     ):
         
-        print("="*50)
-        print("TIME SERIES DECISION MAKER")
-        print("="*50)
-        print(" Available Functions \n1 analyze_stationarity \n2 analyze_volatility \n3 analyze_distribution \n4 analyze_seasonality \n5 print_comprehensive_report")
-        print("="*50)
+        self.prints = prints
+        
+        if self.prints:
+            print("="*50)
+            print("TIME SERIES DECISION MAKER")
+            print("="*50)
+            print(" Available Functions \n1 analyze_stationarity \n2 analyze_volatility \n3 analyze_distribution \n4 analyze_seasonality \n5 print_comprehensive_report")
+            print("="*50)
         
         self.results = analysis_results
         self.decisions = {}
@@ -182,7 +186,7 @@ class ForexTimeSeriesDecisionMaker:
         
         return self.decisions
     
-    def print_comprehensive_report(
+    def comprehensive_report(
         self
     ):
         
@@ -190,46 +194,54 @@ class ForexTimeSeriesDecisionMaker:
         Run a Comprehesive Report for Decisions 
         
         """
-        
-        print("=" * 50)
-        print("TIME SERIES ANALYSIS - AUTOMATED DECISION REPORT")
-        print("=" * 50)
-        
-        self.analyze_stationarity()
-        self.analyze_volatility() 
-        self.analyze_distribution()
-        self.analyze_seasonality()
-        
-        print("\n STATIONARITY ANALYSIS")
-        print("-" * 50)
-        for key, value in self.decisions['stationarity'].items():
-            print(f"{key:20}: {value}")
+        if self.prints:
+            print("=" * 50)
+            print("TIME SERIES ANALYSIS - AUTOMATED DECISION REPORT")
+            print("=" * 50)
             
-        print("\n VOLATILITY ANALYSIS")
-        print("-" * 50)
-        for key, value in self.decisions['volatility'].items():
-            print(f"{key:20}: {value}")
+            self.analyze_stationarity()
+            self.analyze_volatility() 
+            self.analyze_distribution()
+            self.analyze_seasonality()
             
-        print("\n DISTRIBUTION ANALYSIS") 
-        print("-" * 50)
-        for key, value in self.decisions['distribution'].items():
-            print(f"{key:20}: {value}")
+            print("\n STATIONARITY ANALYSIS")
+            print("-" * 50)
             
-        print("\n SEASONALITY ANALYSIS")
-        print("-" * 50) 
-        for key, value in self.decisions['seasonality'].items():
-            print(f"  {key:20}: {value}")
+            for key, value in self.decisions['stationarity'].items():
+                print(f"{key:20}: {value}")
+                
+            print("\n VOLATILITY ANALYSIS")
+            print("-" * 50)
+            
+            for key, value in self.decisions['volatility'].items():
+                print(f"{key:20}: {value}")
+                
+            print("\n DISTRIBUTION ANALYSIS") 
+            print("-" * 50)
+            
+            for key, value in self.decisions['distribution'].items():
+                print(f"{key:20}: {value}")
+                
+            print("\n SEASONALITY ANALYSIS")
+            print("-" * 50) 
+            
+            for key, value in self.decisions['seasonality'].items():
+                print(f"  {key:20}: {value}")
 
-        print("\n KEY METRICS SUMMARY")
-        print("-" * 50)
-        vol_stats = self.results['volatility_analysis']
-        dist_stats = self.results['distribution_analysis']
-        
-        print(f"Avg Volatility: {vol_stats['avg_volatility']:.4f}")
-        print(f"Vol of Vol: {vol_stats['vol_of_vol']:.4f}")
-        print(f"Max Drawdown: {self.results['drawdown_analysis']['max_drawdown']:.4f}")
-        print(f"Skewness: {dist_stats['skewness']:.4f}")
-        print(f"Kurtosis: {dist_stats['kurtosis']:.4f}")
-        print(f"Extreme Returns: {dist_stats['extreme_returns_pct']:.4f}%")
-        
-        print("=" * 50)
+            print("\n KEY METRICS SUMMARY")
+            print("-" * 50)
+            
+            vol_stats = self.results['volatility_analysis']
+            dist_stats = self.results['distribution_analysis']
+            
+            print(f"Avg Volatility: {vol_stats['avg_volatility']:.4f}")
+            print(f"Vol of Vol: {vol_stats['vol_of_vol']:.4f}")
+            print(f"Max Drawdown: {self.results['drawdown_analysis']['max_drawdown']:.4f}")
+            print(f"Skewness: {dist_stats['skewness']:.4f}")
+            print(f"Kurtosis: {dist_stats['kurtosis']:.4f}")
+            print(f"Extreme Returns: {dist_stats['extreme_returns_pct']:.4f}%")
+            print("=" * 50)
+            
+            return self.decisions
+        else:
+            return self.decisions
