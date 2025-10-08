@@ -194,15 +194,16 @@ class ForexTimeSeriesDecisionMaker:
         Run a Comprehesive Report for Decisions 
         
         """
+        
+        self.analyze_stationarity()
+        self.analyze_volatility() 
+        self.analyze_distribution()
+        self.analyze_seasonality()
+        
         if self.prints:
             print("=" * 50)
             print("TIME SERIES ANALYSIS - AUTOMATED DECISION REPORT")
             print("=" * 50)
-            
-            self.analyze_stationarity()
-            self.analyze_volatility() 
-            self.analyze_distribution()
-            self.analyze_seasonality()
             
             print("\n STATIONARITY ANALYSIS")
             print("-" * 50)
@@ -242,6 +243,4 @@ class ForexTimeSeriesDecisionMaker:
             print(f"Extreme Returns: {dist_stats['extreme_returns_pct']:.4f}%")
             print("=" * 50)
             
-            return self.decisions
-        else:
-            return self.decisions
+        return self.decisions
