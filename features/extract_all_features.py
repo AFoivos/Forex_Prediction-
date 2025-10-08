@@ -129,9 +129,7 @@ class ForexFeauturesExtractor:
             ).generate_all_momentum_indicators(
             **self.momentum_parameters
         )
-        print(self.momentum_parameters)
-        print(type(momentum_data))
-        
+       
         trend_data, self.trend_parameters = ForexTrendIndicators(
             data = self.data,
             open_col = self.open_col,
@@ -143,8 +141,6 @@ class ForexFeauturesExtractor:
             ).generate_all_trend_indicators(
             **self.trend_parameters
         )
-        print(self.trend_parameters)
-        print(type(trend_data))
         
         volatility_data, self.volatility_parameters = ForexVolatilityIndicators(
             data = self.data,
@@ -157,8 +153,6 @@ class ForexFeauturesExtractor:
             ).generate_all_volatility_indicators(
             **self.volatility_parameters
         )
-        print(self.volatility_parameters)
-        print(type(volatility_data))
         
         self.indicators_data = pd.concat(
             [
@@ -168,10 +162,8 @@ class ForexFeauturesExtractor:
             ], 
             axis=1,
         )
-        print(self.indicators_data)
-        print(type(self.indicators_data))
-        self.indicators_data.index = self.data.index
-        return self.indicators_data
+  
+        # self.indicators_data.index = self.data.index
 
     def _extract_signals(
         self
@@ -182,7 +174,6 @@ class ForexFeauturesExtractor:
         
         """
         
-        print(self.indicators_data)
         rsi_signals = ForexRSISignals(
             data = self.indicators_data,
             close_col = self.close_col,
@@ -293,8 +284,6 @@ class ForexFeauturesExtractor:
             ],
             axis=1
         )
-        
-        return self.signals_data 
     
     def extract_all_features(
         self
@@ -315,6 +304,14 @@ class ForexFeauturesExtractor:
             ],
             axis=1
         )
+        
+        removed_cols = self.data.shape[0] - data_with_signals_and_indicators.shape[0]
+        if removed_cols > 0:
+            print('='*50)
+            print('='*50)
+            print(f'Removed {removed_cols} rows')
+            print('='*50)
+            print('='*50)
         
         return self.indicators_data, self.signals_data, data_with_signals_and_indicators
                     

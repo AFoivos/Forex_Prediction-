@@ -36,7 +36,6 @@ class ForexRSISignals:
         self.close_col = close_col
         self.data = data.copy()
         
-        print(self.data.info(),type(self.data) )
         self.signals = pd.DataFrame(
             {self.close_col: self.data[self.close_col]},
             index=self.data.index
