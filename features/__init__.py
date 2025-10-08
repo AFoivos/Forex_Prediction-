@@ -3,7 +3,6 @@ from .indicators import (
     ForexTrendIndicators,
     ForexVolumeIndicators,
     ForexVolatilityIndicators,
-    #ForexCustomIndicators,
     ForexTSIndicators,
 )
 from .signals import (
@@ -25,7 +24,6 @@ from .signals import (
 from .extract_all_features import ForexFeauturesExtractor
 
 __all__ = [
-    #"ForexCustomFeatures",
     "ForexFeauturesExtractor",
     "ForexTSFeatures",
     "ForexMomentumIndicators",
@@ -38,7 +36,6 @@ __all__ = [
     "ForexADXSignals",
     "ForexRSISignals",
     "ForexStochasticSignals",
-    "ForexCustomIndicators",
     "ForexTSIndicators",
     "ForexWilliamsRSignals",
     "ForexCCISignals",
