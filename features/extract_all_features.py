@@ -41,9 +41,9 @@ class ForexFeauturesExtractor:
             'momentum_periods': [10, 14, 20]
         },
         trend_parameters: Dict = {
-            'sma_params': [10, 20, 50, 100, 200],
-            'ema_params': [10, 20, 50, 100, 200],
-            'macd_params': [12, 26, 9],
+            'sma_periods': [10, 20, 50, 100, 200],
+            'ema_periods': [10, 20, 50, 100, 200],
+            'macd_fast_slow_signal': [12, 26, 9],
             'adx_params': [14, 21, 28],
             'sar_params': [0.02, 0.2]   
         },
@@ -130,17 +130,17 @@ class ForexFeauturesExtractor:
             **self.momentum_parameters
         )
             
-        # trend_data, _ = ForexTrendIndicators(
-        #     data = self.data,
-        #     open_col = self.open_col,
-        #     high_col = self.high_col,
-        #     low_col = self.low_col,
-        #     close_col = self.close_col,
-        #     volume_col = self.volume_col,
-        #     prints = False
-        #     ).generate_all_trend_indicators(
-        #     **self.trend_parameters
-        # )
+        trend_data, self.trend_parameters = ForexTrendIndicators(
+            data = self.data,
+            open_col = self.open_col,
+            high_col = self.high_col,
+            low_col = self.low_col,
+            close_col = self.close_col,
+            volume_col = self.volume_col,
+            prints = False
+            ).generate_all_trend_indicators(
+            **self.trend_parameters
+        )
         
         # volatility_data, _ = ForexVolatilityIndicators(
         #     data = self.data,
@@ -165,7 +165,9 @@ class ForexFeauturesExtractor:
         
         # return self.indicators_data
         print(momentum_data.info())
-
+        print(trend_data.info())
+        # print(volatility_data.info())
+        
     
 
     def _extract_signals(

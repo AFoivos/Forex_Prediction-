@@ -103,7 +103,7 @@ class ForexTrendIndicators:
         
     def add_sma(
         self, 
-        periods: List[int] = [10, 20, 50, 100, 200]
+        sma_periods: List[int] = [10, 20, 50, 100, 200]
     ):
         
         """
@@ -114,25 +114,23 @@ class ForexTrendIndicators:
         
         """ 
         
-        self.parameters['sma_params'] = periods
+        self.parameters['sma_params'] = sma_periods
         
-        for period in periods:
+        for period in sma_periods:
             col_name = f"sma_{period}"
             
-            # SMA
             self.trend_data[col_name] = talib.SMA(
                 self.data[self.close_col], 
                 timeperiod=period
             )
             
-            # SMA slope
             self.trend_data[f"{col_name}_slope"] = self.trend_data[col_name].diff()
         
         return self.trend_data
         
     def add_ema(
         self, 
-        periods: List[int] = [10, 20, 50, 100, 200]
+        ema_periods: List[int] = [10, 20, 50, 100, 200]
     ):
         
         """
@@ -143,9 +141,9 @@ class ForexTrendIndicators:
         
         """
         
-        self.parameters['ema_params'] = periods
+        self.parameters['ema_params'] = ema_periods
         
-        for period in periods:
+        for period in ema_periods:
             col_name = f'ema_{period}'
             
             # EMA
@@ -161,7 +159,7 @@ class ForexTrendIndicators:
         
     def add_macd(
         self, 
-        fast_slow_signal_periods: List[int] = [12, 26, 9],
+        macd_fast_slow_signal: List[int] = [12, 26, 9],
     ):
         
         """
@@ -172,9 +170,9 @@ class ForexTrendIndicators:
         
         """
         
-        self.parameters['macd_params'] = fast_slow_signal_periods
+        self.parameters['macd_params'] = macd_fast_slow_signal
         
-        fast_slow_signal_periods = self._is_nested_list(fast_slow_signal_periods)
+        fast_slow_signal_periods = self._is_nested_list(macd_fast_slow_signal)
         
         for lst in fast_slow_signal_periods:
             fast = lst[0]
@@ -201,7 +199,7 @@ class ForexTrendIndicators:
     
     def add_adx(
         self,
-        periods: List[int] = [14, 21, 28],
+        adx_periods: List[int] = [14, 21, 28],
     ):
 
         """
@@ -212,10 +210,9 @@ class ForexTrendIndicators:
         
         """  
         
-        self.parameters['adx_params'] = periods
+        self.parameters['adx_params'] = adx_periods
        
-        for period in periods:
-            # Average Directional Movement Index
+        for period in adx_periods:
             adx = talib.ADX(
                 self.data[self.high_col],
                 self.data[self.low_col],
@@ -223,7 +220,6 @@ class ForexTrendIndicators:
                 timeperiod=period
             )
             
-            # Positive Directional 
             plus_di = talib.PLUS_DI(
                 self.data[self.high_col],
                 self.data[self.low_col],
@@ -231,7 +227,6 @@ class ForexTrendIndicators:
                 timeperiod=period
             )
             
-            # Negative Directional 
             minus_di = talib.MINUS_DI(
                 self.data[self.high_col],
                 self.data[self.low_col],
@@ -241,12 +236,10 @@ class ForexTrendIndicators:
             
             col_name = f'adx_{period}'
             
-            # ADX
             self.trend_data[col_name] = adx
             self.trend_data[f'{col_name}_plus'] = plus_di
             self.trend_data[f'{col_name}_minus'] = minus_di
             
-            # ADX Slope
             self.trend_data[f'{col_name}_slope'] = adx.diff()
             self.trend_data[f'{col_name}_plus_di_slope'] = plus_di.diff()
             self.trend_data[f'{col_name}_minus_di_slope'] = minus_di.diff()
@@ -255,7 +248,7 @@ class ForexTrendIndicators:
         
     def add_parabolic_sar(
         self, 
-        acc_max: List[float] = [0.02, 0.2],
+        sar_acc_max: List[float] = [0.02, 0.2],
     ):
         
         """
@@ -266,9 +259,9 @@ class ForexTrendIndicators:
         
         """
         
-        self.parameters['sar_params'] = acc_max
+        self.parameters['sar_params'] = sar_acc_max
         
-        acc_max = self._is_nested_list(acc_max)
+        acc_max = self._is_nested_list(sar_acc_max)
         
         for lst in acc_max:
             sar = talib.SAR(
@@ -279,10 +272,8 @@ class ForexTrendIndicators:
             )
             col_name = f'sar_{lst[0]}_{lst[1]}'
 
-            # Parabolic sar
             self.trend_data[col_name] = sar
             
-            # Parabolic sar slope
             self.trend_data[f"{col_name}_slope"] = self.trend_data[col_name].diff()
                    
         return self.trend_data     
@@ -291,9 +282,9 @@ class ForexTrendIndicators:
         self,
         sma_periods: List[int] = [10, 20, 50, 100, 200],
         ema_periods: List[int] = [10, 20, 50, 100, 200],
-        macd: List[int] = [12, 26, 9],
+        macd_fast_slow_signal: List[int] = [12, 26, 9],
         adx_periods: List[int] = [14, 21, 28],
-        parabolic_sar: List[int] = [0.02, 0.2],
+        sar_acc_max: List[int] = [0.02, 0.2],
     ):
         
         """
@@ -308,11 +299,11 @@ class ForexTrendIndicators:
         
         """
         
-        self.add_sma(periods = sma_periods)
-        self.add_ema(periods = ema_periods)
-        self.add_macd(fast_slow_signal_periods = macd)
-        self.add_adx(periods = adx_periods)
-        self.add_parabolic_sar(acc_max = parabolic_sar)
+        self.add_sma(sma_periods = sma_periods)
+        self.add_ema(ema_periods = ema_periods)
+        self.add_macd(macd_fast_slow_signal = macd_fast_slow_signal)
+        self.add_adx(adx_periods = adx_periods)
+        self.add_parabolic_sar(sar_acc_max = sar_acc_max)
         
         count_removed_rows = self.data.shape[0] - self.trend_data.shape[0]
 
