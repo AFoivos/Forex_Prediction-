@@ -13,6 +13,7 @@ class ForexWilliamsRSignals:
         data: pd.DataFrame,
         close_col: str = 'close',
         parameters: List = None,
+        prints = True
     ):
         
         """
@@ -24,11 +25,14 @@ class ForexWilliamsRSignals:
         
         """
         
-        print("="*50)
-        print("WILLIAMS %R SIGNAL GENERATION")
-        print("="*50)
-        print("Available functions: \n1 williams_overbought_oversold_signals \n2 williams_momentum_signals \n3 williams_reversal_signals \n4 williams_divergence_signals \n5 generate_all_williams_signals")
-        print("="*50)
+        self.prints = prints
+        
+        if self.prints:
+            print("="*50)
+            print("WILLIAMS %R SIGNAL GENERATION")
+            print("="*50)
+            print("Available functions: \n1 williams_overbought_oversold_signals \n2 williams_momentum_signals \n3 williams_reversal_signals \n4 williams_divergence_signals \n5 generate_all_williams_signals")
+            print("="*50)
         
         self.close_col = close_col
         self.data = data.copy()
@@ -317,12 +321,13 @@ class ForexWilliamsRSignals:
         
         count_removed_rows = self.signals.shape[0] - self.data.shape[0]
         
-        print('='*50)
-        print(self.signals.info())
-        print('='*50)   
-        print(f'Shape of data {self.signals.shape}')
-        print('='*50)
-        print(f'{count_removed_rows} rows removed')
-        print('='*50)
-        
+        if self.prints:
+            print('='*50)
+            print(self.signals.info())
+            print('='*50)   
+            print(f'Shape of data {self.signals.shape}')
+            print('='*50)
+            print(f'{count_removed_rows} rows removed')
+            print('='*50)
+            
         return self.signals

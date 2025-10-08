@@ -14,6 +14,7 @@ class ForexADXSignals:
         data: pd.DataFrame,
         close_col: str = 'close',
         parameters: List = None,
+        prints = True
     ):
         """
         Class for ADX signals
@@ -23,13 +24,15 @@ class ForexADXSignals:
         close_col (str): Column name for close price
         
         """
+        self.prints = prints
         
-        print("="*50)
-        print("ADX SIGNAL GENERATION")
-        print("="*50)
-        print(" Available Fuctions: \n1 adx_trend_strength_signals \n2 adx_direction_signals \n3 adx_di_crossover_signals \n4 adx_slope_signals \n5 adx_comprehensive_signals \n6 generate_all_adx_signals")
-        print("="*50)
-        
+        if self.prints:
+            print("="*50)
+            print("ADX SIGNAL GENERATION")
+            print("="*50)
+            print(" Available Fuctions: \n1 adx_trend_strength_signals \n2 adx_direction_signals \n3 adx_di_crossover_signals \n4 adx_slope_signals \n5 adx_comprehensive_signals \n6 generate_all_adx_signals")
+            print("="*50)
+            
         self.close_col = close_col
         self.data = data.copy()
         
@@ -305,13 +308,14 @@ class ForexADXSignals:
 
         count_removed_rows = self.signals.shape[0] - self.data.shape[0]
         
-        print('='*50)
-        print('Data Info')
-        print(self.signals.info())
-        print('='*50)   
-        print(f'Shape of data {self.signals.shape}')
-        print('='*50)   
-        print(f'{count_removed_rows} rows removed')
-        print('='*50)
+        if self.prints:
+            print('='*50)
+            print('Data Info')
+            print(self.signals.info())
+            print('='*50)   
+            print(f'Shape of data {self.signals.shape}')
+            print('='*50)   
+            print(f'{count_removed_rows} rows removed')
+            print('='*50)
 
         return self.signals

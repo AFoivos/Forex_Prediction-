@@ -114,7 +114,7 @@ class ForexMomentumIndicators:
         
         """
         
-        self.parameters['rsi_paramas'] = rsi_periods
+        self.parameters['rsi_params'] = rsi_periods
         
         periods = self._is_nested_list(rsi_periods)
         

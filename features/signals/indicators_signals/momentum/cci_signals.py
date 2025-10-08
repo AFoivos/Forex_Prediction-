@@ -12,6 +12,7 @@ class ForexCCISignals:
         data: pd.DataFrame,
         close_col: str = 'close',
         parameters: List = None,
+        prints = True
     ):
         
         """
@@ -23,11 +24,14 @@ class ForexCCISignals:
         
         """
         
-        print("="*50)
-        print("CCI SIGNAL GENERATION")
-        print("="*50)
-        print("Available functions: \n1 cci_overbought_oversold_signals \n2 cci_momentum_signals \n3 cci_reversal_signals \n4 cci_divergence_signals \n5 cci_zero_line_signals \n6 generate_all_cci_signals")
-        print("="*50)
+        self.prints = prints
+        
+        if self.prints:
+            print("="*50)
+            print("CCI SIGNAL GENERATION")
+            print("="*50)
+            print("Available functions: \n1 cci_overbought_oversold_signals \n2 cci_momentum_signals \n3 cci_reversal_signals \n4 cci_divergence_signals \n5 cci_zero_line_signals \n6 generate_all_cci_signals")
+            print("="*50)
         
         self.close_col = close_col
         self.data = data.copy()
@@ -355,12 +359,13 @@ class ForexCCISignals:
         
         count_removed_rows = self.signals.shape[0] - self.data.shape[0]
         
-        print('='*50)
-        print(self.signals.info())
-        print('='*50)   
-        print(f'Shape of data {self.signals.shape}')
-        print('='*50)
-        print(f'{count_removed_rows} rows removed')
-        print('='*50)
+        if self.prints:
+            print('='*50)
+            print(self.signals.info())
+            print('='*50)   
+            print(f'Shape of data {self.signals.shape}')
+            print('='*50)
+            print(f'{count_removed_rows} rows removed')
+            print('='*50)
         
         return self.signals

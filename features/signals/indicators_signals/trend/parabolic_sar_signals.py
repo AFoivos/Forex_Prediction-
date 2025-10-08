@@ -12,6 +12,7 @@ class ForexParabolicSARSignals:
         data: pd.DataFrame,
         close_col: str = 'close',
         parameters: List = None, 
+        prints = True
     ):
         
         """
@@ -21,13 +22,17 @@ class ForexParabolicSARSignals:
         data (pd.DataFrame): DataFrame containing the data    
         close_col (str): Column name for close price
         parameters (List): List of parameters for SAR [acceleration, maximum] or nested list
+        
         """
         
-        print("="*50)
-        print("PARABOLIC SAR SIGNAL GENERATION")
-        print("="*50)
-        print(" Available Functions: \n1. sar_trend_signals \n2. sar_reversal_signals \n3. sar_distance_signals \n4. sar_slope_signals \n5. sar_trend_confirmation_signals\n6. generate_all_sar_signals")
-        print("="*50)   
+        self.prints = prints
+        
+        if self.prints:
+            print("="*50)
+            print("PARABOLIC SAR SIGNAL GENERATION")
+            print("="*50)
+            print(" Available Functions: \n1. sar_trend_signals \n2. sar_reversal_signals \n3. sar_distance_signals \n4. sar_slope_signals \n5. sar_trend_confirmation_signals\n6. generate_all_sar_signals")
+            print("="*50)   
         
         self.close_col = close_col
         self.data = data.copy() 
@@ -304,13 +309,14 @@ class ForexParabolicSARSignals:
         
         count_removed_rows = self.data.shape[0] - self.signals.shape[0]
         
-        print('='*50)
-        print('Data Info')
-        print(self.signals.info())
-        print('='*50)
-        print(f'Shape of data {self.signals.shape}')
-        print('='*50)
-        print(f'{count_removed_rows} rows removed')
-        print('='*50)
+        if self.prints:
+            print('='*50)
+            print('Data Info')
+            print(self.signals.info())
+            print('='*50)
+            print(f'Shape of data {self.signals.shape}')
+            print('='*50)
+            print(f'{count_removed_rows} rows removed')
+            print('='*50)
         
         return self.signals

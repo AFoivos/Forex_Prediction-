@@ -129,7 +129,9 @@ class ForexFeauturesExtractor:
             ).generate_all_momentum_indicators(
             **self.momentum_parameters
         )
-            
+        print(self.momentum_parameters)
+        print(type(momentum_data))
+        
         trend_data, self.trend_parameters = ForexTrendIndicators(
             data = self.data,
             open_col = self.open_col,
@@ -141,6 +143,8 @@ class ForexFeauturesExtractor:
             ).generate_all_trend_indicators(
             **self.trend_parameters
         )
+        print(self.trend_parameters)
+        print(type(trend_data))
         
         volatility_data, self.volatility_parameters = ForexVolatilityIndicators(
             data = self.data,
@@ -153,16 +157,20 @@ class ForexFeauturesExtractor:
             ).generate_all_volatility_indicators(
             **self.volatility_parameters
         )
+        print(self.volatility_parameters)
+        print(type(volatility_data))
         
         self.indicators_data = pd.concat(
             [
                 momentum_data,
-                trend_data,
-                volatility_data
+                trend_data.drop(columns = self.close_col),
+                volatility_data.drop(columns = self.close_col)
             ], 
-            axis=1
+            axis=1,
         )
-                
+        print(self.indicators_data)
+        print(type(self.indicators_data))
+        self.indicators_data.index = self.data.index
         return self.indicators_data
 
     def _extract_signals(
@@ -174,104 +182,119 @@ class ForexFeauturesExtractor:
         
         """
         
+        print(self.indicators_data)
         rsi_signals = ForexRSISignals(
             data = self.indicators_data,
             close_col = self.close_col,
-            parameters = self.momentum_parameters['rsi_params']
+            parameters = self.momentum_parameters['rsi_params'],
+            prints = False
         ).generate_all_rsi_signals()
         
         stochastic_signals = ForexStochasticSignals(
             data = self.indicators_data,
             close_col = self.close_col,
-            parameters = self.momentum_parameters['stochastic_params']
+            parameters = self.momentum_parameters['stochastic_params'],
+            prints = False
         ).generate_all_stochastic_signals()
 
         williams_r_signals = ForexWilliamsRSignals(
             data = self.indicators_data,
             close_col = self.close_col,
-            parameters = self.momentum_parameters['williams_r_params']
+            parameters = self.momentum_parameters['williams_r_params'],
+            prints = False
         ).generate_all_williams_signals()
 
         cci_signals = ForexCCISignals(
             data = self.indicators_data,
             close_col = self.close_col,
-            parameters = self.momentum_parameters['cci_params']
+            parameters = self.momentum_parameters['cci_params'],
+            prints = False
         ).generate_all_cci_signals()
 
         momentum_signals = ForexMomentumSignals(
-            data = self.indicators,
+            data = self.indicators_data,
             close_col = self.close_col,
-            parameters = self.momentum_parameters['momentum_params']
+            parameters = self.momentum_parameters['momentum_params'],
+            prints = False
         ).generate_all_momentum_signals()
         
         mas_signals = ForexMASignals(
             data = self.indicators_data,
             close_col = self.close_col,
-            parameters = self.trend_parameters['sma_params']
+            ema_parameters=self.trend_parameters['ema_params'],
+            sma_parameters=self.trend_parameters['sma_params'],
+            prints = False
         ).generate_all_signals()
         
         macd_signals = ForexMACDSignals(
             data = self.indicators_data,
             close_col = self.close_col,
-            parameters = self.trend_parameters['macd_params']
+            parameters = self.trend_parameters['macd_params'],
+            prints = False
         ).generate_all_macd_signals()   
         
         adx_signals = ForexADXSignals(
             data = self.indicators_data,
             close_col = self.close_col,
-            parameters = self.trend_parameters['adx_params']
+            parameters = self.trend_parameters['adx_params'],
+            prints = False
         ).generate_all_adx_signals()
         
         sar_signals = ForexParabolicSARSignals(
             data = self.indicators_data,
             close_col = self.close_col,
-            parameters = self.trend_parameters['sar_params']
+            parameters = self.trend_parameters['sar_params'],
+            prints = False
         ).generate_all_sar_signals()
         
         atr_signals = ForexATRSignals(
             data = self.indicators_data,
             close_col = self.close_col,
-            parameters = self.volatility_parameters['atr_params']
+            parameters = self.volatility_parameters['atr_params'],
+            prints = False
         ).generate_all_atr_signals()
         
         bb_signals = ForexBollingerBandsSignals(
             data = self.indicators_data,
             close_col = self.close_col,
-            parameters = self.volatility_parameters['bb_params']
+            parameters = self.volatility_parameters['bb_params'],
+            prints = False
         ).generate_all_bb_signals()
         
         keltner_signals = ForexKeltnerSignals(
             data = self.indicators_data,
             close_col = self.close_col,
-            parameters = self.volatility_parameters['keltner_params']
+            parameters = self.volatility_parameters['keltner_params'],
+            prints = False
         ).generate_all_keltner_signals()
         
         std_signals = ForexSTDSignals(
             data = self.indicators_data,
             close_col = self.close_col,
-            parameters = self.volatility_parameters['std_params']
+            parameters = self.volatility_parameters['std_params'],
+            prints = False
         ).generate_all_std_signals()
         
         self.signals_data = pd.concat(
             [
                 rsi_signals,
-                stochastic_signals,
-                williams_r_signals,
-                cci_signals,
-                momentum_signals,
-                mas_signals,
-                macd_signals,
-                adx_signals,
-                sar_signals,
-                atr_signals,
-                bb_signals,
-                keltner_signals,
-                std_signals
+                stochastic_signals.drop(columns = self.close_col),
+                williams_r_signals.drop(columns = self.close_col),
+                cci_signals.drop(columns = self.close_col),
+                momentum_signals.drop(columns = self.close_col),
+                mas_signals.drop(columns = self.close_col),
+                macd_signals.drop(columns = self.close_col),
+                adx_signals.drop(columns = self.close_col),
+                sar_signals.drop(columns = self.close_col),
+                atr_signals.drop(columns = self.close_col),
+                bb_signals.drop(columns = self.close_col),
+                keltner_signals.drop(columns = self.close_col),
+                std_signals.drop(columns = self.close_col)
             ],
             axis=1
         )
         
-        return self.signals_data
+        return self.signals_data 
     
     def extract_all_features(
         self
@@ -283,17 +306,17 @@ class ForexFeauturesExtractor:
         """
         
         self._extract_indicators()
-        # self._extract_signals()
+        self._extract_signals()
         
-        # data_with_signals_and_indicators = pd.concat(
-        #     [
-        #         self.indicators_data,
-        #         self.signals_data
-        #     ],
-        #     axis=1
-        # )
+        data_with_signals_and_indicators = pd.concat(
+            [
+                self.indicators_data,
+                self.signals_data.drop(columns = self.close_col)
+            ],
+            axis=1
+        )
         
-        return self.indicators_data#, self.signals_data, data_with_signals_and_indicators
+        return self.indicators_data, self.signals_data, data_with_signals_and_indicators
                     
                         
         

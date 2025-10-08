@@ -14,6 +14,7 @@ class ForexStochasticSignals:
         data: pd.DataFrame,
         close_col: str = 'close',
         parameters: List = None,
+        prints = True
     ):
         
         """
@@ -25,11 +26,14 @@ class ForexStochasticSignals:
         
         """
         
-        print("="*50)
-        print("STOCHASTIC SIGNAL GENERATION")
-        print("="*50)
-        print("Available functions: \n1 stochastic_overbought_oversold_signals \n2 stochastic_crossover_signals \n3 stochastic_divergence_signals \n4 stochastic_momentum_signals \n5 stochastic_reversal_signals \n6 generate_all_stochastic_signals")
-        print("="*50)
+        self.prints = prints
+        
+        if self.prints:
+            print("="*50)
+            print("STOCHASTIC SIGNAL GENERATION")
+            print("="*50)
+            print("Available functions: \n1 stochastic_overbought_oversold_signals \n2 stochastic_crossover_signals \n3 stochastic_divergence_signals \n4 stochastic_momentum_signals \n5 stochastic_reversal_signals \n6 generate_all_stochastic_signals")
+            print("="*50)
         
         self.close_col = close_col
         self.data = data.copy()
@@ -331,13 +335,14 @@ class ForexStochasticSignals:
         
         count_removed_rows = self.signals.shape[0] - self.data.shape[0]
         
-        print('='*50)
-        print('Data Info')
-        print(self.signals.info())
-        print('='*50)   
-        print(f'Shape of data {self.signals.shape}')
-        print('='*50)
-        print(f'{count_removed_rows} rows removed')
-        print('='*50)
+        if self.prints:
+            print('='*50)
+            print('Data Info')
+            print(self.signals.info())
+            print('='*50)   
+            print(f'Shape of data {self.signals.shape}')
+            print('='*50)
+            print(f'{count_removed_rows} rows removed')
+            print('='*50)
         
         return self.signals

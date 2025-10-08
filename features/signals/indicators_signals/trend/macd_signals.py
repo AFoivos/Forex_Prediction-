@@ -14,6 +14,7 @@ class ForexMACDSignals:
         data: pd.DataFrame,
         close_col: str = 'close',
         parameters: List = None,
+        prints = True
         
     ):
         """
@@ -26,11 +27,14 @@ class ForexMACDSignals:
         
         """
         
-        print("="*50)
-        print("MACD SIGNAL GENERATION")
-        print("="*50)
-        print(" Available Fuctions: \n1 macd_crossover_signals \n2 macd_histogram_signals \n3 macd_zero_line_signals \n4 generate_all_macd_signals")
-        print("="*50)
+        self.prints = prints
+        
+        if self.prints:
+            print("="*50)
+            print("MACD SIGNAL GENERATION")
+            print("="*50)
+            print(" Available Fuctions: \n1 macd_crossover_signals \n2 macd_histogram_signals \n3 macd_zero_line_signals \n4 generate_all_macd_signals")
+            print("="*50)
         
         self.close_col = close_col
         self.data = data.copy()
@@ -241,14 +245,15 @@ class ForexMACDSignals:
         
         count_removed_rows = self.signals.shape[0] - self.data.shape[0]
         
-        print('='*50)
-        print('Data Info')
-        print(self.signals.info())
-        print('='*50)   
-        print(f'Shape of data {self.signals.shape}')
-        print('='*50)
-        print(f'{count_removed_rows} rows removed')
-        print('='*50)
+        if self.prints:
+            print('='*50)
+            print('Data Info')
+            print(self.signals.info())
+            print('='*50)   
+            print(f'Shape of data {self.signals.shape}')
+            print('='*50)
+            print(f'{count_removed_rows} rows removed')
+            print('='*50)
         
         return self.signals
        

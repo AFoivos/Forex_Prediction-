@@ -13,6 +13,7 @@ class ForexATRSignals:
         data: pd.DataFrame,
         close_col: str = 'close',
         parameters: List = None,
+        prints = True
     ):
         
         """
@@ -24,11 +25,14 @@ class ForexATRSignals:
         
         """
         
-        print("="*50)
-        print("ATR SIGNAL GENERATION")
-        print("="*50)
-        print("Available functions: \n1 atr_volatility_signals \n2 atr_breakout_signals \n3 atr_trend_strength_signals \n4 atr_squeeze_signals \n5 atr_expansion_contraction_signals \n6 generate_all_atr_signals")
-        print("="*50)
+        self.prints = prints
+        
+        if self.prints:
+            print("="*50)
+            print("ATR SIGNAL GENERATION")
+            print("="*50)
+            print("Available functions: \n1 atr_volatility_signals \n2 atr_breakout_signals \n3 atr_trend_strength_signals \n4 atr_squeeze_signals \n5 atr_expansion_contraction_signals \n6 generate_all_atr_signals")
+            print("="*50)
         
         self.close_col = close_col
         self.data = data.copy()
@@ -341,12 +345,13 @@ class ForexATRSignals:
         
         count_removed_rows = self.signals.shape[0] - self.data.shape[0]
         
-        print('='*50)
-        print(self.signals.info())
-        print('='*50)   
-        print(f'Shape of data {self.signals.shape}')
-        print('='*50)
-        print(f'{count_removed_rows} rows removed')
-        print('='*50)
+        if self.prints:
+            print('='*50)
+            print(self.signals.info())
+            print('='*50)   
+            print(f'Shape of data {self.signals.shape}')
+            print('='*50)
+            print(f'{count_removed_rows} rows removed')
+            print('='*50)
         
         return self.signals

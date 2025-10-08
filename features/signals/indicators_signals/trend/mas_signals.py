@@ -15,6 +15,7 @@ class ForexMASignals:
         close_col: str = 'close',
         sma_parameters: List = None,
         ema_parameters: List = None,
+        prints = True
     ):
         
         """
@@ -25,12 +26,14 @@ class ForexMASignals:
         close_col (str): Column name for close price
         
         """
+        self.prints = prints
         
-        print("="*50)
-        print("EMA/SMA SIGNAL GENERATION")
-        print("="*50)   
-        print(" Available Fuctions: \n1 golden_death_cross \n2 ema_crossover \n3 trend_hierarchy \n4 ma_bounce_signals \n5 ma_slope_signals \n6 price_extension_signals \n7 generate_all_signals")
-        print("="*50)
+        if self.prints:
+            print("="*50)
+            print("EMA/SMA SIGNAL GENERATION")
+            print("="*50)   
+            print(" Available Fuctions: \n1 golden_death_cross \n2 ema_crossover \n3 trend_hierarchy \n4 ma_bounce_signals \n5 ma_slope_signals \n6 price_extension_signals \n7 generate_all_signals")
+            print("="*50)
         
         self.data = data.copy()
         self.close_col = close_col
@@ -364,14 +367,15 @@ class ForexMASignals:
 
         count_removed_rows = self.data.shape[0] - self.signals.shape[0]
         
-        print('='*50)
-        print('Data Info')
-        print(self.signals.info())
-        print('='*50)   
-        print(f'Shape of data {self.signals.shape}')
-        print('='*50)
-        print(f'{count_removed_rows} rows removed')
-        print('='*50)
+        if self.prints:
+            print('='*50)
+            print('Data Info')
+            print(self.signals.info())
+            print('='*50)   
+            print(f'Shape of data {self.signals.shape}')
+            print('='*50)
+            print(f'{count_removed_rows} rows removed')
+            print('='*50)
         
         return self.signals
 
