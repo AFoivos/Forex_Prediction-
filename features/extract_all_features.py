@@ -85,7 +85,6 @@ class ForexFeauturesExtractor:
         self.trend_parameters = trend_parameters
         self.volatility_parameters = volatility_parameters
         
-        
     def _validate_columns(
         self, 
     ):  
@@ -117,7 +116,7 @@ class ForexFeauturesExtractor:
         Extract all indicators
         
         """
-        
+        ### WE MUST CHANGE INDICATORS TO ADD 'IF' FOR EVERY INDICATOR IF PARAPETERS EXIST TO AVOID ERRORS
         momentum_data, self.momentum_parameters = ForexMomentumIndicators(
             data = self.data,
             open_col = self.open_col,
@@ -163,8 +162,6 @@ class ForexFeauturesExtractor:
             axis=1,
         )
   
-        # self.indicators_data.index = self.data.index
-
     def _extract_signals(
         self
     ):
@@ -174,97 +171,110 @@ class ForexFeauturesExtractor:
         
         """
         
-        rsi_signals = ForexRSISignals(
-            data = self.indicators_data,
-            close_col = self.close_col,
-            parameters = self.momentum_parameters['rsi_params'],
-            prints = False
-        ).generate_all_rsi_signals()
+        if 'rsi_params' in self.momentum_parameters:
+            rsi_signals = ForexRSISignals(
+                data = self.indicators_data,
+                close_col = self.close_col,
+                parameters = self.momentum_parameters['rsi_params'],
+                prints = False
+            ).generate_all_rsi_signals()
         
-        stochastic_signals = ForexStochasticSignals(
-            data = self.indicators_data,
-            close_col = self.close_col,
-            parameters = self.momentum_parameters['stochastic_params'],
-            prints = False
-        ).generate_all_stochastic_signals()
+        if 'stochastic_params' in self.momentum_parameters:
+            stochastic_signals = ForexStochasticSignals(
+                data = self.indicators_data,
+                close_col = self.close_col,
+                parameters = self.momentum_parameters['stochastic_params'],
+                prints = False
+            ).generate_all_stochastic_signals()
 
-        williams_r_signals = ForexWilliamsRSignals(
-            data = self.indicators_data,
-            close_col = self.close_col,
-            parameters = self.momentum_parameters['williams_r_params'],
-            prints = False
-        ).generate_all_williams_signals()
+        if 'williams_r_params' in self.momentum_parameters:
+            williams_r_signals = ForexWilliamsRSignals(
+                data = self.indicators_data,
+                close_col = self.close_col,
+                parameters = self.momentum_parameters['williams_r_params'],
+                prints = False
+            ).generate_all_williams_signals()
 
-        cci_signals = ForexCCISignals(
-            data = self.indicators_data,
-            close_col = self.close_col,
-            parameters = self.momentum_parameters['cci_params'],
-            prints = False
-        ).generate_all_cci_signals()
+        if 'cci_params' in self.momentum_parameters:
+            cci_signals = ForexCCISignals(
+                data = self.indicators_data,
+                close_col = self.close_col,
+                parameters = self.momentum_parameters['cci_params'],
+                prints = False
+            ).generate_all_cci_signals()
 
-        momentum_signals = ForexMomentumSignals(
-            data = self.indicators_data,
-            close_col = self.close_col,
-            parameters = self.momentum_parameters['momentum_params'],
-            prints = False
-        ).generate_all_momentum_signals()
+        if 'momentum_params' in self.momentum_parameters:
+            momentum_signals = ForexMomentumSignals(
+                data = self.indicators_data,
+                close_col = self.close_col,
+                parameters = self.momentum_parameters['momentum_params'],
+                prints = False
+            ).generate_all_momentum_signals()
         
-        mas_signals = ForexMASignals(
-            data = self.indicators_data,
-            close_col = self.close_col,
-            ema_parameters=self.trend_parameters['ema_params'],
-            sma_parameters=self.trend_parameters['sma_params'],
-            prints = False
-        ).generate_all_signals()
+        if 'mas_params' in self.trend_parameters:
+            mas_signals = ForexMASignals(
+                data = self.indicators_data,
+                close_col = self.close_col,
+                ema_parameters=self.trend_parameters['ema_params'],
+                sma_parameters=self.trend_parameters['sma_params'],
+                prints = False
+            ).generate_all_signals()
         
-        macd_signals = ForexMACDSignals(
-            data = self.indicators_data,
-            close_col = self.close_col,
-            parameters = self.trend_parameters['macd_params'],
-            prints = False
-        ).generate_all_macd_signals()   
+        if 'macd_params' in self.trend_parameters:
+            macd_signals = ForexMACDSignals(
+                data = self.indicators_data,
+                close_col = self.close_col,
+                parameters = self.trend_parameters['macd_params'],
+                prints = False
+            ).generate_all_macd_signals()   
         
-        adx_signals = ForexADXSignals(
-            data = self.indicators_data,
-            close_col = self.close_col,
-            parameters = self.trend_parameters['adx_params'],
-            prints = False
-        ).generate_all_adx_signals()
+        if 'adx_params' in self.trend_parameters:
+            adx_signals = ForexADXSignals(
+                data = self.indicators_data,
+                close_col = self.close_col,
+                parameters = self.trend_parameters['adx_params'],
+                prints = False
+            ).generate_all_adx_signals()
         
-        sar_signals = ForexParabolicSARSignals(
-            data = self.indicators_data,
-            close_col = self.close_col,
-            parameters = self.trend_parameters['sar_params'],
-            prints = False
-        ).generate_all_sar_signals()
+        if 'sar_params' in self.trend_parameters:
+            sar_signals = ForexParabolicSARSignals(
+                data = self.indicators_data,
+                close_col = self.close_col,
+                parameters = self.trend_parameters['sar_params'],
+                prints = False
+            ).generate_all_sar_signals()
         
-        atr_signals = ForexATRSignals(
-            data = self.indicators_data,
-            close_col = self.close_col,
-            parameters = self.volatility_parameters['atr_params'],
-            prints = False
-        ).generate_all_atr_signals()
+        if 'atr_params' in self.volatility_parameters:
+            atr_signals = ForexATRSignals(
+                data = self.indicators_data,
+                close_col = self.close_col,
+                parameters = self.volatility_parameters['atr_params'],
+                prints = False
+            ).generate_all_atr_signals()
         
-        bb_signals = ForexBollingerBandsSignals(
-            data = self.indicators_data,
-            close_col = self.close_col,
-            parameters = self.volatility_parameters['bb_params'],
-            prints = False
-        ).generate_all_bb_signals()
+        if 'bb_params' in self.volatility_parameters:
+            bb_signals = ForexBollingerBandsSignals(
+                data = self.indicators_data,
+                close_col = self.close_col,
+                parameters = self.volatility_parameters['bb_params'],
+                prints = False
+            ).generate_all_bb_signals()
         
-        keltner_signals = ForexKeltnerSignals(
-            data = self.indicators_data,
-            close_col = self.close_col,
-            parameters = self.volatility_parameters['keltner_params'],
-            prints = False
-        ).generate_all_keltner_signals()
+        if 'keltner_params' in self.volatility_parameters:
+            keltner_signals = ForexKeltnerSignals(
+                data = self.indicators_data,
+                close_col = self.close_col,
+                parameters = self.volatility_parameters['keltner_params'],
+                prints = False
+            ).generate_all_keltner_signals()
         
-        std_signals = ForexSTDSignals(
-            data = self.indicators_data,
-            close_col = self.close_col,
-            parameters = self.volatility_parameters['std_params'],
-            prints = False
-        ).generate_all_std_signals()
+        if 'std_params' in self.volatility_parameters:
+            std_signals = ForexSTDSignals(
+                data = self.indicators_data,
+                close_col = self.close_col,
+                parameters = self.volatility_parameters['std_params'],
+                prints = False
+            ).generate_all_std_signals()
         
         self.signals_data = pd.concat(
             [
