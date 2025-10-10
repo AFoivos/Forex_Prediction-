@@ -25,6 +25,5 @@ ta-lib
 darts
 mlflow
 ipywidgets
-
-# Optional (αν χρειάζεσαι)
 gym
+
