@@ -306,6 +306,7 @@ class ForexFeauturesExtractor:
         )
         
         removed_cols = self.data.shape[0] - data_with_signals_and_indicators.shape[0]
+        
         if removed_cols > 0:
             print('='*50)
             print('='*50)
