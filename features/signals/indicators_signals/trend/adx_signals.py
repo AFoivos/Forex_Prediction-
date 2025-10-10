@@ -113,26 +113,23 @@ class ForexADXSignals:
                         self.adx_plus_slopes[-1], 
                         self.adx_minus_slopes[-1]]
                     )
+        def _extract_parameters(period: int):
+            self.adx_names.extend([f'adx_{period}'])
+            self.adx_plus.extend([f'adx_{period}_plus'])
+            self.adx_minus.extend([f'adx_{period}_minus'])
+            self.adx_slopes.extend([f'adx_{period}_slope'])
+            self.adx_plus_slopes.extend([f'adx_{period}_plus_di_slope'])
+            self.adx_minus_slopes.extend([f'adx_{period}_minus_di_slope'])
+            _validate()
+            
 
         if is_nested:
             for sublist in parameters:
                 for period in sublist:
-                    self.adx_names.extend([f'adx_{period}'])
-                    self.adx_plus.extend([f'adx_{period}_plus'])
-                    self.adx_minus.extend([f'adx_{period}_minus'])
-                    self.adx_slopes.extend([f'adx_{period}_slope'])
-                    self.adx_plus_slopes.extend([f'adx_{period}_plus_di_slope'])
-                    self.adx_minus_slopes.extend([f'adx_{period}_minus_di_slope'])
-                    _validate()
+                    _extract_parameters(period = period)
         else:
             for period in parameters:
-                self.adx_names.extend([f'adx_{period}'])
-                self.adx_plus.extend([f'adx_{period}_plus'])
-                self.adx_minus.extend([f'adx_{period}_minus'])
-                self.adx_slopes.extend([f'adx_{period}_slope'])
-                self.adx_plus_slopes.extend([f'adx_{period}_plus_di_slope'])
-                self.adx_minus_slopes.extend([f'adx_{period}_minus_di_slope'])
-                _validate()
+                _extract_parameters(period = period)
         
     def adx_trend_strength_signals(
         self, 

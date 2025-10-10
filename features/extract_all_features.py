@@ -211,7 +211,7 @@ class ForexFeauturesExtractor:
                 prints = False
             ).generate_all_momentum_signals()
         
-        if 'mas_params' in self.trend_parameters:
+        if 'ema_params' and 'sma_params' in self.trend_parameters:
             mas_signals = ForexMASignals(
                 data = self.indicators_data,
                 close_col = self.close_col,
@@ -219,7 +219,7 @@ class ForexFeauturesExtractor:
                 sma_parameters=self.trend_parameters['sma_params'],
                 prints = False
             ).generate_all_signals()
-        
+            
         if 'macd_params' in self.trend_parameters:
             macd_signals = ForexMACDSignals(
                 data = self.indicators_data,
