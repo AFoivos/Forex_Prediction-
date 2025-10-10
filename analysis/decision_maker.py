@@ -69,6 +69,7 @@ class ForexTimeSeriesDecisionMaker:
         
         vol_stats = self.results['volatility_analysis']
         acf_stats = self.results['autocorrelation_analysis']
+        
         decisions = {}
         
         sq_returns_sig = any(p < 0.05 for p in acf_stats['squared_returns_lb']['lb_pvalue'])
@@ -108,6 +109,7 @@ class ForexTimeSeriesDecisionMaker:
         
         dist_stats = self.results['distribution_analysis']
         desc_stats = self.results['descriptive_stats']['Returns']
+        
         decisions = {}
         
         jb_sig = dist_stats['jarque_bera_pval'] < 0.05
@@ -156,6 +158,7 @@ class ForexTimeSeriesDecisionMaker:
         """
        
         seasonal_stats = self.results['seasonal_decomposition']
+        
         decisions = {}
         
         seasonal_strength = seasonal_stats['seasonal_strength']
