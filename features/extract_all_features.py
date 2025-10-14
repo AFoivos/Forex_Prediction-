@@ -178,11 +178,14 @@ class ForexFeauturesExtractor:
             if i == 0:  
                 cleaned_indicators.append(df)
             else:
-                clean_df = df.drop(columns=self.close_col)
+                clean_df = df.drop(columns = self.close_col)
                 cleaned_indicators.append(clean_df)
 
-        self.indicators_data = pd.concat(cleaned_indicators, axis=1).dropn
-  
+        self.indicators_data = pd.concat(
+            cleaned_indicators,
+            axis = 1
+        ).dropna()
+
     def _extract_signals(
         self
     ):
@@ -318,29 +321,13 @@ class ForexFeauturesExtractor:
             if i == 0:  
                 cleaned_signals.append(df)
             else:
-                clean_df = df.drop(columns=self.close_col) if self.close_col in df.columns else df
+                clean_df = df.drop(columns = self.close_col) if self.close_col in df.columns else df
                 cleaned_signals.append(clean_df)
 
-        self.signals_data = pd.concat(cleaned_signals, axis=1).dropna()
-        
-        # self.signals_data = pd.concat(
-        #     [
-        #         rsi_signals,
-        #         stochastic_signals.drop(columns = self.close_col),
-        #         williams_r_signals.drop(columns = self.close_col),
-        #         cci_signals.drop(columns = self.close_col),
-        #         momentum_signals.drop(columns = self.close_col),
-        #         mas_signals.drop(columns = self.close_col),
-        #         macd_signals.drop(columns = self.close_col),
-        #         adx_signals.drop(columns = self.close_col),
-        #         sar_signals.drop(columns = self.close_col),
-        #         atr_signals.drop(columns = self.close_col),
-        #         bb_signals.drop(columns = self.close_col),
-        #         keltner_signals.drop(columns = self.close_col),
-        #         std_signals.drop(columns = self.close_col)
-        #     ],
-        #     axis=1
-        # )
+        self.signals_data = pd.concat(
+            cleaned_signals,
+            axis = 1
+        ).dropna()
     
     def extract_all_features(
         self
