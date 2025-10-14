@@ -72,32 +72,26 @@ class ForexQuickLook():
         print("DATASET INFORMATION")
         print("="*50)
         
-        # Basic info
         print("\n1. BASIC INFO:")
         print(self.data.info())
         print("="*50)
         
-        # Head of the data
         print("\n2. FIRST 3 ROWS:")
         print(self.data.head(3))
         print("="*50)
         
-        # Tail of the data
         print("\n3. LAST 3 ROWS:")
         print(self.data.tail(3))
         print("="*50)
         
-        # Statistical description
         print("\n4. STATISTICAL DESCRIPTION:")
         print(self.data.describe())
         print("="*50)
         
-        # Data types
         print("\n6. DATA TYPES:")
         print(self.data.dtypes)
         print("="*50)
         
-        # Index information
         print("\n7. INDEX INFORMATION:")
         print(f"Index name: {self.data.index.name}")
         print(f"Index type: {type(self.data.index)}")
@@ -113,41 +107,34 @@ class ForexQuickLook():
         print("MISSING VALUES ANALYSIS")
         print("="*50)
         
-        # Check for NaN values
         nan_values = self.data.isna().sum()
         print("\n1. NaN VALUES PER COLUMN:")
         print(nan_values)
         print("="*50)
         
-        # Check for Duplicate values
         duplicate_rows = self.data.duplicated().sum()
         print(f"\n2. DUPLICATE ROWS: {duplicate_rows}")
         print("="*50)
         
-        # Total missing values per column
         missing_values = self.data.isnull().sum()
         print("\n3. MISSING VALUES PER COLUMN:")
         print(missing_values)
         print("="*50)
         
-        # Total missing values
         total_missing = missing_values.sum()
         print(f"\n4. TOTAL MISSING VALUES: {total_missing}")
         print("="*50)
         
-        # Percentage of missing values
         missing_percentage = (missing_values / len(self.data)) * 100
         print("\n5. MISSING VALUES PERCENTAGE:")
         print(missing_percentage.round(2))
         print("="*50)
         
-        # Check for infinite values
         infinite_values = np.isinf(self.data.select_dtypes(include=[np.number])).sum()
         print("\n6. INFINITE VALUES:")
         print(infinite_values)
         print("="*50)
 
-    
     def plot_candlestick(self):
         
         """
@@ -160,12 +147,10 @@ class ForexQuickLook():
         """
         
         try:
-            # Ensure we have OHLC data
             required_cols = ['open', 'high', 'low', 'close']
             if not all(col in self.data.columns for col in required_cols):
                 raise ValueError("Error: Missing OHLC columns for candlestick chart")
                 
-            # Create the candlestick chart
             plt.figure(figsize=(15, 6))
             plot_data = self.data.dropna()
             

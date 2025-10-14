@@ -75,8 +75,6 @@ class ForexDataLoad:
                 inplace=True
                 )
     
-            # self.data = self.data[self.data['datetime'].dt.year > 2020]
-    
             self.data.set_index('datetime', inplace=True)
             
             if self.prints:
