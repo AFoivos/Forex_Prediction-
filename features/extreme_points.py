@@ -103,4 +103,16 @@ class ForexExtremePoints:
 
                 self.extreme_data[f'Label_p{period}_o{order}'] = labels.astype(int)
 
+        count_removed_rows = self.data.shape[0] - self.extreme_data.shape[0]
+
+        if self.prints:
+            print('='*50)
+            print('Data Info')
+            print(self.extreme_data.info())
+            print('='*50)
+            print(f'Shape of data {self.extreme_data.shape}')
+            print('='*50)
+            print(f'{count_removed_rows} rows removed')
+            print('='*50)
+            
         return self.extreme_data, self.parameters
