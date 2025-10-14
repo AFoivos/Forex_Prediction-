@@ -90,8 +90,8 @@ class ForexDataLoad:
     
     def load_from_database(
         self, 
-        connection_string: str , 
-        query: str
+        connection_string: str = None , 
+        query: str = None
     ):
         
         """

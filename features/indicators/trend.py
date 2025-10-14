@@ -116,16 +116,19 @@ class ForexTrendIndicators:
         
         self.parameters['sma_params'] = sma_periods
         
-        for period in sma_periods:
-            col_name = f"sma_{period}"
-            
-            self.trend_data[col_name] = talib.SMA(
-                self.data[self.close_col], 
-                timeperiod=period
-            )
-            
-            self.trend_data[f"{col_name}_slope"] = self.trend_data[col_name].diff()
+        sma_periods = self._is_nested_list(sma_periods)
         
+        for sublist in sma_periods:
+            for period in sublist:
+                col_name = f"sma_{period}"
+
+                self.trend_data[col_name] = talib.SMA(
+                    self.data[self.close_col],
+                    timeperiod=period
+                )
+
+                self.trend_data[f"{col_name}_slope"] = self.trend_data[col_name].diff()
+
         return self.trend_data
         
     def add_ema(
@@ -143,17 +146,18 @@ class ForexTrendIndicators:
         
         self.parameters['ema_params'] = ema_periods
         
-        for period in ema_periods:
-            col_name = f'ema_{period}'
-            
-            # EMA
-            self.trend_data[col_name] = talib.EMA(
-                self.data[self.close_col], 
-                timeperiod=period
-            )
-        
-            # EMA slope
-            self.trend_data[f'{col_name}_slope'] = self.trend_data[col_name].diff()
+        ema_periods = self._is_nested_list(ema_periods)
+
+        for sublist in ema_periods:
+            for period in sublist:
+                col_name = f'ema_{period}'
+
+                self.trend_data[col_name] = talib.EMA(
+                    self.data[self.close_col],
+                    timeperiod=period
+                )
+
+                self.trend_data[f'{col_name}_slope'] = self.trend_data[col_name].diff()
 
         return self.trend_data
         
@@ -186,12 +190,10 @@ class ForexTrendIndicators:
             signalperiod=lst[2]
         )
 
-            # MACD
             self.trend_data[f'macd_{fast}_{slow}'] = macd
             self.trend_data[f'macd_signal_{signal}'] = macd_signal
             self.trend_data[f'macd_hist_fast_{fast}_slow{slow}_sig{signal}'] = macd_hist
             
-            # MACD slopes
             self.trend_data[f"macd_{fast}_{slow}_slope"] = macd.diff()
             self.trend_data[f"macd_signal_{signal}_slope"] = macd_signal.diff()
             
