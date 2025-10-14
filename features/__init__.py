@@ -22,6 +22,7 @@ from .signals import (
 )
 
 from .extract_all_features import ForexFeauturesExtractor
+from .extreme_points import ForexExtremePoints
 
 __all__ = [
     "ForexFeauturesExtractor",
@@ -43,5 +44,6 @@ __all__ = [
     "ForexATRSignals",
     "ForexBollingerBandsSignals",
     "ForexKeltnerSignals",
-    "ForexSTDSignals"
+    "ForexSTDSignals",
+    "ForexExtremePoints"
 ]
