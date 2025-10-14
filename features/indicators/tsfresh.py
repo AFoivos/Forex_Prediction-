@@ -38,10 +38,8 @@ class ForexTSIndicators:
         self.target_column = target_column
         self.instrument_id = instrument_id
         
-        # Validate data
         self._validate_data()
         
-        # Initialize results
         self.long_format_data = None
         self.extracted_features = None
         self.selected_features = None
@@ -84,16 +82,13 @@ class ForexTSIndicators:
         
         """
                 
-        # Use all numeric columns except target if not specified
         if feature_columns is None:
             numeric_cols = self.data.select_dtypes(include=[np.number]).columns.tolist()
             feature_columns = [col for col in numeric_cols if col != self.target_column]
                 
-        # Reset index to have datetime as column
         data_temp = self.data.reset_index()
-        datetime_col = data_temp.columns[0]  # Get the name of the first column (datetime index)
+        datetime_col = data_temp.columns[0]  
         
-        # Melt DataFrame to long format
         data_long = data_temp[[datetime_col] + feature_columns].melt(
             id_vars = [datetime_col],
             value_vars = feature_columns,
@@ -101,10 +96,8 @@ class ForexTSIndicators:
             value_name = "value"
         )
         
-        # Add instrument ID
         data_long["id"] = self.instrument_id
         
-        # Create rolling windows
         data_rolled = roll_time_series(
             data_long, 
             column_id = "id",
@@ -115,7 +108,7 @@ class ForexTSIndicators:
         )
         
         self.long_format_data = data_rolled
-        self.datetime_column = datetime_col  # Store for later use
+        self.datetime_column = datetime_col  
         
         return self.long_format_data
     
@@ -139,7 +132,6 @@ class ForexTSIndicators:
         if self.long_format_data is None:
             raise ValueError("Call prepare_ts_data() first")
                 
-        # Use comprehensive feature settings if not provided
         if feature_settings is None:
             feature_settings = ComprehensiveFCParameters()
             print("Using comprehensive feature settings")
@@ -155,12 +147,10 @@ class ForexTSIndicators:
             disable_progressbar = disable_progressbar
         )
         
-        # Clean feature names
         self.extracted_features.columns = [f"tsfresh_{col}" for col in self.extracted_features.columns]
         
         self.extracted_features = self.extracted_features.replace([np.inf, -np.inf], np.nan)
         
-        # Remove columns with too many NaN values
         initial_features = self.extracted_features.shape[1]
         self.extracted_features = self.extracted_features.dropna(axis=1, thresh=0.7 * len(self.extracted_features))
         self.extracted_features = self.extracted_features.ffill().bfill()
@@ -189,43 +179,37 @@ class ForexTSIndicators:
         
         print("Selecting relevant features...")
         
-        # FIX: Get the unique time points from the rolled data to align with target
         unique_times = self.long_format_data[self.datetime_column].unique()
         
-        # Create a mapping from time points to the extracted features index
         time_to_index_map = {}
         for idx, time_val in enumerate(unique_times):
             time_to_index_map[time_val] = idx
         
-        # Align features with target using the time points - FIXED VERSION
         aligned_pairs = []
         
         for time_val in unique_times:
-            if time_val in self.data.index:  # Check if time exists in original data
-                if time_val in time_to_index_map:  # Check if time exists in mapping
+            if time_val in self.data.index: 
+                if time_val in time_to_index_map:  
                     feature_idx = time_to_index_map[time_val]
-                    if feature_idx < len(self.extracted_features):  # Check if feature index is valid
+                    if feature_idx < len(self.extracted_features): 
                         target_value = self.data.loc[time_val, self.target_column]
                         aligned_pairs.append((time_val, feature_idx, target_value))
         
         if len(aligned_pairs) == 0:
             raise ValueError("No common time points between features and target")
         
-        # Separate the aligned data
-        aligned_indices = [pair[0] for pair in aligned_pairs]  # Time indices
-        feature_indices = [pair[1] for pair in aligned_pairs]  # Feature indices  
-        aligned_targets = [pair[2] for pair in aligned_pairs]  # Target values
+        aligned_indices = [pair[0] for pair in aligned_pairs] 
+        feature_indices = [pair[1] for pair in aligned_pairs]    
+        aligned_targets = [pair[2] for pair in aligned_pairs] 
         
         X_aligned = self.extracted_features.iloc[feature_indices]
         
-        # FIX: Set the same index for both X and y
-        X_aligned.index = aligned_indices  # Set index to match y
+        X_aligned.index = aligned_indices 
         y_aligned = pd.Series(aligned_targets, index=aligned_indices)
         
         print(f"Aligned data: {len(X_aligned)} samples")
         print(f"Target range: {y_aligned.min():.4f} to {y_aligned.max():.4f}")
         
-        # Verify indices match
         print(f"X index: {X_aligned.index[:5].tolist()}")
         print(f"y index: {y_aligned.index[:5].tolist()}")
         print(f"Indices match: {X_aligned.index.equals(y_aligned.index)}")
@@ -237,7 +221,6 @@ class ForexTSIndicators:
             ml_task=ml_task
         )
         
-        # Store the aligned indices for later use
         self.aligned_indices = aligned_indices
         self.y_aligned = y_aligned
         
@@ -261,12 +244,10 @@ class ForexTSIndicators:
         if self.selected_features is None:
             raise ValueError("Call select_relevant_features() first")
         
-        # Align with target using index
         common_index = self.selected_features.index.intersection(self.data.index)
         X_aligned = self.selected_features.loc[common_index]
         y_aligned = self.data.loc[common_index, self.target_column]
         
-        # Calculate correlation with target
         correlations = X_aligned.apply(lambda x: np.corrcoef(x, y_aligned)[0, 1])
         correlations = correlations.abs().sort_values(ascending=False)
         
@@ -298,12 +279,10 @@ class ForexTSIndicators:
         if self.selected_features is None:
             raise ValueError("Call select_relevant_features() first")
                 
-        # Align features and target using index
         common_index = self.selected_features.index.intersection(self.data.index)
         X = self.selected_features.loc[common_index]
         y = self.data.loc[common_index, self.target_column]
         
-        # Time-series split without shuffling - preserve time order
         split_idx = int(len(X) * (1 - test_size))
         
         X_train, X_test = X.iloc[:split_idx], X.iloc[split_idx:]
@@ -314,7 +293,6 @@ class ForexTSIndicators:
             X_train_scaled = scaler.fit_transform(X_train)
             X_test_scaled = scaler.transform(X_test)
             
-            # Convert back to DataFrame with original index and columns
             X_train = pd.DataFrame(X_train_scaled, 
                                  index=X_train.index, 
                                  columns=X_train.columns)
@@ -346,20 +324,12 @@ class ForexTSIndicators:
         
         """
         
-        # Step 1: Prepare data
         self.prepare_ts_data(feature_columns=feature_columns, window_size=window_size)
-        
-        # Step 2: Extract features
         self.extract_ts_indicators()
-        
-        # Step 3: Select relevant features
         self.select_relevant_indicators()
-        
-        # Step 4: Get feature importance
         self.get_indicators_importance()
         
         if train_test:
-            # Step 5: Train/test split
             X_train, X_test, y_train, y_test = self.get_train_test_split(
                 test_size=test_size, 
                 scale_features=scale_features

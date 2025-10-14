@@ -3,6 +3,8 @@ import numpy as np
 import talib
 from typing import Dict, List, Optional, Union
 
+from .extreme_points import ForexExtremePoints
+
 from .indicators import (
     ForexMomentumIndicators,
     ForexTrendIndicators,
@@ -52,7 +54,11 @@ class ForexFeauturesExtractor:
             'bb_period_nbdevup_nbdevdn': [20, 2.0, 2.0],
             'keltner_ema_atr_multiplier': [20, 10, 2.0],
             'std_periods': [20, 50, 100]
-        },        
+        },
+        extreme_points_parameters: Dict = {
+            'extreme_periods': [5, 10, 20, 50, 100, 200, 300, 400, 500, 600],
+            'extreme_orders': [1, 2, 3, 4, 5, 10, 20, 25, 30, 35, 40, 45, 50]
+        },
         open_col: str = 'open',
         high_col: str = 'high', 
         low_col: str = 'low', 
@@ -70,9 +76,6 @@ class ForexFeauturesExtractor:
         """
         
         self.data = data.copy()
-        self.indicators_data = pd.DataFrame()
-        self.signals_data = pd.DataFrame()
-        
         self.open_col = open_col
         self.high_col = high_col
         self.low_col = low_col
@@ -81,6 +84,11 @@ class ForexFeauturesExtractor:
         
         self._validate_columns()
         
+        self.indicators_data = pd.DataFrame()
+        self.signals_data = pd.DataFrame()
+        self.extreme_points_data = pd.DataFrame()
+        
+        self.extreme_points_parameters = extreme_points_parameters
         self.momentum_parameters = momentum_parameters
         self.trend_parameters = trend_parameters
         self.volatility_parameters = volatility_parameters
@@ -89,10 +97,7 @@ class ForexFeauturesExtractor:
         self, 
     ):  
         """
-        Validate that required indicator columns exist
-        
-        Parameters:
-        columns (list[str]): List of column names to validate
+        Validate required columns are in the DataFrame
             
         """
         
@@ -107,7 +112,22 @@ class ForexFeauturesExtractor:
         missing_cols = [col for col in required_cols if col not in self.data.columns]
         if missing_cols:
             raise ValueError(f"Missing columns in DataFrame: {missing_cols}")
-       
+    
+    def _extract_extreme_points(
+        self
+    ):
+        """
+        Extract extreme points
+        
+        """
+        
+        self.extreme_points_data, self.extreme_points_parameters = ForexExtremePoints(
+            data = self.data,
+            close_col = self.close_col,
+            prints = False
+        ).generate_extreme_points(**self.extreme_points_parameters)
+        
+    
     def _extract_indicators(
         self
     ):
@@ -116,7 +136,7 @@ class ForexFeauturesExtractor:
         Extract all indicators
         
         """
-        ### WE MUST CHANGE INDICATORS TO ADD 'IF' FOR EVERY INDICATOR IF PARAPETERS EXIST TO AVOID ERRORS
+
         momentum_data, self.momentum_parameters = ForexMomentumIndicators(
             data = self.data,
             open_col = self.open_col,
@@ -125,10 +145,8 @@ class ForexFeauturesExtractor:
             close_col = self.close_col,
             volume_col = self.volume_col,
             prints = False
-            ).generate_all_momentum_indicators(
-            **self.momentum_parameters
-        )
-       
+        ).generate_all_momentum_indicators(**self.momentum_parameters)
+        
         trend_data, self.trend_parameters = ForexTrendIndicators(
             data = self.data,
             open_col = self.open_col,
@@ -137,9 +155,7 @@ class ForexFeauturesExtractor:
             close_col = self.close_col,
             volume_col = self.volume_col,
             prints = False
-            ).generate_all_trend_indicators(
-            **self.trend_parameters
-        )
+        ).generate_all_trend_indicators(**self.trend_parameters)
         
         volatility_data, self.volatility_parameters = ForexVolatilityIndicators(
             data = self.data,
@@ -149,18 +165,23 @@ class ForexFeauturesExtractor:
             close_col = self.close_col,
             volume_col = self.volume_col,
             prints = False
-            ).generate_all_volatility_indicators(
-            **self.volatility_parameters
-        )
+        ).generate_all_volatility_indicators(**self.volatility_parameters)
+            
+        indicators = [
+            momentum_data,
+            trend_data,
+            volatility_data
+        ]
         
-        self.indicators_data = pd.concat(
-            [
-                momentum_data,
-                trend_data.drop(columns = self.close_col),
-                volatility_data.drop(columns = self.close_col)
-            ], 
-            axis=1,
-        )
+        cleaned_indicators = []
+        for i, df in enumerate(indicators):
+            if i == 0:  
+                cleaned_indicators.append(df)
+            else:
+                clean_df = df.drop(columns=self.close_col)
+                cleaned_indicators.append(clean_df)
+
+        self.indicators_data = pd.concat(cleaned_indicators, axis=1).dropn
   
     def _extract_signals(
         self
@@ -276,24 +297,50 @@ class ForexFeauturesExtractor:
                 prints = False
             ).generate_all_std_signals()
         
-        self.signals_data = pd.concat(
-            [
-                rsi_signals,
-                stochastic_signals.drop(columns = self.close_col),
-                williams_r_signals.drop(columns = self.close_col),
-                cci_signals.drop(columns = self.close_col),
-                momentum_signals.drop(columns = self.close_col),
-                mas_signals.drop(columns = self.close_col),
-                macd_signals.drop(columns = self.close_col),
-                adx_signals.drop(columns = self.close_col),
-                sar_signals.drop(columns = self.close_col),
-                atr_signals.drop(columns = self.close_col),
-                bb_signals.drop(columns = self.close_col),
-                keltner_signals.drop(columns = self.close_col),
-                std_signals.drop(columns = self.close_col)
-            ],
-            axis=1
-        )
+        signals = [
+            rsi_signals,
+            stochastic_signals,
+            williams_r_signals,
+            cci_signals,
+            momentum_signals,
+            mas_signals,
+            macd_signals,
+            adx_signals,
+            sar_signals,
+            atr_signals,
+            bb_signals,
+            keltner_signals,
+            std_signals
+        ]
+
+        cleaned_signals = []
+        for i, df in enumerate(signals):
+            if i == 0:  
+                cleaned_signals.append(df)
+            else:
+                clean_df = df.drop(columns=self.close_col) if self.close_col in df.columns else df
+                cleaned_signals.append(clean_df)
+
+        self.signals_data = pd.concat(cleaned_signals, axis=1).dropna()
+        
+        # self.signals_data = pd.concat(
+        #     [
+        #         rsi_signals,
+        #         stochastic_signals.drop(columns = self.close_col),
+        #         williams_r_signals.drop(columns = self.close_col),
+        #         cci_signals.drop(columns = self.close_col),
+        #         momentum_signals.drop(columns = self.close_col),
+        #         mas_signals.drop(columns = self.close_col),
+        #         macd_signals.drop(columns = self.close_col),
+        #         adx_signals.drop(columns = self.close_col),
+        #         sar_signals.drop(columns = self.close_col),
+        #         atr_signals.drop(columns = self.close_col),
+        #         bb_signals.drop(columns = self.close_col),
+        #         keltner_signals.drop(columns = self.close_col),
+        #         std_signals.drop(columns = self.close_col)
+        #     ],
+        #     axis=1
+        # )
     
     def extract_all_features(
         self
@@ -306,17 +353,19 @@ class ForexFeauturesExtractor:
         
         self._extract_indicators()
         self._extract_signals()
-        
-        data_with_signals_and_indicators = pd.concat(
+        self._extract_extreme_points()
+
+        all_features_data = pd.concat(
             [
                 self.indicators_data,
-                self.signals_data.drop(columns = self.close_col)
+                self.signals_data.drop(columns = self.close_col),
+                self.extreme_points_data.drop(columns = self.close_col)
             ],
             axis=1
         )
-        
-        removed_cols = self.data.shape[0] - data_with_signals_and_indicators.shape[0]
-        
+
+        removed_cols = self.data.shape[0] - all_features_data.shape[0]
+
         if removed_cols > 0:
             print('='*50)
             print('='*50)
@@ -324,7 +373,7 @@ class ForexFeauturesExtractor:
             print('='*50)
             print('='*50)
         
-        return self.indicators_data, self.signals_data, data_with_signals_and_indicators
+        return  all_features_data, self.indicators_data, self.signals_data, self.extreme_points_data
                     
                         
         

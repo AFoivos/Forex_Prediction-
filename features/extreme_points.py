@@ -67,22 +67,22 @@ class ForexExtremePoints:
             missing_cols = [col for col in columns if col not in self.data.columns]
             if missing_cols:
                 raise ValueError(f"Missing columns in data: {missing_cols}")
-        
-    def detect_extreme_points(
+
+    def generate_extreme_points(
         self, 
-        periods: List[int] = [5, 10, 20, 50, 100, 200, 300, 400, 500, 600],
-        orders: List[int] = [1, 2, 3, 4, 5, 10, 20, 25, 30, 35, 40, 45, 50]
+        extreme_periods: List[int] = [5, 10, 20, 50, 100, 200, 300, 400, 500, 600],
+        extreme_orders: List[int] = [1, 2, 3, 4, 5, 10, 20, 25, 30, 35, 40, 45, 50]
     ):
         
         self._validate_columns()
-        
-        self.parameters['periods'] = periods
-        self.parameters['orders'] = orders
-        
+
+        self.parameters['extreme_periods'] = extreme_periods
+        self.parameters['extreme_orders'] = extreme_orders
+    
         prices = self.data[self.close_col].values
 
-        for period in periods:
-            for order in orders:
+        for period in extreme_periods:
+            for order in extreme_orders:
                 local_max = argrelextrema(
                     prices, 
                     np.greater,
