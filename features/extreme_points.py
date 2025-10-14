@@ -83,8 +83,16 @@ class ForexExtremePoints:
 
         for period in periods:
             for order in orders:
-                local_max = argrelextrema(prices, np.greater, order=order)[0]
-                local_min = argrelextrema(prices, np.less, order=order)[0]
+                local_max = argrelextrema(
+                    prices, 
+                    np.greater,
+                    order=order
+                )[0]
+                local_min = argrelextrema(
+                    prices,
+                    np.less,
+                    order=order
+                )[0]
 
                 labels = np.zeros(len(prices))
                 labels[local_min] = 1  
