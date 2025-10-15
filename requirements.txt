@@ -26,4 +26,5 @@ darts
 mlflow
 ipywidgets
 gym
+umap-learn
 

@@ -70,8 +70,8 @@ class ForexExtremePoints:
 
     def generate_extreme_points(
         self, 
-        extreme_periods: List[int] = [5, 10, 20, 50, 100, 200, 300, 400, 500, 600],
-        extreme_orders: List[int] = [1, 2, 3, 4, 5, 10, 20, 25, 30, 35, 40, 45, 50]
+        extreme_periods: List[int] = [5, 10, 20, 50, 100],
+        extreme_orders: List[int] = [1, 2, 3, 4, 5, 10, 20]
     ):
         
         self._validate_columns()
@@ -96,18 +96,18 @@ class ForexExtremePoints:
 
                 labels = np.zeros(len(prices))
                 labels[local_min] = 1  
-                labels[local_max] = 3   
+                labels[local_max] = 2
 
-                labeled_points = [(i, labels[i]) for i in range(len(labels)) if labels[i] in [1, 3]]
+                labeled_points = [(i, labels[i]) for i in range(len(labels)) if labels[i] in [1, 2]]
 
                 for idx in range(len(labeled_points) - 1):
                     i1, l1 = labeled_points[idx]
                     i2, l2 = labeled_points[idx + 1]
 
-                    if l1 == 1 and l2 in [1, 3]:  
-                        labels[i1 + 1:i2] = 2     
-                    elif l1 == 3 and l2 in [3, 1]: 
-                        labels[i1 + 1:i2] = 4    
+                    # if l1 == 1 and l2 in [1, 3]:  
+                    #     labels[i1 + 1:i2] = 2     
+                    # elif l1 == 3 and l2 in [3, 1]: 
+                    #     labels[i1 + 1:i2] = 4    
 
                 self.extreme_data[f'Label_p{period}_o{order}'] = labels.astype(int)
 

@@ -126,7 +126,7 @@ class ForexPlotter:
             )
 
             buy_signals = plot_data[plot_data[col] == 1]
-            sell_signals = plot_data[plot_data[col] == 3]
+            sell_signals = plot_data[plot_data[col] == 2]
 
             plt.scatter(
                 buy_signals.index,

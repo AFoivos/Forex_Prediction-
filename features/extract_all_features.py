@@ -56,8 +56,8 @@ class ForexFeauturesExtractor:
             'std_periods': [20, 50, 100]
         },
         extreme_points_parameters: Dict = {
-            'extreme_periods': [5, 10, 20, 50, 100, 200, 300, 400, 500, 600],
-            'extreme_orders': [1, 2, 3, 4, 5, 10, 20, 25, 30, 35, 40, 45, 50]
+            'extreme_periods': [5, 10, 20, 50, 100],
+            'extreme_orders':[1, 2, 3, 4, 5, 10, 20]
         },
         open_col: str = 'open',
         high_col: str = 'high', 
@@ -184,7 +184,7 @@ class ForexFeauturesExtractor:
         self.indicators_data = pd.concat(
             cleaned_indicators,
             axis = 1
-        ).dropna()
+        )
 
     def _extract_signals(
         self
