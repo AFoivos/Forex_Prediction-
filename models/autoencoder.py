@@ -13,7 +13,8 @@ class TimeSeriesAutoencoder:
         self,
         input_dim,
         encoding_dim: int = 2,
-        learning_rate: float = 0.001
+        learning_rate: float = 0.001,
+        backend_clear: bool = True,
     ):
         self.input_dim = input_dim
         self.encoding_dim = encoding_dim
@@ -22,6 +23,7 @@ class TimeSeriesAutoencoder:
         self.encoder = None
         self.scaler = StandardScaler()
         self.is_trained = False
+        self.backend_clear = backend_clear
         
     def build_model(self):
         
@@ -30,7 +32,9 @@ class TimeSeriesAutoencoder:
         
         """
         
-        tf.keras.backend.clear_session()
+        if self.backend_clear:
+            tf.keras.backend.clear_session()
+        
         input_layer = Input(shape=(self.input_dim,))
         encoded = Dense(128,activation='relu')(input_layer)
         encoded = Dropout(0.2)(encoded)
@@ -278,3 +282,7 @@ class TimeSeriesAutoencoder:
         
         return df_with_clusters, cluster_stats
 
+    def compresive_run(
+        self,
+    ):
+        pass

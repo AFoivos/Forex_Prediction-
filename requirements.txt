@@ -19,6 +19,7 @@ tensorflow
 torch
 optuna
 xgboost
+keras
 
 # Specialized
 ta-lib
