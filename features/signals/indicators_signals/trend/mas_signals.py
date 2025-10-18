@@ -7,7 +7,7 @@ from itertools import combinations
 
 import warnings
 warnings.filterwarnings('ignore')
-
+#ασδασδ
 class ForexMASignals:
     def __init__(
         self, 
