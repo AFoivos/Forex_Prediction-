@@ -37,10 +37,19 @@ class ForexMomentumSignals:
         self.close_col = close_col
         self.data = data.copy()
         
-        self.signals = pd.DataFrame(
-            {self.close_col: self.data[self.close_col]},
-            index=self.data.index
-        )
+        self.signals = {}
+        signals_names= [
+            'trend_strength',           # Δύναμη τάσης
+            'momentum',                 # Ορμή            
+            'divergence',               # Αποκλίσεις
+            'centerline',               # Κεντρική γραμμή
+        ]
+
+        for name in signals_names:
+            self.signals[name] = pd.DataFrame(
+                {self.close_col: self.data[self.close_col]},
+                index = self.data.index
+            )
         
         self.momentum = []
         self.momentum_slope = []
@@ -129,7 +138,7 @@ class ForexMomentumSignals:
             positive_momentum = self.data[name] > 0
             negative_momentum = self.data[name] < 0
             
-            self.signals[f'{name}_direction'] = np.select(
+            self.signals['momentum'][f'{name}_direction'] = np.select(
                 [positive_momentum, negative_momentum],
                 [2, 1],
                 default = 0
@@ -149,12 +158,10 @@ class ForexMomentumSignals:
         for name in self.momentum_slope:
             self._validate_columns(columns = [name])
          
-            # Accelerating: slope > 0
             momentum_accelerating = self.data[name] > 0
-            # Decelerating: slope < 0
             momentum_decelerating = self.data[name] < 0
             
-            self.signals[f'{name}_acceleration'] = np.select(
+            self.signals['momentum'][f'{name}_acceleration'] = np.select(
                 [momentum_accelerating, momentum_decelerating],
                 [2, 1],
                 default = 0
@@ -187,7 +194,7 @@ class ForexMomentumSignals:
                 (self.data[name].shift(1) >= 0)
             )
 
-            self.signals[f'{name}_zero_cross'] = np.select(
+            self.signals['centerline'][f'{name}_zero_cross'] = np.select(
                 [above_zero, below_zero],
                 [2, 1],
                 default = 0
@@ -238,7 +245,7 @@ class ForexMomentumSignals:
             
             bearish_divergence = price_higher_high & momentum_lower_high
             
-            self.signals[f'{name}_divergence'] = np.select(
+            self.signals['divergence'][f'{name}_divergence'] = np.select(
                 [bullish_divergence, bearish_divergence],
                 [2, 1],
                 default = 0
@@ -270,7 +277,7 @@ class ForexMomentumSignals:
             extreme_bullish_condition = self.data[name] > extreme_bullish
             extreme_bearish_condition = self.data[name] < extreme_bearish
             
-            self.signals[f'{name}_extreme'] = np.select(
+            self.signals['momentum'][f'{name}_extreme'] = np.select(
                 [extreme_bullish_condition, extreme_bearish_condition],
                 [2, 1],
                 default = 0
@@ -302,7 +309,7 @@ class ForexMomentumSignals:
             strong_trend = abs(self.data[name]) > strong_threshold
             weak_trend = abs(self.data[name]) < weak_threshold
             
-            self.signals[f'{name}_trend_strength'] = np.select(
+            self.signals['trend_strength'][f'{name}_trend_strength'] = np.select(
                 [strong_trend, weak_trend],
                 [2, 1],
                 default = 0
@@ -329,22 +336,26 @@ class ForexMomentumSignals:
         self.momentum_zero_line_signals()
         self.momentum_divergence_signals(lookback = lookback)
         self.momentum_extreme_signals(
-            extreme_bullish=extreme_bullish,
-            extreme_bearish=extreme_bearish
+            extreme_bullish = extreme_bullish,
+            extreme_bearish = extreme_bearish
         )
         self.momentum_trend_strength_signals(
-            strong_threshold=strong_threshold,
-            weak_threshold=weak_threshold
+            strong_threshold = strong_threshold,
+            weak_threshold = weak_threshold
         )
         
-        count_removed_rows = self.signals.shape[0] - self.data.shape[0]
+        count_removed_rows = 0
+        for name in self.signals.keys():
+            count_removed_rows += self.signals[name].shape[0] - self.data.shape[0]
         
         if self.prints:
             print('='*50)
-            print(self.signals.info())
+            for name in self.signals.keys():
+                print(self.signals[name].info())
             print('='*50)   
-            print(f'Shape of data {self.signals.shape}')
-            print('='*50)
+            for name in self.signals.keys():
+                print(f'Shape of {name} data {self.signals[name].shape}')
+            print('='*50)   
             print(f'{count_removed_rows} rows removed')
             print('='*50)
         

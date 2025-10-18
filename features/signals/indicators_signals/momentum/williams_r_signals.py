@@ -37,10 +37,19 @@ class ForexWilliamsRSignals:
         self.close_col = close_col
         self.data = data.copy()
         
-        self.signals = pd.DataFrame(
-            {self.close_col: self.data[self.close_col]},
-            index=self.data.index
-        )
+        self.signals = {}
+        signals_names= [
+            'momentum',                 # Ορμή
+            'overbought_oversold',      # Υπερβολική αγορά/πώληση
+            'reversal',                 # Ανατροπή
+            'divergence',               # Αποκλίσεις  
+        ]
+
+        for name in signals_names:
+            self.signals[name] = pd.DataFrame(
+                {self.close_col: self.data[self.close_col]},
+                index = self.data.index
+            )
         
         self.williams_r = []
         self.williams_r_slope = []
@@ -134,7 +143,7 @@ class ForexWilliamsRSignals:
             overbought_condition = self.data[name] > overbought  
             oversold_condition = self.data[name] < oversold      
             
-            self.signals[f'{name}_overbought_oversold'] = np.select(
+            self.signals['overbought_oversold'][f'{name}_overbought_oversold'] = np.select(
                 [overbought_condition, oversold_condition],
                 [2, 1],
                 default = 0
@@ -160,7 +169,7 @@ class ForexWilliamsRSignals:
             williams_rising = self.data[name] > 0
             williams_falling = self.data[name] < 0
             
-            self.signals[f'{name}_momentum'] = np.select(
+            self.signals['momentum'][f'{name}_momentum'] = np.select(
                 [williams_rising, williams_falling],
                 [2, 1],
                 default = 0
@@ -199,7 +208,7 @@ class ForexWilliamsRSignals:
                 (self.data[name].shift(1) >= overbought)
             )
             
-            self.signals[f'{name}_reversal'] = np.select(
+            self.signals['reversal'][f'{name}_reversal'] = np.select(
                 [bullish_reversal, bearish_reversal],
                 [2, 1],
                 default = 0
@@ -250,7 +259,7 @@ class ForexWilliamsRSignals:
             
             bearish_divergence = price_higher_high & williams_lower_high
             
-            self.signals[f'{name}_divergence'] = np.select(
+            self.signals['divergence'][f'{name}_divergence'] = np.select(
                 [bullish_divergence, bearish_divergence],
                 [2, 1],
                 default = 0
@@ -282,7 +291,7 @@ class ForexWilliamsRSignals:
             extreme_overbought_condition = self.data[name] > extreme_overbought
             extreme_oversold_condition = self.data[name] < extreme_oversold
             
-            self.signals[f'{name}_extreme'] = np.select(
+            self.signals['overbought_oversold'][f'{name}_extreme'] = np.select(
                 [extreme_overbought_condition, extreme_oversold_condition],
                 [2, 1],
                 default = 0
@@ -319,14 +328,18 @@ class ForexWilliamsRSignals:
             extreme_oversold = extreme_oversold
         )
         
-        count_removed_rows = self.signals.shape[0] - self.data.shape[0]
+        count_removed_rows = 0
+        for name in self.signals.keys():
+            count_removed_rows += self.signals[name].shape[0] - self.data.shape[0]
         
         if self.prints:
             print('='*50)
-            print(self.signals.info())
+            for name in self.signals.keys():
+                print(self.signals[name].info())
             print('='*50)   
-            print(f'Shape of data {self.signals.shape}')
-            print('='*50)
+            for name in self.signals.keys():
+                print(f'Shape of {name} data {self.signals[name].shape}')
+            print('='*50)   
             print(f'{count_removed_rows} rows removed')
             print('='*50)
             

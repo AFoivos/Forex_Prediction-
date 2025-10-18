@@ -38,10 +38,20 @@ class ForexStochasticSignals:
         self.close_col = close_col
         self.data = data.copy()
         
-        self.signals = pd.DataFrame(
-            {self.close_col: self.data[self.close_col]},
-            index=self.data.index
-        )
+        self.signals = {}
+        signals_names= [
+            'trend_change',             # Αλλαγή τάσης
+            'momentum',                 # Ορμή
+            'overbought_oversold',      # Υπερβολική αγορά/πώληση
+            'reversal',                 # Ανατροπή
+            'divergence',               # Αποκλίσεις
+        ]
+
+        for name in signals_names:
+            self.signals[name] = pd.DataFrame(
+                {self.close_col: self.data[self.close_col]},
+                index = self.data.index
+            )
         
         self.fast_k_param = []
         self.slow_k = []
@@ -140,7 +150,7 @@ class ForexStochasticSignals:
             overbought_condition = self.data[name] > overbought
             oversold_condition = self.data[name] < oversold
             
-            self.signals[f'{name}_overbough'] = np.select(
+            self.signals['overbought_oversold'][f'{name}_overbough'] = np.select(
                 [overbought_condition, oversold_condition],
                 [2, 1],
                 default = 0
@@ -173,7 +183,7 @@ class ForexStochasticSignals:
                 (self.data[name1].shift(1) >= self.data[name2].shift(1))
             )
             
-            self.signals[f'{name1}_{name2}_crossover'] = np.select(
+            self.signals['trend_change'][f'{name1}_{name2}_crossover'] = np.select(
                 [bullish_cross, bearish_cross],
                 [2, 1],
                 default = 0
@@ -224,7 +234,7 @@ class ForexStochasticSignals:
             
             bearish_divergence = price_higher_high & stoch_lower_high
             
-            self.signals[f'{name}_divergence'] = np.select(
+            self.signals['divergence'][f'{name}_divergence'] = np.select(
                 [bullish_divergence, bearish_divergence],
                 [2, 1],
                 default=0
@@ -250,7 +260,7 @@ class ForexStochasticSignals:
             k_rising = self.data[name1] > 0
             k_falling = self.data[name1] < 0
             
-            self.signals[f'{name1}_momentum'] = np.select(
+            self.signals['momentum'][f'{name1}_momentum'] = np.select(
                 [k_rising, k_falling],
                 [2, 1],
                 default = 0
@@ -262,7 +272,7 @@ class ForexStochasticSignals:
             d_rising = self.data[name2] > 0
             d_falling = self.data[name2] < 0
             
-            self.signals[f'{name2}_momentum'] = np.select(
+            self.signals['momentum'][f'{name2}_momentum'] = np.select(
                 [d_rising, d_falling],
                 [2, 1],
                 default = 0
@@ -301,7 +311,7 @@ class ForexStochasticSignals:
                 (self.data[name] <= overbought)
             )
             
-            self.signals[f'{name}_reversal'] = np.select(
+            self.signals['reversal'][f'{name}_reversal'] = np.select(
                 [bullish_reversal, bearish_reversal],
                 [2, 1],
                 default = 0 
@@ -333,15 +343,18 @@ class ForexStochasticSignals:
             oversold = oversold
         )
         
-        count_removed_rows = self.signals.shape[0] - self.data.shape[0]
+        count_removed_rows = 0
+        for name in self.signals.keys():
+            count_removed_rows += self.signals[name].shape[0] - self.data.shape[0]
         
         if self.prints:
             print('='*50)
-            print('Data Info')
-            print(self.signals.info())
+            for name in self.signals.keys():
+                print(self.signals[name].info())
             print('='*50)   
-            print(f'Shape of data {self.signals.shape}')
-            print('='*50)
+            for name in self.signals.keys():
+                print(f'Shape of {name} data {self.signals[name].shape}')
+            print('='*50)   
             print(f'{count_removed_rows} rows removed')
             print('='*50)
         

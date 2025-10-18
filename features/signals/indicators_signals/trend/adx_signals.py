@@ -36,10 +36,20 @@ class ForexADXSignals:
         self.close_col = close_col
         self.data = data.copy()
         
-        self.signals = pd.DataFrame(
-            {self.close_col: self.data[self.close_col]},
-            index=self.data.index
-        )
+        self.signals = {}
+        signals_names= [
+            'trend_strength',           # Δύναμη τάσης
+            'trend_direction',          # Κατεύθυνση τάσης  
+            'trend_change',             # Αλλαγή τάσης
+            'trend_acceleration',       # Επιτάχυνση τάσης     
+            'comprehensive',  
+        ]
+        
+        for name in signals_names:
+            self.signals[name] = pd.DataFrame(
+                {self.close_col: self.data[self.close_col]},
+                index = self.data.index
+            )
         
         self.adx_names  = []
         self.adx_plus = []
@@ -156,7 +166,7 @@ class ForexADXSignals:
             strong_trend = self.data[name] > strong_threshold
             weak_trend = self.data[name] < weak_threshold
 
-            self.signals[f'{name}_trend_strength'] = np.select(
+            self.signals['trend_strength'][f'{name}_trend_strength'] = np.select(
                 [strong_trend, weak_trend],
                 [2, 1],
                 default=0
@@ -182,7 +192,7 @@ class ForexADXSignals:
             bullish = self.data[name1] > self.data[name2]
             bearish = self.data[name2] > self.data[name1]
 
-            self.signals[f'{name1}_{name2}_direction'] = np.select(
+            self.signals['trend_direction'][f'{name1}_{name2}_direction'] = np.select(
                 [bullish, bearish],
                 [2, 1],
                 default=0
@@ -215,7 +225,7 @@ class ForexADXSignals:
                 (self.data[name1].shift(1) >= self.data[name2].shift(1))    
             )
             
-            self.signals[f'{name1}_{name2}_crossover'] = np.select(
+            self.signals['trend_change'][f'{name1}_{name2}_crossover'] = np.select(
                 [bullish_cross, bearish_cross],
                 [2, 1],
                 default=0
@@ -245,7 +255,7 @@ class ForexADXSignals:
             increasing = self.data[name] > 0
             decreasing = self.data[name] < 0
             
-            self.signals[f'{name}_slope'] = np.select(
+            self.signals['trend_acceleration'][f'{name}_slope'] = np.select(
                 [increasing, decreasing],
                 [2, 1],
                 default=0
@@ -282,7 +292,7 @@ class ForexADXSignals:
                 (self.data[name3] > self.data[name2])
             )
             
-            self.signals[f'{name1}_{name2}_{name3}_comprehensive'] = np.select(
+            self.signals['comprehensive'][f'{name1}_{name2}_{name3}_comprehensive'] = np.select(
                 [strong_bullish, strong_bearish],
                 [2, 1],
                 default=0
@@ -303,14 +313,17 @@ class ForexADXSignals:
         self.adx_slope_signals()
         self.adx_comprehensive_signals()
 
-        count_removed_rows = self.signals.shape[0] - self.data.shape[0]
+        count_removed_rows = 0
+        for name in self.signals.keys():
+            count_removed_rows += self.signals[name].shape[0] - self.data.shape[0]
         
         if self.prints:
             print('='*50)
-            print('Data Info')
-            print(self.signals.info())
+            for name in self.signals.keys():
+                print(self.signals[name].info())
             print('='*50)   
-            print(f'Shape of data {self.signals.shape}')
+            for name in self.signals.keys():
+                print(f'Shape of {name} data {self.signals[name].shape}')
             print('='*50)   
             print(f'{count_removed_rows} rows removed')
             print('='*50)

@@ -36,10 +36,20 @@ class ForexRSISignals:
         self.close_col = close_col
         self.data = data.copy()
         
-        self.signals = pd.DataFrame(
-            {self.close_col: self.data[self.close_col]},
-            index=self.data.index
-        )
+        self.signals = {}
+        signals_names= [
+            'momentum',                 # Ορμή
+            'overbought_oversold',      # Υπερβολική αγορά/πώληση
+            'reversal',                 # Ανατροπή
+            'divergence',               # Αποκλίσεις
+            'centerline',               # Κεντρική γραμμή
+        ]
+
+        for name in signals_names:
+            self.signals[name] = pd.DataFrame(
+                {self.close_col: self.data[self.close_col]},
+                index = self.data.index
+            )
         
         self.rsi = []
         self.rsi_slope = []
@@ -48,8 +58,6 @@ class ForexRSISignals:
         
         self._validate_columns()
         self._extract_column_names(parameters = parameters)
-        
-        
         
     def _validate_columns(
         self, 
@@ -135,7 +143,7 @@ class ForexRSISignals:
             overbought_condition = self.data[name] > overbought
             oversold_condition = self.data[name] < oversold
             
-            self.signals[f'{name}_overbought'] = np.select(
+            self.signals['overbought_oversold'][f'{name}_overbought'] = np.select(
                 [overbought_condition, oversold_condition],
                 [2, 1],
                 default = 0
@@ -168,7 +176,7 @@ class ForexRSISignals:
                 (self.data[name] >= 50)
             )
             
-            self.signals[f'{name}_centerline'] = np.select(
+            self.signals['centerline'][f'{name}_centerline'] = np.select(
                 [bullish_centerline, bearish_centerline],
                 [2, 1],
                 default = 0
@@ -219,7 +227,7 @@ class ForexRSISignals:
             
             bearish_divergence = price_higher_high & rsi_lower_high
             
-            self.signals[f'{name}_divergence'] = np.select(
+            self.signals['divergence'][f'{name}_divergence'] = np.select(
                 [bullish_divergence, bearish_divergence],
                 [2, 1],
                 default = 0
@@ -249,7 +257,7 @@ class ForexRSISignals:
             rsi_increasing = self.data[name] > 0
             rsi_decreasing = self.data[name] < 0
             
-            self.signals[f'{name}_momentum'] = np.select(
+            self.signals['momentum'][f'{name}_momentum'] = np.select(
                 [rsi_increasing, rsi_decreasing],
                 [2, 1],
                 default = 0
@@ -296,7 +304,7 @@ class ForexRSISignals:
             
             bearish_failure_swing = rsi_overbought & rsi_pullback & rsi_retest_lower_high
             
-            self.signals[f"{name}_swing_fail"] = np.select(
+            self.signals['reversal'][f"{name}_swing_fail"] = np.select(
                 [bullish_failure_swing, bearish_failure_swing],
                 [2, 1],
                 default = 0
@@ -336,7 +344,7 @@ class ForexRSISignals:
                 (self.data[name].shift(1) >= overbought)
             )
             
-            self.signals[f'{name}_reversal'] = np.select(
+            self.signals['reversal'][f'{name}_reversal'] = np.select(
                 [bullish_reversal, bearish_reversal],
                 [2, 1],
                 default = 0
@@ -378,14 +386,18 @@ class ForexRSISignals:
             oversold = oversold 
         )
         
-        count_removed_rows = self.signals.shape[0] - self.data.shape[0]
+        count_removed_rows = 0
+        for name in self.signals.keys():
+            count_removed_rows += self.signals[name].shape[0] - self.data.shape[0]
+        
         if self.prints:
             print('='*50)
-            print('Data Info')
-            print(self.signals.info())
+            for name in self.signals.keys():
+                print(self.signals[name].info())
             print('='*50)   
-            print(f'Shape of data {self.signals.shape}')
-            print('='*50)
+            for name in self.signals.keys():
+                print(f'Shape of {name} data {self.signals[name].shape}')
+            print('='*50)   
             print(f'{count_removed_rows} rows removed')
             print('='*50)
             

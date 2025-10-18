@@ -37,10 +37,21 @@ class ForexKeltnerSignals:
         self.close_col = close_col
         self.data = data.copy()
         
-        self.signals = pd.DataFrame(
-            {self.close_col: self.data[self.close_col]},
-            index = self.data.index
-        )
+        self.signals = {}
+        signals_names= [
+            'trend_direction',          # Κατεύθυνση τάσης  
+            'reversal',                 # Ανατροπή
+            'breakout',                 # Εκρήξεις
+            'divergence',               # Αποκλίσεις
+            'price_position',           # Θέση τιμής
+            'squeeze',                  # Συμπίεση
+        ]
+
+        for name in signals_names:
+            self.signals[name] = pd.DataFrame(
+                {self.close_col: self.data[self.close_col]},
+                index = self.data.index
+            )
         
         self.keltner_upper = []
         self.keltner_middle = []
@@ -141,7 +152,7 @@ class ForexKeltnerSignals:
             above_upper = self.data[self.close_col] > self.data[upper]
             below_lower = self.data[self.close_col] < self.data[lower]
             
-            self.signals[f'{upper}_{lower}_position'] = np.select(
+            self.signals['price_position'][f'{upper}_{lower}_position'] = np.select(
                 [above_upper, below_lower],
                 [2, 1],
                 default = 0
@@ -174,7 +185,7 @@ class ForexKeltnerSignals:
                 (self.data[self.close_col].shift(1) >= self.data[lower].shift(1))
             )
             
-            self.signals[f'{upper}_{lower}_breakout'] = np.select(
+            self.signals['breakout'][f'{upper}_{lower}_breakout'] = np.select(
                 [breakout_above, breakdown_below],
                 [2, 1],
                 default = 0
@@ -212,7 +223,7 @@ class ForexKeltnerSignals:
             squeeze = width_percentile < squeeze_threshold
             expansion = width_percentile > (1 - squeeze_threshold)
             
-            self.signals[f'{upper}_{lower}_{middle}_squeeze'] = np.select(
+            self.signals['squeeze'][f'{upper}_{lower}_{middle}_squeeze'] = np.select(
                 [squeeze, expansion],
                 [2, 1],
                 default = 0
@@ -247,7 +258,7 @@ class ForexKeltnerSignals:
                 (middle_slope < 0)
             )
             
-            self.signals[f'{upper}_{lower}_{middle}_trend'] = np.select(
+            self.signals['trend_direction'][f'{upper}_{lower}_{middle}_trend'] = np.select(
                 [strong_uptrend, strong_downtrend],
                 [2, 1],
                 default = 0
@@ -296,7 +307,7 @@ class ForexKeltnerSignals:
             )
             bearish_divergence = price_higher_high & position_lower
             
-            self.signals[f'{upper}_{lower}_divergence'] = np.select(
+            self.signals['divergence'][f'{upper}_{lower}_divergence'] = np.select(
                 [bullish_divergence, bearish_divergence],
                 [2, 1],
                 default = 0
@@ -325,7 +336,7 @@ class ForexKeltnerSignals:
             walking_upper = (upper_touch & upper_touch.shift(1) & upper_touch.shift(2))
             walking_lower = (lower_touch & lower_touch.shift(1) & lower_touch.shift(2))
             
-            self.signals[f'{upper}_{lower}_walk'] = np.select(
+            self.signals['trend_direction'][f'{upper}_{lower}_walk'] = np.select(
                 [walking_upper, walking_lower],
                 [2, 1],
                 default = 0
@@ -358,7 +369,7 @@ class ForexKeltnerSignals:
                 (self.data[self.close_col].shift(1) >= self.data[upper].shift(1))
             )
             
-            self.signals[f'{upper}_{lower}_{middle}_reversal'] = np.select(
+            self.signals['reversal'][f'{upper}_{lower}_{middle}_reversal'] = np.select(
                 [bullish_reversal, bearish_reversal],
                 [2, 1],
                 default = 0
@@ -389,14 +400,18 @@ class ForexKeltnerSignals:
         self.keltner_walk_signals()
         self.keltner_reversal_signals()
         
-        count_removed_rows = self.signals.shape[0] - self.data.shape[0]
+        count_removed_rows = 0
+        for name in self.signals.keys():
+            count_removed_rows += self.signals[name].shape[0] - self.data.shape[0]
         
         if self.prints:
             print('='*50)
-            print(self.signals.info())
+            for name in self.signals.keys():
+                print(self.signals[name].info())
             print('='*50)   
-            print(f'Shape of data {self.signals.shape}')
-            print('='*50)
+            for name in self.signals.keys():
+                print(f'Shape of {name} data {self.signals[name].shape}')
+            print('='*50)   
             print(f'{count_removed_rows} rows removed')
             print('='*50)
             

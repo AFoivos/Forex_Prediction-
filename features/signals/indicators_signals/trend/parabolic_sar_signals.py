@@ -37,10 +37,20 @@ class ForexParabolicSARSignals:
         self.close_col = close_col
         self.data = data.copy() 
         
-        self.signals = pd.DataFrame(
-            {self.close_col: self.data[self.close_col]}, 
-            index=self.data.index
-        )
+        self.signals = {}
+        signals_names= [
+            'trend_direction',          # Κατεύθυνση τάσης  
+            'trend_acceleration',       # Επιτάχυνση τάσης
+            'reversal',                 # Ανατροπή
+            'price_position',           # Θέση τιμής
+            'comprehensive',  
+        ]
+
+        for name in signals_names:
+            self.signals[name] = pd.DataFrame(
+                {self.close_col: self.data[self.close_col]},
+                index = self.data.index
+            )
         
         self.sar_names = []
         self.sar_slope_names = []
@@ -134,7 +144,7 @@ class ForexParabolicSARSignals:
             uptrend = self.data[self.close_col] > self.data[column]
             downtrend = self.data[self.close_col] < self.data[column]
             
-            self.signals[f'{column}_trend'] = np.select(
+            self.signals['trend_direction'][f'{column}_trend'] = np.select(
                 [uptrend, downtrend],
                 [2, 1],
                 default=0
@@ -172,7 +182,7 @@ class ForexParabolicSARSignals:
                 (self.data[self.close_col].shift(1) >= self.data[column].shift(1))
             )
             
-            self.signals[f'{column}_reversal'] = np.select(
+            self.signals['reversal'][f'{column}_reversal'] = np.select(
                 [bullish_reversal, bearish_reversal],
                 [2, 1],
                 default=0
@@ -201,7 +211,6 @@ class ForexParabolicSARSignals:
             
             column = sar_name
             
-            # Calculate percentage distance from SAR
             distance_pct = abs(self.data[self.close_col] - self.data[column]) / self.data[self.close_col]
             
             strong_uptrend = (
@@ -214,7 +223,7 @@ class ForexParabolicSARSignals:
                 (distance_pct > threshold)
             )
             
-            self.signals[f'{column}_distance'] = np.select(
+            self.signals['price_position'][f'{column}_distance'] = np.select(
                 [strong_uptrend, strong_downtrend],
                 [2, 1],
                 default=0
@@ -242,11 +251,10 @@ class ForexParabolicSARSignals:
             
             column = f'{sar_name}_slope'
         
-            # Note: SAR moves opposite to price trend
             sar_accelerating_up = self.data[column] > 0  
             sar_accelerating_down = self.data[column] < 0  
             
-            self.signals[f'{column}_signal'] = np.select(
+            self.signals['trend_acceleration'][f'{column}_signal'] = np.select(
                 [sar_accelerating_up, sar_accelerating_down],
                 [2, 1],
                 default=0
@@ -286,7 +294,7 @@ class ForexParabolicSARSignals:
                 (self.data[slope] > 0)  
             )
             
-            self.signals[f'{sar}_trend_confirmation'] = np.select(
+            self.signals['comprehensive'][f'{sar}_trend_confirmation'] = np.select(
                 [confirms_uptrend, confirms_downtrend],
                 [2, 1],
                 default=0
@@ -307,15 +315,18 @@ class ForexParabolicSARSignals:
         self.sar_slope_signals()
         self.sar_trend_confirmation_signals()
         
-        count_removed_rows = self.data.shape[0] - self.signals.shape[0]
+        count_removed_rows = 0
+        for name in self.signals.keys():
+            count_removed_rows += self.signals[name].shape[0] - self.data.shape[0]
         
         if self.prints:
             print('='*50)
-            print('Data Info')
-            print(self.signals.info())
-            print('='*50)
-            print(f'Shape of data {self.signals.shape}')
-            print('='*50)
+            for name in self.signals.keys():
+                print(self.signals[name].info())
+            print('='*50)   
+            for name in self.signals.keys():
+                print(f'Shape of {name} data {self.signals[name].shape}')
+            print('='*50)   
             print(f'{count_removed_rows} rows removed')
             print('='*50)
         

@@ -37,10 +37,19 @@ class ForexATRSignals:
         self.close_col = close_col
         self.data = data.copy()
         
-        self.signals = pd.DataFrame(
-            {self.close_col: self.data[self.close_col]},
-            index=self.data.index
-        )
+        self.signals = {}
+        signals_names= [
+            'trend_strength',           # Δύναμη τάσης
+            'volatility',               # Μεταβλητότητα
+            'breakout',                 # Εκρήξεις
+            'squeeze',                  # Συμπίεση
+        ]
+
+        for name in signals_names:
+            self.signals[name] = pd.DataFrame(
+                {self.close_col: self.data[self.close_col]},
+                index = self.data.index
+            )
         
         self.atr = []
         self.atr_slope = []
@@ -136,7 +145,7 @@ class ForexATRSignals:
             high_volatility = self.data[name] > (atr_ma * high_volatility_multiplier)
             low_volatility = self.data[name] < (atr_ma * low_volatility_multiplier)
             
-            self.signals[f'{name}_volatility_level'] = np.select(
+            self.signals['volatility'][f'{name}_volatility_level'] = np.select(
                 [high_volatility, low_volatility],
                 [2, 1],
                 default = 0
@@ -169,7 +178,7 @@ class ForexATRSignals:
             volatility_breakout = self.data[name] > atr_high.shift(1)
             volatility_collapse = self.data[name] < atr_low.shift(1)
             
-            self.signals[f'{name}_breakout'] = np.select(
+            self.signals['breakout'][f'{name}_breakout'] = np.select(
                 [volatility_breakout, volatility_collapse],
                 [2, 1],
                 default = 0
@@ -204,7 +213,7 @@ class ForexATRSignals:
             strong_trend = normalized_slope > strong_trend_threshold
             weak_trend = normalized_slope < weak_trend_threshold
             
-            self.signals[f'{name}_trend_strength'] = np.select(
+            self.signals['trend_strength'][f'{name}_trend_strength'] = np.select(
                 [strong_trend, weak_trend],
                 [2, 1],
                 default = 0
@@ -240,7 +249,7 @@ class ForexATRSignals:
             squeeze = atr_percentile < squeeze_threshold  
             expansion = atr_percentile > (1 - squeeze_threshold)  
             
-            self.signals[f'{name}_squeeze'] = np.select(
+            self.signals['squeeze'][f'{name}_squeeze'] = np.select(
                 [squeeze, expansion],
                 [2, 1],
                 default = 0
@@ -266,7 +275,7 @@ class ForexATRSignals:
             atr_expanding = self.data[name] > 0
             atr_contracting = self.data[name] < 0
             
-            self.signals[f'{name}_expansion'] = np.select(
+            self.signals['volatility'][f'{name}_expansion'] = np.select(
                 [atr_expanding, atr_contracting],
                 [2, 1],
                 default = 0
@@ -302,7 +311,7 @@ class ForexATRSignals:
             break_above_resistance = self.data[self.close_col] > resistance
             break_below_support = self.data[self.close_col] < support
             
-            self.signals[f'{name}_sr_break'] = np.select(
+            self.signals['breakout'][f'{name}_sr_break'] = np.select(
                 [break_above_resistance, break_below_support],
                 [2, 1],
                 default = 0
@@ -343,14 +352,18 @@ class ForexATRSignals:
         self.atr_expansion_contraction_signals()
         self.atr_support_resistance_signals(atr_multiplier = atr_multiplier)
         
-        count_removed_rows = self.signals.shape[0] - self.data.shape[0]
+        count_removed_rows = 0
+        for name in self.signals.keys():
+            count_removed_rows += self.signals[name].shape[0] - self.data.shape[0]
         
         if self.prints:
             print('='*50)
-            print(self.signals.info())
+            for name in self.signals.keys():
+                print(self.signals[name].info())
             print('='*50)   
-            print(f'Shape of data {self.signals.shape}')
-            print('='*50)
+            for name in self.signals.keys():
+                print(f'Shape of {name} data {self.signals[name].shape}')
+            print('='*50)   
             print(f'{count_removed_rows} rows removed')
             print('='*50)
         

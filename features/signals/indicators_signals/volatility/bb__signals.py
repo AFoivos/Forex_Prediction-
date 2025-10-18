@@ -37,10 +37,22 @@ class ForexBollingerBandsSignals:
         self.close_col = close_col
         self.data = data.copy()
         
-        self.signals = pd.DataFrame(
-            {self.close_col: self.data[self.close_col]},
-            index = self.data.index
-        )
+        self.signals = {}
+        signals_names= [
+            'trend_direction',          # Κατεύθυνση τάσης  
+            'momentum',                 # Ορμή
+            'volatility',               # Μεταβλητότητα
+            'breakout',                 # Εκρήξεις
+            'divergence',               # Αποκλίσεις
+            'price_position',           # Θέση τιμής
+            'squeeze',                  # Συμπίεση
+        ]
+
+        for name in signals_names:
+            self.signals[name] = pd.DataFrame(
+                {self.close_col: self.data[self.close_col]},
+                index = self.data.index
+            )
         
         self.bb_upper = []
         self.bb_middle = []
@@ -138,7 +150,7 @@ class ForexBollingerBandsSignals:
             below_lower = self.data[self.close_col] < self.data[lower]
             
             col_name = upper.replace('_upper', '')
-            self.signals[f'{col_name}_above_below'] = np.select(
+            self.signals['price_position'][f'{col_name}_above_below'] = np.select(
                 [above_upper, below_lower],
                 [2, 1],
                 default = 0
@@ -172,7 +184,7 @@ class ForexBollingerBandsSignals:
             narrow_bands = band_width < narrow_threshold
             
             col_name = upper.replace('_upper', '')
-            self.signals[f'{col_name}_wide_narrow'] = np.select(
+            self.signals['volatility'][f'{col_name}_wide_narrow'] = np.select(
                 [wide_bands, narrow_bands],
                 [2, 1],
                 default = 0
@@ -210,7 +222,7 @@ class ForexBollingerBandsSignals:
             expansion = width_percentile > (1 - squeeze_threshold)
             
             col_name = upper.replace('_upper', '')
-            self.signals[f'{col_name}_squeeze_expansion'] = np.select(
+            self.signals['squeeze'][f'{col_name}_squeeze_expansion'] = np.select(
                 [squeeze, expansion],
                 [2, 1],
                 default = 0
@@ -244,7 +256,7 @@ class ForexBollingerBandsSignals:
             )
             
             col_name = upper.replace('_upper', '')
-            self.signals[f'{col_name}_breakout'] = np.select(
+            self.signals['breakout'][f'{col_name}_breakout'] = np.select(
                 [breakout_above, breakdown_below],
                 [2, 1],
                 default = 0
@@ -273,7 +285,7 @@ class ForexBollingerBandsSignals:
             lower_half = band_position < 0.3  
             
             col_name = upper.replace('_upper', '')
-            self.signals[f'{col_name}_upper_lower_half'] = np.select(
+            self.signals['momentum'][f'{col_name}_upper_lower_half'] = np.select(
                 [upper_half, lower_half],
                 [2, 1],
                 default = 0
@@ -326,7 +338,7 @@ class ForexBollingerBandsSignals:
             bearish_divergence = price_higher_high & percent_b_lower_high
             
             col_name = upper.replace('_upper', '')
-            self.signals[f'{col_name}_bullish_bearish'] = np.select(
+            self.signals['divergence'][f'{col_name}_bullish_bearish'] = np.select(
                 [bullish_divergence, bearish_divergence],
                 [2, 1],
                 default = 0
@@ -356,7 +368,7 @@ class ForexBollingerBandsSignals:
             walking_lower = (lower_touch & lower_touch.shift(1) & lower_touch.shift(2))
             
             col_name = upper.replace('_upper', '')
-            self.signals[f'{col_name}_upper_lower_walking'] = np.select(
+            self.signals['trend_direction'][f'{col_name}_upper_lower_walking'] = np.select(
                 [walking_upper, walking_lower],
                 [2, 1],
                 default = 0
@@ -392,14 +404,18 @@ class ForexBollingerBandsSignals:
         self.bb_divergence_signals(lookback = lookback)
         self.bb_walk_signals()
         
-        count_removed_rows = self.signals.shape[0] - self.data.shape[0]
+        count_removed_rows = 0
+        for name in self.signals.keys():
+            count_removed_rows += self.signals[name].shape[0] - self.data.shape[0]
         
         if self.prints:
             print('='*50)
-            print(self.signals.info())
+            for name in self.signals.keys():
+                print(self.signals[name].info())
             print('='*50)   
-            print(f'Shape of data {self.signals.shape}')
-            print('='*50)
+            for name in self.signals.keys():
+                print(f'Shape of {name} data {self.signals[name].shape}')
+            print('='*50)   
             print(f'{count_removed_rows} rows removed')
             print('='*50)
         

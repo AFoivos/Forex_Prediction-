@@ -39,10 +39,17 @@ class ForexMACDSignals:
         self.close_col = close_col
         self.data = data.copy()
         
-        self.signals = pd.DataFrame(
-            {self.close_col: self.data[self.close_col]},
-            index=self.data.index
-        )
+        self.signals = {}
+        signals_names= [
+            'trend_change',             # Αλλαγή τάσης
+            'momentum',                 # Ορμή
+            'centerline',               # Κεντρική γραμμή 
+        ]
+        for name in signals_names:
+            self.signals[name] = pd.DataFrame(
+                {self.close_col: self.data[self.close_col]},
+                index = self.data.index
+            )
         
         self.macds = []
         self.macd_signals = []
@@ -153,7 +160,7 @@ class ForexMACDSignals:
                 (self.data[name1].shift(1) >= self.data[name2].shift(1))
             )
 
-            self.signals[f'{name1}_{name2}_crossover'] = np.select(
+            self.signals['trend_change'][f'{name1}_{name2}_crossover'] = np.select(
                 [bullish_cross, bearish_cross],
                 [2, 1],
                 default=0
@@ -182,7 +189,7 @@ class ForexMACDSignals:
             hist_positive = self.data[name] > 0
             hist_negative = self.data[name] < 0
 
-            self.signals[f'{name}_direction'] = np.select(
+            self.signals['momentum'][f'{name}_direction'] = np.select(
                 [hist_positive, hist_negative],
                 [2, 1],
                 default=0
@@ -191,7 +198,7 @@ class ForexMACDSignals:
             hist_increasing = self.data[name] > self.data[name].shift(1)
             hist_decreasing = self.data[name] < self.data[name].shift(1)
 
-            self.signals[f'{name}_momentum'] = np.select(
+            self.signals['momentum'][f'{name}_momentum'] = np.select(
                 [hist_increasing, hist_decreasing],
                 [2, 1],
                 default=0
@@ -224,7 +231,7 @@ class ForexMACDSignals:
                 (self.data[name].shift(1) >= 0)
             )
 
-            self.signals[f'{name}_zero_cross'] = np.select(
+            self.signals['centerline'][f'{name}_zero_cross'] = np.select(
                 [above_zero, below_zero],
                 [2, 1],
                 default=0
@@ -243,15 +250,18 @@ class ForexMACDSignals:
         self.macd_histogram_signals()
         self.macd_zero_line_signals()
         
-        count_removed_rows = self.signals.shape[0] - self.data.shape[0]
+        count_removed_rows = 0
+        for name in self.signals.keys():
+            count_removed_rows += self.signals[name].shape[0] - self.data.shape[0]
         
         if self.prints:
             print('='*50)
-            print('Data Info')
-            print(self.signals.info())
+            for name in self.signals.keys():
+                print(self.signals[name].info())
             print('='*50)   
-            print(f'Shape of data {self.signals.shape}')
-            print('='*50)
+            for name in self.signals.keys():
+                print(f'Shape of {name} data {self.signals[name].shape}')
+            print('='*50)   
             print(f'{count_removed_rows} rows removed')
             print('='*50)
         

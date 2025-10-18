@@ -37,10 +37,21 @@ class ForexSTDSignals:
         self.close_col = close_col
         self.data = data.copy()
         
-        self.signals = pd.DataFrame(
-            {self.close_col: self.data[self.close_col]},
-            index = self.data.index
-        )
+        self.signals = {}
+        signals_names= [
+            'overbought_oversold',      # Υπερβολική αγορά/πώληση
+            'reversal',                 # Ανατροπή
+            'volatility',               # Μεταβλητότητα
+            'breakout',                 # Εκρήξεις
+            'divergence',               # Αποκλίσεις
+            'squeeze',                  # Συμπίεση
+        ]
+
+        for name in signals_names:
+            self.signals[name] = pd.DataFrame(
+                {self.close_col: self.data[self.close_col]},
+                index = self.data.index
+            )
         
         self.std_columns = []
         
@@ -137,7 +148,7 @@ class ForexSTDSignals:
             high_vol = self.data[std_col] > (rolling_mean * high_vol_threshold)
             low_vol = self.data[std_col] < (rolling_mean * low_vol_threshold)
             
-            self.signals[f'{std_col}_regime'] = np.select(
+            self.signals['volatility'][f'{std_col}_regime'] = np.select(
                 [high_vol, low_vol],
                 [2, 1],
                 default = 0
@@ -174,7 +185,7 @@ class ForexSTDSignals:
             above_upper = self.data[self.close_col] > upper_band
             below_lower = self.data[self.close_col] < lower_band
             
-            self.signals[f'{std_col}_price_position'] = np.select(
+            self.signals['overbought_oversold'][f'{std_col}_price_position'] = np.select(
                 [above_upper, below_lower],
                 [2, 1],
                 default = 0
@@ -217,7 +228,7 @@ class ForexSTDSignals:
                 (self.data[self.close_col].shift(1) >= lower_band.shift(1))
             )
             
-            self.signals[f'{std_col}_breakout'] = np.select(
+            self.signals['breakout'][f'{std_col}_breakout'] = np.select(
                 [breakout_above, breakdown_below],
                 [2, 1],
                 default = 0
@@ -255,7 +266,7 @@ class ForexSTDSignals:
             squeeze = std_position < squeeze_threshold
             expansion = std_position > (1 - squeeze_threshold)
             
-            self.signals[f'{std_col}_squeeze'] = np.select(
+            self.signals['squeeze'][f'{std_col}_squeeze'] = np.select(
                 [squeeze, expansion],
                 [2, 1],
                 default = 0
@@ -287,7 +298,7 @@ class ForexSTDSignals:
             increasing_vol = std_slope > 0
             decreasing_vol = std_slope < 0
             
-            self.signals[f'{std_col}_trend'] = np.select(
+            self.signals['volatility'][f'{std_col}_trend'] = np.select(
                 [increasing_vol, decreasing_vol],
                 [2, 1],
                 default = 0
@@ -334,7 +345,7 @@ class ForexSTDSignals:
             )
             bearish_divergence = price_higher_high & std_lower_low
             
-            self.signals[f'{std_col}_divergence'] = np.select(
+            self.signals['divergence'][f'{std_col}_divergence'] = np.select(
                 [bullish_divergence, bearish_divergence],
                 [2, 1],
                 default = 0
@@ -369,7 +380,7 @@ class ForexSTDSignals:
             far_above = distance_from_mean > std_multiplier
             far_below = distance_from_mean < -std_multiplier
             
-            self.signals[f'{std_col}_mean_reversion'] = np.select(
+            self.signals['reversal'][f'{std_col}_mean_reversion'] = np.select(
                 [far_above, far_below],
                 [2, 1],
                 default = 0
@@ -405,7 +416,7 @@ class ForexSTDSignals:
             high_vol_cluster = high_vol.rolling(window=cluster_period).sum() >= (cluster_period - 1)
             low_vol_cluster = low_vol.rolling(window=cluster_period).sum() >= (cluster_period - 1)
             
-            self.signals[f'{std_col}_vol_cluster'] = np.select(
+            self.signals['volatility'][f'{std_col}_vol_cluster'] = np.select(
                 [high_vol_cluster, low_vol_cluster],
                 [2, 1],
                 default = 0
@@ -447,14 +458,18 @@ class ForexSTDSignals:
         self.std_mean_reversion_signals(std_multiplier = std_multiplier)
         self.std_volatility_cluster_signals(cluster_period = cluster_period)
         
-        count_removed_rows = self.signals.shape[0] - self.data.shape[0]
+        count_removed_rows = 0
+        for name in self.signals.keys():
+            count_removed_rows += self.signals[name].shape[0] - self.data.shape[0]
         
         if self.prints:
             print('='*50)
-            print(self.signals.info())
+            for name in self.signals.keys():
+                print(self.signals[name].info())
             print('='*50)   
-            print(f'Shape of data {self.signals.shape}')
-            print('='*50)
+            for name in self.signals.keys():
+                print(f'Shape of {name} data {self.signals[name].shape}')
+            print('='*50)   
             print(f'{count_removed_rows} rows removed')
             print('='*50)
         

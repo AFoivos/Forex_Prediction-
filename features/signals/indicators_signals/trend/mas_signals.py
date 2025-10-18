@@ -38,10 +38,20 @@ class ForexMASignals:
         self.data = data.copy()
         self.close_col = close_col
         
-        self.signals = pd.DataFrame(
-            {self.close_col: self.data[self.close_col]}, 
-            index=self.data.index
-        )
+        self.signals = {}
+        signals_names= [ 
+            'trend_strength',           # Δύναμη τάσης
+            'trend_change',             # Αλλαγή τάσης
+            'trend_acceleration',       # Επιτάχυνση τάσης
+            'trend_hierarchy',          # Ιεραρχία τάσης
+            'price_position',           # Θέση τιμής
+        ]
+
+        for name in signals_names:
+            self.signals[name] = pd.DataFrame(
+                {self.close_col: self.data[self.close_col]},
+                index = self.data.index
+            )
         
         self.ema_names = []
         self.ema_slope_names = []
@@ -53,8 +63,8 @@ class ForexMASignals:
         self.sma_parameters = [10, 20, 50, 100, 200] if sma_parameters is None else sma_parameters
         
         self._validate_columns()
-        self._extract_column_names(parameters=self.ema_parameters, ma_type='ema')
-        self._extract_column_names(parameters=self.sma_parameters, ma_type='sma')
+        self._extract_column_names(parameters = self.ema_parameters, ma_type='ema')
+        self._extract_column_names(parameters = self.sma_parameters, ma_type='sma')
                 
     def _validate_columns(
         self,
@@ -157,7 +167,7 @@ class ForexMASignals:
                 (self.data[fast].shift(1) >= self.data[slow].shift(1))
             )
             
-            self.signals[f'{fast}_{slow}_golden_death_cross'] = np.select(
+            self.signals['trend_change'][f'{fast}_{slow}_golden_death_cross'] = np.select(
                 [golden_condition, death_condition],
                 [2, 1],
                 default = 0
@@ -189,8 +199,7 @@ class ForexMASignals:
                 (self.data[fast].shift(1) >= self.data[slow].shift(1))
             )
             
-            # Create signal
-            self.signals[f'{fast}_{slow}_crossover'] = np.select(
+            self.signals['trend_change'][f'{fast}_{slow}_crossover'] = np.select(
                 [bullish_condition, bearish_condition],
                 [2, 1],
                 default=0
@@ -224,7 +233,7 @@ class ForexMASignals:
                     (self.data[mid] < self.data[slow])
                 )
                 
-                self.signals[f'{fast}_{mid}_{slow}_hierarchy'] = np.select(
+                self.signals['trend_hierarchy'][f'{fast}_{mid}_{slow}_hierarchy'] = np.select(
                     [bullish_condition, bearish_condition],
                     [2, 1],
                     default = 0
@@ -260,13 +269,13 @@ class ForexMASignals:
                     (self.data[self.close_col] > self.data[name])
                 )
                 
-                self.signals[f'{name}_bounce'] = np.select(
+                self.signals['price_position'][f'{name}_bounce'] = np.select(
                     [bearish_bounce, bullish_bounce],
                     [1, 2],
                     default = 0
                 )
                 
-                return self.signals
+            return self.signals
 
     def ma_slope_signals(
         self,  
@@ -285,7 +294,7 @@ class ForexMASignals:
                 positive_slope = self.data[f'{name}_slope'] > 0
                 negative_slope = self.data[f'{name}_slope'] < 0
                 
-                self.signals[f'{name}_slope_direction'] = np.select(
+                self.signals['trend_acceleration'][f'{name}_slope_direction'] = np.select(
                     [positive_slope, negative_slope],
                     [2, 1],
                     default = 0
@@ -294,7 +303,7 @@ class ForexMASignals:
                 slope_increasing = self.data[f'{name}_slope'] > self.data[f'{name}_slope'].shift(1)
                 slope_decreasing = self.data[f'{name}_slope'] < self.data[f'{name}_slope'].shift(1)
 
-                self.signals[f'{name}_slope_acceleration'] = np.select(
+                self.signals['trend_acceleration'][f'{name}_slope_acceleration'] = np.select(
                     [slope_increasing, slope_decreasing],
                     [2, 1],  
                     default = 0  
@@ -303,7 +312,7 @@ class ForexMASignals:
                 strong_uptrend = (self.data[self.close_col] > self.data[name]) & (self.data[f'{name}_slope'] > 0)
                 strong_downtrend = (self.data[self.close_col] < self.data[name]) & (self.data[f'{name}_slope'] < 0)
 
-                self.signals[f'{name}_trend_strong'] = np.select(
+                self.signals['trend_strength'][f'{name}_trend_strong'] = np.select(
                     [strong_uptrend, strong_downtrend],
                     [2, 1],  
                     default = 0  
@@ -338,7 +347,7 @@ class ForexMASignals:
                     (deviation_pct > deviation)
                 )
                 
-                self.signals[f'{name}_overbought_oversold'] = np.select(
+                self.signals['price_position'][f'{name}_overbought_oversold'] = np.select(
                     [overbought, oversold],
                     [2, 1],
                     default = 0
@@ -365,15 +374,18 @@ class ForexMASignals:
         self.ma_slope_signals()
         self.price_extension_signals(deviation = price_extesion_deviation)
 
-        count_removed_rows = self.data.shape[0] - self.signals.shape[0]
+        count_removed_rows = 0
+        for name in self.signals.keys():
+            count_removed_rows += self.signals[name].shape[0] - self.data.shape[0]
         
         if self.prints:
             print('='*50)
-            print('Data Info')
-            print(self.signals.info())
+            for name in self.signals.keys():
+                print(self.signals[name].info())
             print('='*50)   
-            print(f'Shape of data {self.signals.shape}')
-            print('='*50)
+            for name in self.signals.keys():
+                print(f'Shape of {name} data {self.signals[name].shape}')
+            print('='*50)   
             print(f'{count_removed_rows} rows removed')
             print('='*50)
         
