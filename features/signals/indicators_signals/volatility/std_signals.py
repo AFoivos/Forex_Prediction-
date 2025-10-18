@@ -201,7 +201,7 @@ class ForexSTDSignals:
         """
         Standard Deviation Breakout Signals
         2 = Breakout above upper band
-        1 = Breakdown below lower band
+        1 = Breakdown be low lower band
         0 = No breakout
         
         Parameters:
