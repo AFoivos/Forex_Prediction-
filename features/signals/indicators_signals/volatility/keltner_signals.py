@@ -44,7 +44,7 @@ class ForexKeltnerSignals:
             'breakout',                 # Εκρήξεις
             'divergence',               # Αποκλίσεις
             'price_position',           # Θέση τιμής
-            'squeeze',                  # Συμπίεση
+            'volatility',                # Μεταβλητότητα
         ]
 
         for name in signals_names:
@@ -152,7 +152,7 @@ class ForexKeltnerSignals:
             above_upper = self.data[self.close_col] > self.data[upper]
             below_lower = self.data[self.close_col] < self.data[lower]
             
-            self.signals['price_position'][f'{upper}_{lower}_position'] = np.select(
+            self.signals['trend_direction'][f'{upper}_{lower}_position'] = np.select(
                 [above_upper, below_lower],
                 [2, 1],
                 default = 0
@@ -201,8 +201,8 @@ class ForexKeltnerSignals:
         
         """
         Keltner Channels Squeeze Signals
-        2 = Squeeze (Channels very narrow - low volatility)
-        1 = Expansion (Channels very wide - high volatility)
+        2 = Squeeze (Bands very narrow - low volatility)
+        1 = Expansion (Bands very wide - high volatility)
         0 = Normal
         
         Parameters:
@@ -223,7 +223,7 @@ class ForexKeltnerSignals:
             squeeze = width_percentile < squeeze_threshold
             expansion = width_percentile > (1 - squeeze_threshold)
             
-            self.signals['squeeze'][f'{upper}_{lower}_{middle}_squeeze'] = np.select(
+            self.signals['volatility'][f'{upper}_{lower}_{middle}_squeeze'] = np.select(
                 [squeeze, expansion],
                 [2, 1],
                 default = 0

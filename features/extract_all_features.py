@@ -9,7 +9,6 @@ from .indicators import (
     ForexMomentumIndicators,
     ForexTrendIndicators,
     ForexVolatilityIndicators,
-    ForexTSIndicators
 )
 
 from .signals import (
@@ -85,13 +84,16 @@ class ForexFeauturesExtractor:
         self._validate_columns()
         
         self.indicators_data = pd.DataFrame()
-        self.signals_data = pd.DataFrame()
+        self.signals_data = {}
         self.extreme_points_data = pd.DataFrame()
         
         self.extreme_points_parameters = extreme_points_parameters
         self.momentum_parameters = momentum_parameters
         self.trend_parameters = trend_parameters
         self.volatility_parameters = volatility_parameters
+        
+        self.safe_removes = 0
+        self.min_index_datetime = min(self.data.index)
         
     def _validate_columns(
         self, 
@@ -127,6 +129,7 @@ class ForexFeauturesExtractor:
             prints = False
         ).generate_extreme_points(**self.extreme_points_parameters)
         
+        self.extreme_points_data = self.extreme_points_data[self.extreme_points_data.index >= self.min_index_datetime]
     
     def _extract_indicators(
         self
@@ -184,7 +187,9 @@ class ForexFeauturesExtractor:
         self.indicators_data = pd.concat(
             cleaned_indicators,
             axis = 1
-        )
+        ).dropna()
+        self.safe_removes = self.data.shape[0] - self.indicators_data.shape[0]
+        self.min_index_datetime = min(self.indicators_data.index)
 
     def _extract_signals(
         self
@@ -298,8 +303,8 @@ class ForexFeauturesExtractor:
                 close_col = self.close_col,
                 parameters = self.volatility_parameters['std_params'],
                 prints = False
-            ).generate_all_std_signals()
-        
+            ).generate_all_std_signals() 
+            
         signals = [
             rsi_signals,
             stochastic_signals,
@@ -315,19 +320,35 @@ class ForexFeauturesExtractor:
             keltner_signals,
             std_signals
         ]
+        
+        signals_names= [
+            'trend_strength',          
+            'trend_direction',          
+            'trend_change',             
+            'trend_hierarchy',          
+            'trend_acceleration',       
+            'momentum',                 
+            'overbought_oversold',      
+            'reversal',               
+            'volatility',              
+            'breakout',              
+            'divergence',             
+            'price_position',           
+            'squeeze',               
+            'centerline',               
+            'comprehensive',  
+        ]
 
-        cleaned_signals = []
-        for i, df in enumerate(signals):
-            if i == 0:  
-                cleaned_signals.append(df)
-            else:
-                clean_df = df.drop(columns = self.close_col) if self.close_col in df.columns else df
-                cleaned_signals.append(clean_df)
-
-        self.signals_data = pd.concat(
-            cleaned_signals,
-            axis = 1
-        ).dropna()
+        self.signals_data = {category : pd.DataFrame() for category in signals_names}
+        
+        for signal in signals:
+            for category, df in signal.items():
+                if self.signals_data[category].empty:
+                    self.signals_data[category] = df
+                else:
+                    for col in df.columns:
+                        if col not in self.signals_data[category].columns:
+                            self.signals_data[category][col] = df[col]
     
     def extract_all_features(
         self
@@ -342,25 +363,21 @@ class ForexFeauturesExtractor:
         self._extract_signals()
         self._extract_extreme_points()
 
-        all_features_data = pd.concat(
-            [
-                self.indicators_data,
-                self.signals_data.drop(columns = self.close_col),
-                self.extreme_points_data.drop(columns = self.close_col)
-            ],
-            axis=1
-        )
-
-        removed_cols = self.data.shape[0] - all_features_data.shape[0]
-
-        if removed_cols > 0:
+        removed_rows_signals = 0 
+        for df in self.signals_data.keys():
+            removed_rows_signals += self.data.shape[0] - self.signals_data[df].shape[0] - self.safe_removes
+        count_removed_rows_indicators = self.data.shape[0] - self.indicators_data.shape[0] - self.safe_removes
+        count_removed_rows_extreme_points = self.data.shape[0] - self.extreme_points_data.shape[0] - self.safe_removes
+        
+        removed_rows = removed_rows_signals + count_removed_rows_indicators + count_removed_rows_extreme_points
+        if removed_rows > 0:
             print('='*50)
             print('='*50)
-            print(f'Removed {removed_cols} rows')
+            print(f'Removed {removed_rows} rows')
             print('='*50)
             print('='*50)
         
-        return  all_features_data, self.indicators_data, self.signals_data, self.extreme_points_data
+        return self.indicators_data, self.signals_data, self.extreme_points_data
                     
                         
         
