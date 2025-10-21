@@ -3,13 +3,7 @@ services:
     build: .
     container_name: forex-development
     volumes:
-      - .:/app
-      - ./data:/app/data
-      - ./models:/app/models
-      - ./plots:/app/plots
-      - ./analysis:/app/analysis
-      - ./notebooks:/app/notebooks
-      - ./stored_code:/app/stored_code
+      - .:/app  
     working_dir: /app
     environment:
       - PYTHONPATH=/app:/app/data_handle:/app/features:/app/models:/app/plots:/app/analysis
