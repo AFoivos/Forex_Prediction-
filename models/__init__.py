@@ -1,6 +1,5 @@
-from .autoencoder import TimeSeriesAutoencoder
+from .autoencode import ForexAutoencoder
 
 __all__ =[
-    "TimeSeriesAutoencoder"
-
+    "ForexAutoencoder"
 ]
