@@ -229,7 +229,7 @@ class ForexTimeSeriesDecisionMaker:
             print("-" * 50) 
             
             for key, value in self.decisions['seasonality'].items():
-                print(f"  {key:20}: {value}")
+                print(f"{key:20}: {value}")  # Αφαίρεσα τα 2 επιπλέον spaces
 
             print("\n KEY METRICS SUMMARY")
             print("-" * 50)
