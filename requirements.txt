@@ -1,31 +1,25 @@
 # Core
-pandas
 numpy
+pandas
 scikit-learn
+scipy
 matplotlib
 seaborn
-plotly
+mplfinance
+
+# API & Data
+fastapi
+sqlalchemy
+
+# Time Series & Feature Engineering
+statsmodels
+tsfresh
+ta-lib
+
+# Deep Learning
+tensorflow
+
+# Notebooks
 jupyter
 jupyterlab
 ipykernel
-
-# Time Series
-tsfresh
-statsmodels
-mplfinance
-
-# ML & Deep Learning
-tensorflow
-torch
-optuna
-xgboost
-keras
-
-# Specialized
-ta-lib
-darts
-mlflow
-ipywidgets
-gym
-umap-learn
-
